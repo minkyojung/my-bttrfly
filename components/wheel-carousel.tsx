@@ -124,7 +124,7 @@ export default function WheelCarousel() {
                   zIndex,
                 }}
               >
-                <div className={`relative w-[440px] h-[660px] bg-gray-100 ${isVisible ? 'shadow-2xl' : 'shadow-lg'} hover:scale-105 transition-all duration-300 rounded-lg overflow-hidden`}>
+                <div className={`relative w-[440px] h-[660px] bg-white border border-black ${isVisible ? 'shadow-2xl' : 'shadow-lg'} hover:scale-105 transition-all duration-300 rounded-lg overflow-hidden`}>
                   <Image
                     src={photo.src}
                     alt={photo.alt}
@@ -132,7 +132,7 @@ export default function WheelCarousel() {
                     className="object-cover"
                   />
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4 rounded-b-lg">
-                    <p className="text-white font-mono text-sm">#{photo.id}</p>
+                    <p className="text-white font-serif text-sm">#{photo.id}</p>
                   </div>
                 </div>
               </Link>

@@ -65,7 +65,7 @@ export default function PhotoDetail() {
   if (!currentPhoto) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="font-mono text-sm">Loading...</p>
+        <p className="font-serif text-sm">Loading...</p>
       </div>
     );
   }
@@ -74,14 +74,14 @@ export default function PhotoDetail() {
     <div className="relative w-full h-screen bg-white flex items-center justify-center">
       <Link 
         href="/"
-        className="absolute top-8 right-8 z-20 p-2 hover:bg-gray-100 rounded-full transition-colors"
+        className="absolute top-8 right-8 z-20 p-2 hover:bg-black hover:text-white rounded-full transition-colors"
       >
         <X className="w-6 h-6" />
       </Link>
 
       <button
         onClick={handlePrevious}
-        className="absolute left-8 top-1/2 -translate-y-1/2 z-20 p-2 hover:bg-gray-100 rounded-full transition-colors"
+        className="absolute left-8 top-1/2 -translate-y-1/2 z-20 p-2 hover:bg-black hover:text-white rounded-full transition-colors"
         aria-label="Previous photo"
       >
         <ChevronLeft className="w-8 h-8" />
@@ -89,7 +89,7 @@ export default function PhotoDetail() {
 
       <button
         onClick={handleNext}
-        className="absolute right-8 top-1/2 -translate-y-1/2 z-20 p-2 hover:bg-gray-100 rounded-full transition-colors"
+        className="absolute right-8 top-1/2 -translate-y-1/2 z-20 p-2 hover:bg-black hover:text-white rounded-full transition-colors"
         aria-label="Next photo"
       >
         <ChevronRight className="w-8 h-8" />
@@ -109,12 +109,12 @@ export default function PhotoDetail() {
         
         <div className="mt-6 text-center">
           {currentPhoto.title && (
-            <h2 className="font-mono text-lg mb-2">{currentPhoto.title}</h2>
+            <h2 className="font-serif text-lg mb-2">{currentPhoto.title}</h2>
           )}
           {currentPhoto.description && (
-            <p className="text-sm text-gray-600">{currentPhoto.description}</p>
+            <p className="text-sm text-black">{currentPhoto.description}</p>
           )}
-          <p className="font-mono text-xs text-gray-400 mt-4">
+          <p className="font-serif text-xs text-black mt-4">
             {currentIndex + 1} / {samplePhotos.length}
           </p>
         </div>
