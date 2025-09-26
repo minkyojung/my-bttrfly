@@ -13,17 +13,17 @@ interface Photo {
 }
 
 const samplePhotos: Photo[] = [
-  { id: "1", src: "/images/placeholder.svg", alt: "Photo 1", width: 800, height: 1200 },
-  { id: "2", src: "/images/placeholder.svg", alt: "Photo 2", width: 800, height: 1200 },
-  { id: "3", src: "/images/placeholder.svg", alt: "Photo 3", width: 800, height: 1200 },
-  { id: "4", src: "/images/placeholder.svg", alt: "Photo 4", width: 800, height: 1200 },
-  { id: "5", src: "/images/placeholder.svg", alt: "Photo 5", width: 800, height: 1200 },
-  { id: "6", src: "/images/placeholder.svg", alt: "Photo 6", width: 800, height: 1200 },
-  { id: "7", src: "/images/placeholder.svg", alt: "Photo 7", width: 800, height: 1200 },
-  { id: "8", src: "/images/placeholder.svg", alt: "Photo 8", width: 800, height: 1200 },
+  { id: "1", src: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=1200&fit=crop", alt: "Mountain landscape", width: 800, height: 1200 },
+  { id: "2", src: "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=800&h=1200&fit=crop", alt: "Ocean waves", width: 800, height: 1200 },
+  { id: "3", src: "https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=800&h=1200&fit=crop", alt: "Night sky", width: 800, height: 1200 },
+  { id: "4", src: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800&h=1200&fit=crop", alt: "Forest path", width: 800, height: 1200 },
+  { id: "5", src: "https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&h=1200&fit=crop", alt: "Sunset field", width: 800, height: 1200 },
+  { id: "6", src: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800&h=1200&fit=crop", alt: "Tropical beach", width: 800, height: 1200 },
+  { id: "7", src: "https://images.unsplash.com/photo-1511884642898-4c92249e20b6?w=800&h=1200&fit=crop", alt: "Desert dunes", width: 800, height: 1200 },
+  { id: "8", src: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?w=800&h=1200&fit=crop", alt: "Aurora lights", width: 800, height: 1200 },
 ];
 
-export default function CarouselGallery() {
+export default function WheelCarousel() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [rotation, setRotation] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -32,7 +32,7 @@ export default function CarouselGallery() {
 
   const numberOfPhotos = samplePhotos.length;
   const anglePerPhoto = 360 / numberOfPhotos;
-  const radius = 500;
+  const radius = 800; // 적절한 반경으로 카드 배치
 
   useEffect(() => {
     const handleScroll = (e: WheelEvent) => {
@@ -82,14 +82,16 @@ export default function CarouselGallery() {
   return (
     <div 
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden bg-white cursor-grab active:cursor-grabbing"
+      className="fixed inset-0 w-full h-full overflow-hidden bg-white cursor-grab active:cursor-grabbing"
       onMouseDown={handleMouseDown}
     >
-      <div className="absolute inset-0 flex items-center justify-center perspective-[2000px]">
+      <div className="absolute inset-0 flex items-center justify-center" style={{ perspective: '3000px', perspectiveOrigin: '50% 50%' }}>
         <div 
-          className="relative w-full h-full preserve-3d transition-transform duration-100 ease-out"
+          className="relative preserve-3d transition-transform duration-100 ease-out"
           style={{
             transform: `rotateX(${-rotation}deg)`,
+            width: '100%',
+            height: '100%',
           }}
         >
           {samplePhotos.map((photo, index) => {
@@ -97,24 +99,39 @@ export default function CarouselGallery() {
             const translateZ = radius;
             const rotateX = angle;
             
+            // Calculate if card is visible (front-facing)
+            // Normalize the angle to be between -180 and 180
+            const effectiveAngle = ((rotateX - rotation) % 360 + 540) % 360 - 180;
+            const isVisible = effectiveAngle > -90 && effectiveAngle < 90;
+            const opacity = isVisible ? 1 : 0.3;
+            const pointerEvents = isVisible ? 'auto' : 'none';
+            const zIndex = isVisible ? 50 : 1;
+            
             return (
               <Link
                 key={photo.id}
                 href={`/photo/${photo.id}`}
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 block"
+                className="absolute block transition-opacity duration-300"
                 style={{
+                  left: '50%',
+                  top: '50%',
+                  marginLeft: '-220px',  // 카드 너비의 절반 (440px / 2)
+                  marginTop: '-330px',   // 카드 높이의 절반 (660px / 2)
                   transform: `rotateX(${rotateX}deg) translateZ(${translateZ}px)`,
                   transformStyle: "preserve-3d",
+                  opacity,
+                  pointerEvents,
+                  zIndex,
                 }}
               >
-                <div className="relative w-[400px] h-[600px] bg-gray-100 shadow-2xl hover:scale-105 transition-transform duration-300">
+                <div className={`relative w-[440px] h-[660px] bg-gray-100 ${isVisible ? 'shadow-2xl' : 'shadow-lg'} hover:scale-105 transition-all duration-300 rounded-lg overflow-hidden`}>
                   <Image
                     src={photo.src}
                     alt={photo.alt}
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-4 rounded-b-lg">
                     <p className="text-white font-mono text-sm">#{photo.id}</p>
                   </div>
                 </div>
@@ -125,9 +142,6 @@ export default function CarouselGallery() {
       </div>
       
       <style jsx>{`
-        .perspective-\\[2000px\\] {
-          perspective: 2000px;
-        }
         .preserve-3d {
           transform-style: preserve-3d;
         }

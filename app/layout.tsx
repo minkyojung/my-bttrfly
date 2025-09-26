@@ -35,8 +35,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Photography Portfolio",
-  description: "A minimalist photography portfolio",
+  title: "Minimal Blog",
+  description: "A minimal black and white blog",
 };
 
 export default function RootLayout({
