@@ -1,0 +1,168 @@
+import fs from 'fs';
+import path from 'path';
+import matter from 'gray-matter';
+import { remark } from 'remark';
+import html from 'remark-html';
+
+const postsDirectory = path.join(process.cwd(), 'content/posts');
+const pagesDirectory = path.join(process.cwd(), 'content/pages');
+
+export interface Post {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+  preview: string;
+  content: string;
+  htmlContent?: string;
+}
+
+// 옵시디언 문법을 표준 마크다운으로 변환
+function convertObsidianSyntax(content: string): string {
+  // [[내부링크]] → 일반 링크로
+  content = content.replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (match, link, alias) => {
+    const displayText = alias || link;
+    const urlSlug = link.toLowerCase().replace(/\s+/g, '-');
+    return `[${displayText}](/posts/${urlSlug})`;
+  });
+  
+  // ![[이미지.png]] → 마크다운 이미지로
+  content = content.replace(/!\[\[([^\]]+)\]\]/g, '![image](/attachments/$1)');
+  
+  // 하이라이트 ==텍스트== → <mark>텍스트</mark>
+  content = content.replace(/==(.*?)==/g, '<mark>$1</mark>');
+  
+  return content;
+}
+
+// 모든 포스트 가져오기
+export async function getAllPosts(): Promise<Post[]> {
+  // 폴더가 없으면 빈 배열 반환
+  if (!fs.existsSync(postsDirectory)) {
+    return [];
+  }
+
+  const fileNames = fs.readdirSync(postsDirectory)
+    .filter(fileName => fileName.endsWith('.md'));
+  
+  const posts = await Promise.all(
+    fileNames.map(async (fileName) => {
+      const slug = fileName.replace(/\.md$/, '');
+      const fullPath = path.join(postsDirectory, fileName);
+      const fileContents = fs.readFileSync(fullPath, 'utf8');
+      
+      // frontmatter 파싱
+      const { data, content } = matter(fileContents);
+      
+      // 옵시디언 문법 변환
+      const processedContent = convertObsidianSyntax(content);
+      
+      // 미리보기 텍스트 생성 (첫 150자)
+      const plainText = processedContent.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
+      const preview = plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
+      
+      return {
+        slug,
+        title: data.title || slug.replace(/-/g, ' '),
+        date: data.date || new Date().toISOString().split('T')[0],
+        tags: data.tags || [],
+        preview,
+        content: processedContent
+      };
+    })
+  );
+  
+  // 날짜 기준 내림차순 정렬
+  return posts.sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+}
+
+// 특정 포스트 가져오기
+export async function getPostBySlug(slug: string): Promise<Post | null> {
+  try {
+    const fullPath = path.join(postsDirectory, `${slug}.md`);
+    
+    if (!fs.existsSync(fullPath)) {
+      return null;
+    }
+    
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const { data, content } = matter(fileContents);
+    
+    // 옵시디언 문법 변환
+    const processedContent = convertObsidianSyntax(content);
+    
+    // 마크다운을 HTML로 변환
+    const processedHTML = await remark()
+      .use(html, { sanitize: false })
+      .process(processedContent);
+    
+    const htmlContent = processedHTML.toString();
+    
+    // 미리보기 텍스트
+    const plainText = processedContent.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
+    const preview = plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
+    
+    return {
+      slug,
+      title: data.title || slug.replace(/-/g, ' '),
+      date: data.date || new Date().toISOString().split('T')[0],
+      tags: data.tags || [],
+      preview,
+      content: processedContent,
+      htmlContent
+    };
+  } catch (error) {
+    console.error(`Error reading post ${slug}:`, error);
+    return null;
+  }
+}
+
+// 태그로 포스트 필터링
+export async function getPostsByTag(tag: string): Promise<Post[]> {
+  const allPosts = await getAllPosts();
+  return allPosts.filter(post => 
+    post.tags.map(t => t.toLowerCase()).includes(tag.toLowerCase())
+  );
+}
+
+// 포스트 검색
+export async function searchPosts(query: string): Promise<Post[]> {
+  const allPosts = await getAllPosts();
+  const lowerQuery = query.toLowerCase();
+  
+  return allPosts.filter(post => 
+    post.title.toLowerCase().includes(lowerQuery) ||
+    post.content.toLowerCase().includes(lowerQuery) ||
+    post.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
+  );
+}
+
+// 페이지 가져오기 (About 등)
+export async function getPage(pageName: string): Promise<{ content: string, htmlContent: string } | null> {
+  try {
+    const fullPath = path.join(pagesDirectory, `${pageName}.md`);
+    
+    if (!fs.existsSync(fullPath)) {
+      return null;
+    }
+    
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const { content } = matter(fileContents);
+    
+    const processedContent = convertObsidianSyntax(content);
+    
+    const processedHTML = await remark()
+      .use(html, { sanitize: false })
+      .process(processedContent);
+    
+    return {
+      content: processedContent,
+      htmlContent: processedHTML.toString()
+    };
+  } catch (error) {
+    console.error(`Error reading page ${pageName}:`, error);
+    return null;
+  }
+}

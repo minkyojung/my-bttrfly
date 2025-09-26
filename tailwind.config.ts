@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ["'RIDIBatang'", "serif"],
+        serif: ["'ChosunSm'", "serif"],
       },
     },
   },
