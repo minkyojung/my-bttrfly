@@ -3,19 +3,10 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'RIDIBatang';
-  src: url('/fonts/RIDIBatang.otf') format('opentype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'ChosunSm';
-  src: url('/fonts/ChosunSm.TTF') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+    font-family: 'BonmyeongjoSourceHanSerif';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NotoSerifKR.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
 }
 
 @layer base {
@@ -27,7 +18,7 @@
   body {
     color: #000000;
     background-color: #ffffff;
-    font-family: 'ChosunSm', serif;
+    font-family: 'BonmyeongjoSourceHanSerif', serif;
     line-height: 1.6;
     font-size: 16px;
     letter-spacing: 0.02em;
