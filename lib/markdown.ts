@@ -95,7 +95,7 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     
     // 마크다운을 HTML로 변환
     const processedHTML = await remark()
-      .use(html, { sanitize: false })
+      .use(html, { sanitize: true })
       .process(processedContent);
     
     const htmlContent = processedHTML.toString();
@@ -113,8 +113,8 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       content: processedContent,
       htmlContent
     };
-  } catch (error) {
-    console.error(`Error reading post ${slug}:`, error);
+  } catch {
+    // Production: error logging removed
     return null;
   }
 }
@@ -154,15 +154,15 @@ export async function getPage(pageName: string): Promise<{ content: string, html
     const processedContent = convertObsidianSyntax(content);
     
     const processedHTML = await remark()
-      .use(html, { sanitize: false })
+      .use(html, { sanitize: true })
       .process(processedContent);
     
     return {
       content: processedContent,
       htmlContent: processedHTML.toString()
     };
-  } catch (error) {
-    console.error(`Error reading page ${pageName}:`, error);
+  } catch {
+    // Production: error logging removed
     return null;
   }
 }
