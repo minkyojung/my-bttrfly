@@ -11,14 +11,14 @@
             "id": "770f04c66ced4d67",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "content/.obsidian/workspace.json",
-                "bFile": "content/.obsidian/workspace.json",
-                "aRef": ""
+                "file": "posts/2024-01-28-seoul-to-newyork.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: workspace.json"
+              "icon": "lucide-file",
+              "title": "2024-01-28-seoul-to-newyork"
             }
           }
         ]
@@ -94,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "posts/2024-01-28-seoul-to-newyork.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for 2024-01-28-seoul-to-newyork"
             }
           },
           {
@@ -112,11 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "posts/2024-01-28-seoul-to-newyork.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links"
+              "title": "Outgoing links from 2024-01-28-seoul-to-newyork"
             }
           },
           {
@@ -140,12 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "posts/2024-01-28-seoul-to-newyork.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline"
+              "title": "Outline of 2024-01-28-seoul-to-newyork"
             }
           },
           {
@@ -178,8 +181,8 @@
   },
   "active": "770f04c66ced4d67",
   "lastOpenFiles": [
-    "posts/2024-01-28-seoul-to-newyork.md",
     "posts/2024-01-30-coffee-ritual.md",
+    "posts/2024-01-28-seoul-to-newyork.md",
     "posts/2024-01-29-light-and-shadow.md"
   ]
 }
