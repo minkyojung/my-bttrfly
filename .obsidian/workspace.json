@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "fe9a6e7bad11f90f",
@@ -180,5 +181,9 @@
     }
   },
   "active": "22d2ea38d5a02ae6",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "content/posts/2024-01-30-coffee-ritual.md",
+    "2024-01-28.md",
+    "content/posts/2024-01-28-seoul-to-newyork.md"
+  ]
 }
