@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-white pl-12 pr-6 py-12 md:py-20">
@@ -57,7 +59,7 @@ export default function Home() {
 
         <div className="mt-16 pt-8 border-t border-black">
           <p className="text-sm mb-2">
-            <a href="/posts" className="underline">모든 글 보기 →</a>
+            <Link href="/posts" className="underline">모든 글 보기 →</Link>
           </p>
           <p className="text-sm">
             <a href="mailto:hello@example.com" className="underline">hello@example.com</a>

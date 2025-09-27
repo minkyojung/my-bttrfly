@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function NewPost() {
   const [copied, setCopied] = useState(false);
@@ -68,7 +69,7 @@ console.log(hello);
             <li>
               <strong>새 노트 생성</strong>
               <br />
-              Cmd/Ctrl + N 또는 좌측 패널에서 "New note" 클릭
+              Cmd/Ctrl + N 또는 좌측 패널에서 &ldquo;New note&rdquo; 클릭
             </li>
             <li>
               <strong>posts 폴더에 저장</strong>
@@ -114,7 +115,7 @@ console.log(hello);
         </div>
         
         <div className="mt-8 pt-8 border-t border-black">
-          <a href="/posts" className="text-sm underline">← 글 목록으로</a>
+          <Link href="/posts" className="text-sm underline">← 글 목록으로</Link>
         </div>
       </article>
     </main>

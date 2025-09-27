@@ -32,7 +32,6 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
         <h1 className="text-3xl mb-6 font-black">{post.title}</h1>
         <p className="text-sm text-black mb-8">{typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')}</p>
         
-        {/* 마크다운 HTML 렌더링 */}
         <div 
           className="prose prose-serif max-w-none
             prose-headings:font-black prose-headings:text-black
