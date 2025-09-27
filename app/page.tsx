@@ -19,7 +19,7 @@ export default async function Home() {
         
         {/* 데스크탑: 우측 50% / 모바일: 상단 - 프로필 */}
         <div className="w-full lg:w-1/2 p-6 lg:p-12 border-b lg:border-b-0 lg:border-l order-1 lg:order-2 lg:overflow-hidden" style={{ borderColor: 'var(--border-color)' }}>
-          <div className="flex items-start justify-center h-full min-h-[400px] lg:min-h-full lg:pt-16">
+          <div className="flex items-center justify-center h-full min-h-[400px] lg:min-h-full">
             <div className="text-center w-full max-w-sm">
               {/* 프로필 사진 */}
               <ProfilePhoto />
@@ -45,7 +45,7 @@ export default async function Home() {
                     style={{borderRadius: '12px'}} 
                     src="https://open.spotify.com/embed/playlist/1vayy3M7MvOEcPcatjq24l?utm_source=generator&theme=0" 
                     width="100%" 
-                    height="352" 
+                    height="152" 
                     frameBorder="0" 
                     allowFullScreen={true}
                     allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
