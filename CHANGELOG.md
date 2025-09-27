@@ -7,20 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **SNS Feed Design**: Transformed site into single-page continuous feed
+- **Markdown-based Intro Management**: Added editable intro content via `content/intro.md`
+- **Obsidian Integration**: Full Obsidian support for content editing
+
+### Changed
+- **Font Update**: Switched from NanumMyeongjoOldHangeul to BookkMyungjo font
+- **Architecture**: Consolidated all content to homepage (removed separate post pages)
+- **Navigation**: All post/list routes now redirect to homepage feed
+- **Design**: Softened divider colors from black to gray-200
+- **Typography**: Reduced post title sizes for better readability
+
+### Fixed
+- **Performance**: Added htmlContent generation to getAllPosts() function
+- **Code Quality**: Resolved all ESLint warnings
+- **Hooks**: Fixed React useCallback dependencies in photo viewer
+- **Imports**: Removed unused Link imports
+
 ### Security
 - Fixed XSS vulnerability by enabling HTML sanitization in markdown rendering
 - Added proper input validation for dynamic routes
 
-### Changed
-- Removed console.error statements in production code
-- Fixed ESLint violations (proper Link usage, escaped quotes)
-- Cleaned up commented code and improved code quality
-- Added useCallback hook for better performance in photo viewer
-
-### Fixed
-- Fixed Next.js Link component usage for internal navigation
-- Fixed React hooks dependency warnings
-- Fixed unescaped entities in JSX
+### Removed
+- Individual post pages (now part of continuous feed)
+- Posts list page (integrated into homepage)
+- Hardcoded intro content (now in markdown file)
+- Obsidian Git plugin files
 
 ## [1.2.0] - 2024-12-27
 
