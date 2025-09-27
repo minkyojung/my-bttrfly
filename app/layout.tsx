@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Minimal Blog",
+  title: "Minkyo Jung",
   description: "A minimal black and white blog",
 };
 
