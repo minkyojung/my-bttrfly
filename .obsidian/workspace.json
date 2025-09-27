@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "fe9a6e7bad11f90f",
@@ -180,7 +179,7 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "22d2ea38d5a02ae6",
+  "active": "86f7979db1b413e3",
   "lastOpenFiles": [
     "content/posts/2024-01-30-coffee-ritual.md",
     "2024-01-28.md",
