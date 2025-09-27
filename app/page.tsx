@@ -1,66 +1,77 @@
-import Link from "next/link";
+import { getAllPosts, getIntro } from "@/lib/markdown";
 
-export default function Home() {
+export default async function Home() {
+  const posts = await getAllPosts();
+  const intro = await getIntro();
+  
   return (
     <main className="min-h-screen bg-white pl-12 pr-6 py-12 md:py-20">
       <article className="max-w-2xl">
-        <h1 className="text-5xl font-black tracking-tight mb-12">
-          어디에도 없는 곳
-        </h1>
-        
-        <p className="mb-2 text-lg leading-relaxed">
-          서울에서 태어나 뉴욕에서 자랐다. 두 도시 사이 어딘가에 있는 것들을 찾아다닌다.
-        </p>
-        
-        
-        <p className="mb-2">
-          빛과 그림자, 사람과 공간, 그 사이에서 발견한 이야기들을 모은다.
-        </p>
+        {/* 소개글 섹션 - 마크다운에서 가져오기 */}
+        {intro ? (
+          <div 
+            className="prose prose-serif max-w-none mb-16
+              prose-headings:font-black prose-headings:text-black
+              prose-h1:text-5xl prose-h1:tracking-tight prose-h1:mb-12
+              prose-h2:text-2xl prose-h2:mb-4 prose-h2:mt-12
+              prose-p:mb-2 prose-p:leading-relaxed
+              prose-blockquote:border-l-2 prose-blockquote:border-black 
+              prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
+              prose-strong:font-bold
+              prose-em:italic
+              prose-ul:mb-2 prose-ul:list-none
+              prose-li:mb-1
+              prose-a:underline prose-a:text-black hover:prose-a:opacity-60"
+            dangerouslySetInnerHTML={{ __html: intro.htmlContent }}
+          />
+        ) : (
+          // 폴백 콘텐츠
+          <div>
+            <h1 className="text-5xl font-black tracking-tight mb-12">
+              어디에도 없는 곳
+            </h1>
+            <p className="mb-2">
+              소개글을 불러올 수 없습니다. content/intro.md 파일을 확인해주세요.
+            </p>
+          </div>
+        )}
 
-        <h2 className="text-2xl mb-4 mt-12 font-black">글쓰기</h2>
-        <p className="mb-2">
-          때로는 글을 쓴다. <em>보이지 않는 것들</em>에 대해서. 
-          느낌과 생각의 경계에서 떠오르는 문장들.
-        </p>
+        {/* 글 피드 섹션 */}
+        {posts.length > 0 && (
+          <div className="mt-16 pt-8 border-t border-black">
+            <div className="space-y-16">
+              {posts.map((post) => (
+                <article key={post.slug} className="border-b border-gray-200 pb-16 last:border-b-0 last:pb-0">
+                  <h2 className="text-2xl font-black mb-4">{post.title}</h2>
+                  <p className="text-sm text-black mb-8">{typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')}</p>
+                  
+                  <div 
+                    className="prose prose-serif max-w-none
+                      prose-headings:font-black prose-headings:text-black
+                      prose-h1:text-2xl prose-h1:mb-4 prose-h1:mt-8
+                      prose-h2:text-xl prose-h2:mb-3 prose-h2:mt-6
+                      prose-p:mb-2 prose-p:leading-relaxed
+                      prose-blockquote:border-l-2 prose-blockquote:border-black 
+                      prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
+                      prose-strong:font-bold
+                      prose-em:italic
+                      prose-ul:mb-2 prose-ul:list-none
+                      prose-li:mb-1
+                      prose-img:w-full prose-img:rounded prose-img:my-4
+                      prose-code:bg-white prose-code:border prose-code:border-black prose-code:px-1 prose-code:rounded prose-code:text-sm
+                      prose-pre:bg-white prose-pre:border prose-pre:border-black 
+                      prose-pre:rounded prose-pre:p-4 prose-pre:mb-4
+                      prose-a:underline prose-a:text-black hover:prose-a:opacity-60"
+                    dangerouslySetInnerHTML={{ __html: post.htmlContent || '' }}
+                  />
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
 
-        <p className="mb-2">
-          여행은 낯선 곳에서 나를 만나는 과정이다.
-        </p>
-        
-        <p className="mb-2">
-          도쿄의 골목, 파리의 카페, 제주의 바다.
-        </p>
-
-        
-        <p className="mb-2">
-          도시의 리듬과 나의 발걸음이 만나는 지점. 플레이리스트는 계절마다 바뀐다.
-        </p>
-
-        <p className="mb-2">
-          커피는 하루의 시작이자 쉼표다. 아침의 첫 모금부터 오후의 마지막 한 잔까지.
-        </p>
-
-        <p className="mb-2">
-          책은 또 다른 여행이다. 문장과 문장 사이를 걸으며 
-          작가의 세계를 탐험한다. <span className="underline">밑줄 그은 구절들</span>이 쌓여간다.
-        </p>
-
-        <p className="mb-2 text-sm text-black">
-          일상의 작은 순간들을 수집한다. 
-          창문에 비친 노을, 빗소리, 고양이의 하품. 
-          특별할 것 없는 하루가 특별해지는 순간.
-        </p>
-
-
-        <p className="mb-2">
-          이 공간은 그런 것들을 담는 곳이다. 
-          완성되지 않은 생각들과 계속되는 이야기들.
-        </p>
-
+        {/* 푸터 */}
         <div className="mt-16 pt-8 border-t border-black">
-          <p className="text-sm mb-2">
-            <Link href="/posts" className="underline">모든 글 보기 →</Link>
-          </p>
           <p className="text-sm">
             <a href="mailto:hello@example.com" className="underline">hello@example.com</a>
           </p>

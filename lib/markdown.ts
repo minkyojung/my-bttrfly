@@ -57,6 +57,13 @@ export async function getAllPosts(): Promise<Post[]> {
       // 옵시디언 문법 변환
       const processedContent = convertObsidianSyntax(content);
       
+      // 마크다운을 HTML로 변환
+      const processedHTML = await remark()
+        .use(html, { sanitize: true })
+        .process(processedContent);
+      
+      const htmlContent = processedHTML.toString();
+      
       // 미리보기 텍스트 생성 (첫 150자)
       const plainText = processedContent.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
       const preview = plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
@@ -67,7 +74,8 @@ export async function getAllPosts(): Promise<Post[]> {
         date: data.date || new Date().toISOString().split('T')[0],
         tags: data.tags || [],
         preview,
-        content: processedContent
+        content: processedContent,
+        htmlContent
       };
     })
   );
@@ -137,6 +145,33 @@ export async function searchPosts(query: string): Promise<Post[]> {
     post.content.toLowerCase().includes(lowerQuery) ||
     post.tags.some(tag => tag.toLowerCase().includes(lowerQuery))
   );
+}
+
+// 인트로 가져오기
+export async function getIntro(): Promise<{ content: string, htmlContent: string } | null> {
+  try {
+    const fullPath = path.join(process.cwd(), 'content/intro.md');
+    
+    if (!fs.existsSync(fullPath)) {
+      return null;
+    }
+    
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    const content = fileContents;
+    
+    const processedContent = convertObsidianSyntax(content);
+    
+    const processedHTML = await remark()
+      .use(html, { sanitize: true })
+      .process(processedContent);
+    
+    return {
+      content: processedContent,
+      htmlContent: processedHTML.toString()
+    };
+  } catch {
+    return null;
+  }
 }
 
 // 페이지 가져오기 (About 등)
