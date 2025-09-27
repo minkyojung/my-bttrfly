@@ -35,8 +35,7 @@
               "title": "2024-09-27-rnr"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -196,10 +195,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "be1e9b91f6da16a1",
+  "active": "22d2ea38d5a02ae6",
   "lastOpenFiles": [
-    "content/posts/2024-07-17-10-principles.md",
     "content/posts/2024-09-27-rnr.md",
+    "content/posts/2024-07-17-10-principles.md",
     "content/posts/2024-01-29-light-and-shadow.md",
     "2024-01-28.md"
   ]
