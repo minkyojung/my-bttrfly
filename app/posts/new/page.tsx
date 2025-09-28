@@ -38,7 +38,7 @@ tags: [태그1, 태그2]
 ### 코드 블록
 \`\`\`javascript
 const hello = "world";
-console.log(hello);
+// 콘솔에 출력
 \`\`\`
 `;
 
