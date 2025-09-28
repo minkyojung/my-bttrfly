@@ -8,11 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Horizontal Scroll Tags**: Implemented horizontal scrolling for tag overflow
 - **SNS Feed Design**: Transformed site into single-page continuous feed
 - **Markdown-based Intro Management**: Added editable intro content via `content/intro.md`
 - **Obsidian Integration**: Full Obsidian support for content editing
 
 ### Changed
+- **Contact Email**: Updated to williamjung0130@gmail.com
+- **Site Title**: Changed from "Minimal Blog" to "Minkyo Jung"
 - **Font Update**: Switched from NanumMyeongjoOldHangeul to BookkMyungjo font
 - **Architecture**: Consolidated all content to homepage (removed separate post pages)
 - **Navigation**: All post/list routes now redirect to homepage feed
@@ -24,12 +27,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Code Quality**: Resolved all ESLint warnings
 - **Hooks**: Fixed React useCallback dependencies in photo viewer
 - **Imports**: Removed unused Link imports
+- **Template**: Removed console.log from code example in new post page
 
 ### Security
 - Fixed XSS vulnerability by enabling HTML sanitization in markdown rendering
 - Added proper input validation for dynamic routes
 
 ### Removed
+- **Visitor Counter**: Removed visitor counter component from profile section
+- **Copyright Footer**: Removed "© 2024 · Seoul / NYC" text
+- **Unused Components**: Deleted VisitorCounter, wheel-carousel, and utils.ts
+- **Unused Dependencies**: Removed 6 unused npm packages (@fontsource/jetbrains-mono, class-variance-authority, clsx, date-fns, reading-time, tailwind-merge)
 - Individual post pages (now part of continuous feed)
 - Posts list page (integrated into homepage)
 - Hardcoded intro content (now in markdown file)
