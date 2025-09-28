@@ -1,7 +1,6 @@
 import { getAllPosts, getAllTags } from "@/lib/markdown";
 import { ProfilePhoto } from "@/components/ProfilePhoto";
 import { PostFeed } from "@/components/PostFeed";
-import { VisitorCounter } from "@/components/VisitorCounter";
 
 export default async function Home() {
   const [posts, allTags] = await Promise.all([
@@ -33,8 +32,8 @@ export default async function Home() {
               {/* 연락처 */}
               <div className="space-y-3 lg:space-y-4">
                 <p className="text-sm">
-                  <a href="mailto:hello@minkyojung.com" className="underline hover:opacity-60" style={{ color: 'var(--text-color)' }}>
-                    hello@minkyojung.com
+                  <a href="mailto:williamjung0130@gmail.com" className="underline hover:opacity-60" style={{ color: 'var(--text-color)' }}>
+                    williamjung0130@gmail.com
                   </a>
                 </p>
                 
@@ -52,11 +51,6 @@ export default async function Home() {
                     loading="lazy"
                   />
                 </div>
-                
-                <VisitorCounter />
-                <p className="text-xs" style={{ color: 'var(--text-color)' }}>
-                  © 2024 · Seoul / NYC
-                </p>
               </div>
             </div>
           </div>
