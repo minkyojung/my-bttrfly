@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/ThemeProvider";
 
 export const metadata: Metadata = {
-  title: "Minimal Blog",
+  title: "Minkyo Jung",
   description: "A minimal black and white blog",
 };
 
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="font-serif antialiased">
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

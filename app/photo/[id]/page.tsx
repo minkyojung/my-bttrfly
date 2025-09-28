@@ -41,21 +41,21 @@ export default function PhotoDetail() {
     }
   }, [params.id]);
 
-  const handlePrevious = () => {
+  const handlePrevious = useCallback(() => {
     const newIndex = currentIndex > 0 ? currentIndex - 1 : samplePhotos.length - 1;
     router.push(`/photo/${samplePhotos[newIndex].id}`);
-  };
+  }, [currentIndex, router]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     const newIndex = currentIndex < samplePhotos.length - 1 ? currentIndex + 1 : 0;
     router.push(`/photo/${samplePhotos[newIndex].id}`);
-  };
+  }, [currentIndex, router]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "ArrowLeft") handlePrevious();
     if (e.key === "ArrowRight") handleNext();
     if (e.key === "Escape") router.push("/");
-  }, [currentIndex, router]);
+  }, [handlePrevious, handleNext, router]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);

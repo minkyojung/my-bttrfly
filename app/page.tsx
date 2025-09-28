@@ -1,74 +1,61 @@
-import Link from "next/link";
+import { getAllPosts, getAllTags } from "@/lib/markdown";
+import { ProfilePhoto } from "@/components/ProfilePhoto";
+import { PostFeed } from "@/components/PostFeed";
 
-export default function Home() {
+export default async function Home() {
+  const [posts, allTags] = await Promise.all([
+    getAllPosts(),
+    getAllTags()
+  ]);
+  
   return (
-    <main className="min-h-screen bg-white pl-12 pr-6 py-12 md:py-20">
-      <article className="max-w-2xl">
-        <h1 className="text-5xl font-black tracking-tight mb-12">
-          어디에도 없는 곳
-        </h1>
-        
-        <p className="mb-2 text-lg leading-relaxed">
-          서울에서 태어나 뉴욕에서 자랐다. 두 도시 사이 어딘가에 있는 것들을 찾아다닌다.
-        </p>
-        
-        
-        <p className="mb-2">
-          빛과 그림자, 사람과 공간, 그 사이에서 발견한 이야기들을 모은다.
-        </p>
-
-        <h2 className="text-2xl mb-4 mt-12 font-black">글쓰기</h2>
-        <p className="mb-2">
-          때로는 글을 쓴다. <em>보이지 않는 것들</em>에 대해서. 
-          느낌과 생각의 경계에서 떠오르는 문장들.
-        </p>
-
-        <p className="mb-2">
-          여행은 낯선 곳에서 나를 만나는 과정이다.
-        </p>
-        
-        <p className="mb-2">
-          도쿄의 골목, 파리의 카페, 제주의 바다.
-        </p>
-
-        
-        <p className="mb-2">
-          도시의 리듬과 나의 발걸음이 만나는 지점. 플레이리스트는 계절마다 바뀐다.
-        </p>
-
-        <p className="mb-2">
-          커피는 하루의 시작이자 쉼표다. 아침의 첫 모금부터 오후의 마지막 한 잔까지.
-        </p>
-
-        <p className="mb-2">
-          책은 또 다른 여행이다. 문장과 문장 사이를 걸으며 
-          작가의 세계를 탐험한다. <span className="underline">밑줄 그은 구절들</span>이 쌓여간다.
-        </p>
-
-        <p className="mb-2 text-sm text-black">
-          일상의 작은 순간들을 수집한다. 
-          창문에 비친 노을, 빗소리, 고양이의 하품. 
-          특별할 것 없는 하루가 특별해지는 순간.
-        </p>
-
-
-        <p className="mb-2">
-          이 공간은 그런 것들을 담는 곳이다. 
-          완성되지 않은 생각들과 계속되는 이야기들.
-        </p>
-
-        <div className="mt-16 pt-8 border-t border-black">
-          <p className="text-sm mb-2">
-            <Link href="/posts" className="underline">모든 글 보기 →</Link>
-          </p>
-          <p className="text-sm">
-            <a href="mailto:hello@example.com" className="underline">hello@example.com</a>
-          </p>
-          <p className="text-xs mt-2 text-black">
-            © 2024 · Seoul / NYC
-          </p>
+    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+      <div className="flex flex-col lg:flex-row h-screen">
+        {/* 데스크탑: 좌측 50% / 모바일: 하단 - 글 피드 */}
+        <div className="w-full lg:w-1/2 pl-6 lg:pl-12 pr-6 lg:pr-8 py-6 lg:py-12 overflow-y-auto order-2 lg:order-1 scrollbar-hide">
+          <PostFeed initialPosts={posts} initialTags={allTags} />
         </div>
-      </article>
+        
+        {/* 데스크탑: 우측 50% / 모바일: 상단 - 프로필 */}
+        <div className="w-full lg:w-1/2 p-6 lg:p-12 border-b lg:border-b-0 lg:border-l order-1 lg:order-2 lg:overflow-hidden" style={{ borderColor: 'var(--border-color)' }}>
+          <div className="flex items-center justify-center h-full min-h-[400px] lg:min-h-full">
+            <div className="text-center w-full max-w-sm">
+              {/* 프로필 사진 */}
+              <ProfilePhoto />
+              
+              {/* 인사말 */}
+              <h1 className="text-xl lg:text-2xl font-black mb-2 lg:mb-3" style={{ color: 'var(--text-color)' }}>정민교</h1>
+              <p className="mb-4 lg:mb-5 text-sm lg:text-base leading-normal" style={{ color: 'var(--text-color)' }}>
+                작동원리를 탐구하고 생각을 다듬어갑니다.
+              </p>
+              
+              {/* 연락처 */}
+              <div className="space-y-3 lg:space-y-4">
+                <p className="text-sm">
+                  <a href="mailto:williamjung0130@gmail.com" className="underline hover:opacity-60" style={{ color: 'var(--text-color)' }}>
+                    williamjung0130@gmail.com
+                  </a>
+                </p>
+                
+                {/* Spotify */}
+                <div className="w-full">
+                  <iframe 
+                    data-testid="embed-iframe" 
+                    style={{borderRadius: '12px'}} 
+                    src="https://open.spotify.com/embed/playlist/1vayy3M7MvOEcPcatjq24l?utm_source=generator&theme=0" 
+                    width="100%" 
+                    height="152" 
+                    frameBorder="0" 
+                    allowFullScreen={true}
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   );
 }

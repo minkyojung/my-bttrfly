@@ -38,7 +38,7 @@ tags: [태그1, 태그2]
 ### 코드 블록
 \`\`\`javascript
 const hello = "world";
-console.log(hello);
+// 콘솔에 출력
 \`\`\`
 `;
 
@@ -115,7 +115,7 @@ console.log(hello);
         </div>
         
         <div className="mt-8 pt-8 border-t border-black">
-          <Link href="/posts" className="text-sm underline">← 글 목록으로</Link>
+          <Link href="/" className="text-sm underline">← 홈으로</Link>
         </div>
       </article>
     </main>

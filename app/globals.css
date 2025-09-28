@@ -3,32 +3,58 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: 'NanumMyeongjoOldHangeul';
-    src: url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumMyeongjoYetHangul/NanumMyeongjo-YetHangul.eot);
-    src: url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumMyeongjoYetHangul/NanumMyeongjo-YetHangul.eot?#iefix) format("embedded-opentype"), url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumMyeongjoYetHangul/NanumMyeongjo-YetHangul.woff2) format("woff2"), url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumMyeongjoYetHangul/NanumMyeongjo-YetHangul.woff) format("woff"), url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumMyeongjoYetHangul/NanumMyeongjo-YetHangul.ttf) format("truetype");
+    font-family: 'BookkMyungjo';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Lt.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'BookkMyungjo';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Bd.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
 }
 
 @layer base {
+  :root {
+    --bg-color: #ffffff;
+    --text-color: #000000;
+    --border-color: #d1d5db;
+    --profile-border-color: #000000;
+  }
+  
+  [data-theme="dark"] {
+    --bg-color: #111111;
+    --text-color: #ffffff;
+    --border-color: #404040;
+    --profile-border-color: #ffffff;
+  }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   
   body {
-    color: #000000;
-    background-color: #ffffff;
-    font-family: 'NanumMyeongjoOldHangeul', serif;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    font-family: 'BookkMyungjo', serif;
     line-height: 1.6;
     font-size: 16px;
     letter-spacing: 0.02em;
   }
 
   ::selection {
-    @apply bg-black text-white;
+    background-color: var(--text-color);
+    color: var(--bg-color);
   }
 
   a {
-    color: #000000;
+    color: var(--text-color);
   }
 
   a:hover {
@@ -39,5 +65,16 @@
 @layer utilities {
   .preserve-3d {
     transform-style: preserve-3d;
+  }
+  
+  .scrollbar-hide {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
