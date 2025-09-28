@@ -196,6 +196,11 @@
   },
   "active": "22d2ea38d5a02ae6",
   "lastOpenFiles": [
+    "content/intro.md",
+    "components/ThemeProvider.tsx",
+    "components/TagFilter.tsx",
+    "components/ProfilePhoto.tsx",
+    "components/PostFeed.tsx",
     "content/posts/2024-09-27-rnr.md",
     "content/posts/2024-07-17-10-principles.md",
     "content/posts/2024-01-29-light-and-shadow.md",
