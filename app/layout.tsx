@@ -14,7 +14,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="font-serif antialiased">
+      <head>
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+        <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+      </head>
+      <body className="antialiased">
         <ThemeProvider>
           {children}
         </ThemeProvider>

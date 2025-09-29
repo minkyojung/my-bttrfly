@@ -16,6 +16,8 @@ export interface Post {
   content: string;
   htmlContent?: string;
   readingTime: string;
+  pinned?: boolean;
+  pinnedOrder?: number;
 }
 
 // 읽는 시간 계산 (한글 기준 분당 400자)
@@ -88,7 +90,9 @@ export async function getAllPosts(): Promise<Post[]> {
         preview,
         content: processedContent,
         htmlContent,
-        readingTime
+        readingTime,
+        pinned: data.pinned || false,
+        pinnedOrder: data.pinnedOrder || 999
       };
     })
   );
@@ -136,12 +140,23 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       preview,
       content: processedContent,
       htmlContent,
-      readingTime
+      readingTime,
+      pinned: data.pinned || false,
+      pinnedOrder: data.pinnedOrder || 999
     };
   } catch {
     // Production: error logging removed
     return null;
   }
+}
+
+// Pinned 포스트 가져오기
+export async function getPinnedPosts(): Promise<Post[]> {
+  const allPosts = await getAllPosts();
+  return allPosts
+    .filter(post => post.pinned)
+    .sort((a, b) => (a.pinnedOrder || 999) - (b.pinnedOrder || 999))
+    .slice(0, 5); // 최대 5개까지만
 }
 
 // 모든 태그 가져오기

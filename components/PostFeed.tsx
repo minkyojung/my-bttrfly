@@ -53,18 +53,55 @@ export function PostFeed({ initialPosts, initialTags }: PostFeedProps) {
       {filteredPosts.length > 0 ? (
         <div className="space-y-16">
           {filteredPosts.map((post) => (
-            <article key={post.slug} className="border-b pb-16 last:border-b-0 last:pb-0" style={{ borderColor: 'var(--border-color)' }}>
+            <article 
+              key={post.slug} 
+              id={`post-${post.slug}`}
+              className="border-b pb-16 last:border-b-0 last:pb-0 scroll-mt-6" 
+              style={{ borderColor: 'var(--border-color)' }}
+            >
               <h2 className="text-2xl font-black mb-4" style={{ color: 'var(--text-color)' }}>{post.title}</h2>
-              <p className="text-sm mb-8" style={{ color: 'var(--text-color)' }}>
-                {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')} · {post.readingTime}
-              </p>
+              <div className="flex items-center gap-3 text-sm mb-8" style={{ color: 'var(--text-color)' }}>
+                <p className="opacity-80">
+                  {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')} · {post.readingTime}
+                </p>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/posts/${post.slug}`;
+                      navigator.clipboard.writeText(url);
+                    }}
+                    className="p-1 hover:opacity-60 transition-opacity"
+                    style={{ color: 'var(--text-color)' }}
+                    title="링크 복사"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                    </svg>
+                  </button>
+                  <a
+                    href={`/posts/${post.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1 hover:opacity-60 transition-opacity inline-block"
+                    style={{ color: 'var(--text-color)' }}
+                    title="새 탭에서 열기"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
               
               <div 
                 className="prose prose-serif max-w-none
                   prose-headings:font-black 
                   prose-h1:text-2xl prose-h1:mb-4 prose-h1:mt-8
                   prose-h2:text-xl prose-h2:mb-3 prose-h2:mt-6
-                  prose-p:mb-2 prose-p:leading-relaxed
+                  prose-p:mb-2
                   prose-blockquote:border-l-2 
                   prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
                   prose-strong:font-bold
@@ -76,6 +113,7 @@ export function PostFeed({ initialPosts, initialTags }: PostFeedProps) {
                   prose-pre:rounded prose-pre:p-4 prose-pre:mb-4
                   prose-a:underline hover:prose-a:opacity-60"
                 style={{
+                  lineHeight: '1.9',
                   '--tw-prose-headings': 'var(--text-color)',
                   '--tw-prose-body': 'var(--text-color)',
                   '--tw-prose-bold': 'var(--text-color)',
