@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/posts/2024-05-22-mindset.md",
+                "file": "content/posts/2024-09-27-rnr.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2024-05-22-mindset"
+              "title": "2024-09-27-rnr"
             }
           },
           {
@@ -212,6 +212,7 @@
   },
   "active": "7693c001ebb07522",
   "lastOpenFiles": [
+    "content/posts/2024-05-22-just-di-it.md",
     "data/profile.json",
     "data",
     "components/ShareButton.tsx",
@@ -219,7 +220,6 @@
     "components/ProfileHistory.tsx",
     "components/PinnedPosts.tsx",
     "content/posts/2024-09-27-rnr.md",
-    "content/posts/2024-05-22-mindset.md",
     "content/posts/2024-07-17-10-principles.md",
     "content/posts/2024.md",
     "content/posts/2024-03-24-beginner.md",
