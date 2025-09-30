@@ -9,7 +9,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        serif: ["'BookkMyungjo'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
+        serif: ["'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
       },
     },
   },
