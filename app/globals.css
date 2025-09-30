@@ -3,16 +3,24 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: 'BookkMyungjo';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Lt.woff2') format('woff2');
+    font-family: 'KoPub Batang';
+    src: url('/fonts/KoPub Batang_Pro Light.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'KoPub Batang';
+    src: url('/fonts/KoPub Batang_Pro Medium.otf') format('opentype');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'BookkMyungjo';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Bd.woff2') format('woff2');
+    font-family: 'KoPub Batang';
+    src: url('/fonts/KoPub Batang_Pro Bold.otf') format('opentype');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
@@ -50,7 +58,7 @@
   body {
     color: var(--text-color);
     background-color: var(--bg-color);
-    font-family: 'BookkMyungjo', 'Noto Serif KR', 'Batang', 'Georgia', serif;
+    font-family: 'KoPub Batang', 'Noto Serif KR', 'Batang', 'Georgia', serif;
     line-height: 1.6;
     font-size: 1rem;
     letter-spacing: 0.02em;
