@@ -212,6 +212,9 @@
   },
   "active": "7693c001ebb07522",
   "lastOpenFiles": [
+    "public/fonts/KoPub Batang_Pro Medium.otf",
+    "public/fonts/KoPub Batang_Pro Light.otf",
+    "public/fonts/KoPub Batang_Pro Bold.otf",
     "content/posts/2024-05-22-just-di-it.md",
     "data/profile.json",
     "data",
@@ -226,8 +229,6 @@
     "content/intro.md",
     "components/ThemeProvider.tsx",
     "components/TagFilter.tsx",
-    "components/ProfilePhoto.tsx",
-    "components/PostFeed.tsx",
     "CHANGELOG.md",
     "public/images/profile.png",
     "public/images/Screenshot 2025-09-15 at 11.40.51 PM.png",
