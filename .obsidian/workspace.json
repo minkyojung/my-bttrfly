@@ -36,6 +36,18 @@
             }
           },
           {
+            "id": "503e5c1c986b428f",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.9.14"
+              },
+              "icon": "lucide-book-up",
+              "title": "Release Notes 1.9.14"
+            }
+          },
+          {
             "id": "be1e9b91f6da16a1",
             "type": "leaf",
             "state": {
@@ -50,7 +62,7 @@
             }
           }
         ],
-        "currentTab": 1
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -212,7 +224,7 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "7693c001ebb07522",
+  "active": "503e5c1c986b428f",
   "lastOpenFiles": [
     "my-bttrfly",
     "content/posts/2024-09-27-rnr.md",
