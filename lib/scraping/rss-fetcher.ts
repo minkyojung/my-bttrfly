@@ -25,12 +25,13 @@ export async function fetchRSSFeed(url: string): Promise<RSSArticle[]> {
   try {
     const feed = await parser.parseURL(url);
 
-    return feed.items.map((item: any) => ({
+    return feed.items.map((item) => ({
       title: item.title || 'Untitled',
       link: item.link || '',
       pubDate: item.pubDate || item.isoDate,
-      content: item.content || item.contentSnippet || '',
-      fullContent: item.fullContent,
+      // Use contentSnippet first (HTML-free), then fall back to content
+      content: item.contentSnippet || item.content || '',
+      fullContent: item.fullContent || item.content || item.contentSnippet || '',
       thumbnail:
         item.thumbnail?.['$']?.url ||
         item.mediaContent?.[0]?.['$']?.url ||
@@ -39,7 +40,6 @@ export async function fetchRSSFeed(url: string): Promise<RSSArticle[]> {
       categories: item.categories || [],
     }));
   } catch (error) {
-    console.error(`Error fetching RSS feed: ${url}`, error);
     throw error;
   }
 }
@@ -51,11 +51,9 @@ export async function fetchMultipleFeeds(
 
   const articles: RSSArticle[] = [];
 
-  results.forEach((result, index) => {
+  results.forEach((result) => {
     if (result.status === 'fulfilled') {
       articles.push(...result.value);
-    } else {
-      console.error(`Failed to fetch feed ${urls[index]}:`, result.reason);
     }
   });
 

@@ -40,16 +40,15 @@ export async function extractArticleContent(
     const thumbnail = await extractThumbnail(url, data);
 
     return {
-      title: article.title,
-      content: article.textContent,
-      excerpt: article.excerpt || article.textContent.substring(0, 300),
-      html: article.content,
-      length: article.length,
-      siteName: article.siteName,
+      title: article.title || '',
+      content: article.textContent || '',
+      excerpt: article.excerpt || article.textContent?.substring(0, 300) || '',
+      html: article.content || '',
+      length: article.length || 0,
+      siteName: article.siteName || undefined,
       thumbnail,
     };
-  } catch (error) {
-    console.error('Content extraction failed:', error);
+  } catch {
     return null;
   }
 }

@@ -1,8 +1,5 @@
 import pLimit from 'p-limit';
 
-// 동시 요청 제한 (기본값: 3)
-const limit = pLimit(3);
-
 /**
  * 랜덤 딜레이를 추가하여 사람처럼 행동
  * @param min 최소 밀리초 (기본값: 1000ms)
