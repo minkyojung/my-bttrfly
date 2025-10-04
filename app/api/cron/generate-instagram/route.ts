@@ -4,7 +4,7 @@ import { generateInstagramContent } from '@/lib/ai/instagram-generator';
 
 /**
  * Cron Job: 분류된 기사에서 인스타그램 콘텐츠 생성
- * 스케줄: 매 2시간마다 (30분에 실행, 30 */2 * * *)
+ * 스케줄: 매 2시간마다 (30분에 실행)
  */
 export async function GET(request: NextRequest) {
   // Cron secret 검증 (프로덕션에서 활성화)

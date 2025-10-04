@@ -76,7 +76,7 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 뉴스 기사를 한국어로 요약하
 - 마지막은 전체적인 의미/영향을 설명`;
 
 export default function PromptEditor() {
-  const [mode, setMode] = useState<'template' | 'freetext'>('template');
+  const [mode, setMode] = useState<'template' | 'freetext'>('freetext');
   const [templates, setTemplates] = useState<PromptTemplate[]>(DEFAULT_TEMPLATES);
   const [selectedTemplate, setSelectedTemplate] = useState<PromptTemplate | null>(templates[0]);
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
@@ -106,14 +106,6 @@ export default function PromptEditor() {
 
   const [editingTemplate, setEditingTemplate] = useState<PromptTemplate | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
-
-  useEffect(() => {
-    if (mode === 'template' && selectedTemplate) {
-      generateCustomSummary();
-    } else if (mode === 'freetext') {
-      generateFreetextSummary();
-    }
-  }, [mode, selectedTemplate, customVariables, testArticle, systemPrompt]);
 
   const generateFreetextSummary = () => {
     // Replace variables in system prompt
@@ -164,6 +156,15 @@ export default function PromptEditor() {
     }
     return Array.from(variables);
   };
+
+  useEffect(() => {
+    if (mode === 'template' && selectedTemplate) {
+      generateCustomSummary();
+    } else if (mode === 'freetext') {
+      generateFreetextSummary();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, selectedTemplate, customVariables, testArticle, systemPrompt]);
 
   const updateTemplateVariables = (template: PromptTemplate): PromptTemplate => {
     const allText = `${template.hook} ${template.bullets.join(' ')} ${template.impact}`;
