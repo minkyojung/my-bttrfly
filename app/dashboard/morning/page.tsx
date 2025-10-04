@@ -16,6 +16,7 @@ interface Article {
   keywords?: string[];
   sentiment?: 'positive' | 'negative' | 'neutral';
   relevance_score?: number;
+  summary?: string;
 }
 
 interface InstagramContent {
@@ -24,6 +25,18 @@ interface InstagramContent {
   hashtags: string[];
   format: 'post' | 'reel' | 'story';
   originalArticle: Article;
+}
+
+// 간단한 요약 생성 함수 (실제로는 AI API를 사용해야 함)
+function generateKoreanSummary(article: Article): string {
+  // 임시 요약 생성 로직
+  const templates = [
+    `${article.source || '해당 매체'}에서 보도한 바에 따르면, ${article.title}에 대한 새로운 소식이 전해졌습니다. 이번 발표는 업계에 상당한 영향을 미칠 것으로 예상되며, 전문가들은 향후 동향을 주목하고 있습니다.`,
+    `최근 ${article.category || '해당 분야'}에서 ${article.title}과 관련된 중요한 발전이 있었습니다. 이는 기존 방식에 변화를 가져올 수 있는 혁신적인 접근으로 평가받고 있으며, 관련 업계의 관심이 집중되고 있습니다.`,
+    `${article.title}에 대한 새로운 정보가 공개되었습니다. 전문가들은 이번 소식이 시장에 긍정적인 영향을 미칠 것으로 전망하고 있으며, 소비자들의 반응도 주목됩니다.`,
+  ];
+
+  return templates[Math.floor(Math.random() * templates.length)];
 }
 
 export default function MorningReviewDashboard() {
@@ -52,6 +65,10 @@ export default function MorningReviewDashboard() {
             const articleDate = new Date(article.created_at).toDateString();
             return articleDate === today;
           })
+          .map((article: Article) => ({
+            ...article,
+            summary: article.summary || generateKoreanSummary(article)
+          }))
           .sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
 
         setArticles(todayArticles);
@@ -121,155 +138,167 @@ export default function MorningReviewDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="animate-pulse text-sm text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="animate-pulse text-sm text-zinc-400">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      {/* Minimal Header */}
-      <div className="border-b border-gray-800">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-sm font-medium text-white">Morning Review</h1>
-              <nav className="flex items-center space-x-6 text-sm">
-                <a href="/dashboard/morning" className="text-white">
-                  Morning
-                </a>
-                <a href="/dashboard/news" className="text-gray-400 hover:text-white transition-colors">
-                  Articles
-                </a>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-500">
-                {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Category Filter - Dark Vercel Style */}
-      <div className="px-6 py-3 border-b border-gray-800">
-        <div className="flex items-center space-x-4">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-all ${
-                selectedCategory === cat
-                  ? 'bg-white text-black'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-800'
-              }`}
-            >
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </button>
-          ))}
-          <div className="ml-auto text-xs text-gray-500">
-            {filteredArticles.length} articles
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content - Compact Grid */}
-      <div className="p-6">
+    <div className="min-h-screen bg-zinc-950 pb-24">
+      {/* Feed Content - Cleaner Instagram Style */}
+      <div className="pt-6 px-4">
         {filteredArticles.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-sm text-gray-500">No articles for today</p>
+            <p className="text-sm text-zinc-500">No articles for today</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="max-w-2xl mx-auto">
             {filteredArticles.map((article) => (
-              <div
+              <article
                 key={article.id}
-                className="group border border-gray-800 rounded-lg p-4 hover:border-gray-600 transition-all bg-gray-900"
+                className="mb-6 rounded-lg overflow-hidden border border-zinc-900 hover:border-zinc-700 transition-all hover:shadow-lg cursor-pointer group"
               >
-                {/* Thumbnail */}
+                {/* Thumbnail First for Visual Priority */}
                 {article.thumbnail && (
-                  <div className="mb-3 overflow-hidden rounded bg-gray-800">
+                  <div className="w-full aspect-[16/10] bg-zinc-900 overflow-hidden">
                     <img
                       src={article.thumbnail}
                       alt={article.title}
-                      className="w-full h-32 object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 )}
 
                 {/* Content */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium text-white line-clamp-2">
-                    {article.title}
-                  </h3>
-
-                  {article.description && (
-                    <p className="text-xs text-gray-400 line-clamp-2">
-                      {article.description}
-                    </p>
-                  )}
-
-                  {/* Meta Info */}
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center space-x-2">
-                      {article.relevance_score && (
-                        <span className="text-xs px-2 py-0.5 bg-gray-800 text-gray-300 rounded">
-                          {Math.round(article.relevance_score * 100)}%
-                        </span>
-                      )}
-                      {article.sentiment && (
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          article.sentiment === 'positive' ? 'bg-gray-800 text-white' :
-                          article.sentiment === 'negative' ? 'bg-gray-700 text-gray-300' :
-                          'bg-gray-800 text-gray-400'
-                        }`}>
-                          {article.sentiment}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-xs text-gray-500">
+                <div className="p-5 bg-zinc-950 group-hover:bg-zinc-900/50 transition-colors">
+                  {/* Meta Information - Subtle */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs text-zinc-500">
                       {article.source || 'Unknown'}
+                    </span>
+                    {article.category && (
+                      <>
+                        <span className="text-xs text-zinc-600">•</span>
+                        <span className="text-xs text-zinc-500">
+                          {article.category}
+                        </span>
+                      </>
+                    )}
+                    <span className="text-xs text-zinc-600">•</span>
+                    <span className="text-xs text-zinc-500">
+                      {new Date(article.created_at).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit'
+                      })}
                     </span>
                   </div>
 
-                  {/* Keywords */}
+                  {/* Title - Prominent */}
+                  <h2 className="text-lg font-semibold text-zinc-100 leading-snug mb-3">
+                    {article.title}
+                  </h2>
+
+                  {/* Korean Summary - NEW */}
+                  <div className="mb-3 p-3 bg-zinc-900/50 rounded-md border border-zinc-800">
+                    <p className="text-sm text-zinc-300 leading-relaxed">
+                      {article.summary}
+                    </p>
+                  </div>
+
+                  {/* Keywords as Tags */}
                   {article.keywords && article.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-2">
-                      {article.keywords.slice(0, 3).map((keyword, idx) => (
-                        <span key={idx} className="text-xs text-gray-500">
-                          #{keyword}
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {article.keywords.slice(0, 5).map((keyword, idx) => (
+                        <span key={idx} className="text-xs text-zinc-500">
+                          #{keyword.toLowerCase().replace(/\s+/g, '')}
                         </span>
                       ))}
                     </div>
                   )}
 
-                  {/* Actions */}
-                  <div className="flex items-center space-x-2 pt-3">
+                  {/* Minimal Action Bar */}
+                  <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
+                    <div className="flex items-center gap-2">
+                      {article.relevance_score && (
+                        <span className="text-xs text-zinc-500">
+                          {Math.round(article.relevance_score * 100)}% relevant
+                        </span>
+                      )}
+                      {article.sentiment && (
+                        <span className={`text-xs ${
+                          article.sentiment === 'positive' ? 'text-emerald-500' :
+                          article.sentiment === 'negative' ? 'text-rose-500' :
+                          'text-zinc-500'
+                        }`}>
+                          {article.sentiment}
+                        </span>
+                      )}
+                    </div>
+
                     <button
-                      onClick={() => handleGenerateContent(article)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleGenerateContent(article);
+                      }}
                       disabled={processingArticle === article.id}
-                      className={`flex-1 text-xs py-1.5 px-3 rounded border transition-all ${
+                      className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
                         processingArticle === article.id
-                          ? 'bg-gray-800 text-gray-500 border-gray-700'
-                          : 'bg-white text-black border-white hover:bg-gray-200'
+                          ? 'bg-zinc-800 text-zinc-500'
+                          : 'bg-zinc-100 text-zinc-900 hover:bg-white'
                       }`}
                     >
-                      {processingArticle === article.id ? 'Processing...' : 'Generate'}
-                    </button>
-                    <button className="text-xs py-1.5 px-3 rounded border border-gray-700 text-gray-300 hover:bg-gray-800 transition-all">
-                      Save
+                      {processingArticle === article.id ? '...' : 'Generate'}
                     </button>
                   </div>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         )}
       </div>
 
-      {/* Content Editor Modal - Dark Vercel Style */}
+      {/* Floating Dock - Fixed Bottom Navigation */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        <div className="bg-zinc-900/90 backdrop-blur-lg border border-zinc-800 rounded-lg shadow-xl p-2">
+          <div className="flex items-center gap-4">
+            {/* Navigation */}
+            <nav className="flex items-center gap-1">
+              <a href="/dashboard/morning" className="px-3 py-1.5 rounded-md text-xs font-medium text-zinc-100 bg-zinc-800">
+                Feed
+              </a>
+              <a href="/dashboard/pipeline" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
+                Pipeline
+              </a>
+              <a href="/dashboard/news" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
+                Articles
+              </a>
+            </nav>
+
+            {/* Divider */}
+            <div className="w-px h-4 bg-zinc-700"></div>
+
+            {/* Category Filter (Conditional for Feed View) */}
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="text-xs px-2 py-1 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 focus:outline-none focus:border-zinc-600"
+            >
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </option>
+              ))}
+            </select>
+
+            <span className="text-xs text-zinc-500">
+              {filteredArticles.length}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Editor Modal - Zinc Theme */}
       <Dialog
         open={!!selectedArticle && !!generatedContent}
         onOpenChange={() => {
@@ -278,22 +307,22 @@ export default function MorningReviewDashboard() {
           setEditedContent(null);
         }}
       >
-        <DialogContent className="max-w-4xl p-0 gap-0 bg-gray-900 border-gray-800">
+        <DialogContent className="max-w-4xl p-0 gap-0 bg-zinc-900 border-zinc-800">
           <DialogTitle className="sr-only">Instagram Content Editor</DialogTitle>
           <div className="grid grid-cols-2 h-[600px]">
             {/* Instagram Preview */}
-            <div className="border-r border-gray-800 p-8 bg-gray-950 flex items-center justify-center">
+            <div className="border-r border-zinc-800 p-8 bg-zinc-950 flex items-center justify-center">
               <div className="w-full max-w-sm">
-                <div className="bg-black border border-gray-800 rounded-lg shadow-sm">
+                <div className="bg-black border border-zinc-800 rounded-lg shadow-sm">
                   {/* Instagram Header */}
-                  <div className="p-3 border-b border-gray-800 flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gray-700 rounded-full"></div>
+                  <div className="p-3 border-b border-zinc-800 flex items-center space-x-2">
+                    <div className="w-8 h-8 bg-zinc-700 rounded-full"></div>
                     <span className="text-xs font-medium text-white">yourhandle</span>
                   </div>
 
                   {/* Instagram Content */}
-                  <div className="aspect-square bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center p-6">
-                    <p className="text-center text-sm text-gray-200">
+                  <div className="aspect-square bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center p-6">
+                    <p className="text-center text-sm text-zinc-200">
                       {editedContent?.caption.slice(0, 100)}...
                     </p>
                   </div>
@@ -301,17 +330,17 @@ export default function MorningReviewDashboard() {
                   {/* Instagram Footer */}
                   <div className="p-3 space-y-2">
                     <div className="flex space-x-3">
-                      <button className="text-gray-300">
+                      <button className="text-zinc-300">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
                       </button>
-                      <button className="text-gray-300">
+                      <button className="text-zinc-300">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                       </button>
-                      <button className="text-gray-300">
+                      <button className="text-zinc-300">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.032 4.026a9.001 9.001 0 01-7.432 0m9.032-4.026A9.001 9.001 0 0112 3c-4.474 0-8.268 3.12-9.032 7.326m0 0A9.001 9.001 0 0012 21c4.474 0 8.268-3.12 9.032-7.326" />
                         </svg>
@@ -319,10 +348,10 @@ export default function MorningReviewDashboard() {
                     </div>
                     <p className="text-xs">
                       <span className="font-medium text-white">yourhandle</span>{' '}
-                      <span className="text-gray-400">{editedContent?.caption.slice(0, 50)}...</span>
+                      <span className="text-zinc-400">{editedContent?.caption.slice(0, 50)}...</span>
                     </p>
                     {editedContent?.hashtags && (
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-zinc-400">
                         {editedContent.hashtags.slice(0, 3).map(tag => `#${tag}`).join(' ')}
                       </p>
                     )}
@@ -332,13 +361,13 @@ export default function MorningReviewDashboard() {
             </div>
 
             {/* Edit Panel */}
-            <div className="p-6 bg-gray-900">
+            <div className="p-6 bg-zinc-900">
               <div className="h-full flex flex-col">
                 <div className="mb-4">
                   <h3 className="text-sm font-medium text-white mb-1">
                     Content Editor
                   </h3>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-zinc-400">
                     Edit and customize your Instagram content
                   </p>
                 </div>
@@ -347,43 +376,43 @@ export default function MorningReviewDashboard() {
                   <div className="space-y-4">
                     {/* Title */}
                     <div>
-                      <label className="text-xs text-gray-400 block mb-1">Title</label>
+                      <label className="text-xs text-zinc-400 block mb-1">Title</label>
                       <input
                         type="text"
                         value={editedContent?.title || ''}
                         onChange={(e) => setEditedContent(prev => prev ? {...prev, title: e.target.value} : null)}
-                        className="w-full px-3 py-2 text-sm border border-gray-700 rounded bg-gray-800 text-white focus:outline-none focus:border-gray-500"
+                        className="w-full px-3 py-2 text-sm border border-zinc-700 rounded bg-zinc-800 text-white focus:outline-none focus:border-zinc-500"
                       />
                     </div>
 
                     {/* Caption */}
                     <div>
-                      <label className="text-xs text-gray-400 block mb-1">Caption</label>
+                      <label className="text-xs text-zinc-400 block mb-1">Caption</label>
                       <textarea
                         value={editedContent?.caption || ''}
                         onChange={(e) => setEditedContent(prev => prev ? {...prev, caption: e.target.value} : null)}
-                        className="w-full px-3 py-2 text-sm border border-gray-700 rounded bg-gray-800 text-white focus:outline-none focus:border-gray-500 resize-none"
+                        className="w-full px-3 py-2 text-sm border border-zinc-700 rounded bg-zinc-800 text-white focus:outline-none focus:border-zinc-500 resize-none"
                         rows={4}
                       />
                     </div>
 
                     {/* Hashtags */}
                     <div>
-                      <label className="text-xs text-gray-400 block mb-1">Hashtags</label>
+                      <label className="text-xs text-zinc-400 block mb-1">Hashtags</label>
                       <input
                         type="text"
                         value={editedContent?.hashtags.join(', ') || ''}
                         onChange={(e) => setEditedContent(prev =>
                           prev ? {...prev, hashtags: e.target.value.split(',').map(h => h.trim())} : null
                         )}
-                        className="w-full px-3 py-2 text-sm border border-gray-700 rounded bg-gray-800 text-white focus:outline-none focus:border-gray-500"
+                        className="w-full px-3 py-2 text-sm border border-zinc-700 rounded bg-zinc-800 text-white focus:outline-none focus:border-zinc-500"
                         placeholder="tag1, tag2, tag3"
                       />
                     </div>
 
                     {/* Format */}
                     <div>
-                      <label className="text-xs text-gray-400 block mb-1">Format</label>
+                      <label className="text-xs text-zinc-400 block mb-1">Format</label>
                       <div className="flex space-x-2">
                         {['post', 'reel', 'story'].map((format) => (
                           <button
@@ -395,7 +424,7 @@ export default function MorningReviewDashboard() {
                             className={`text-xs px-3 py-1.5 rounded border transition-all ${
                               editedContent?.format === format
                                 ? 'bg-white text-black border-white'
-                                : 'border-gray-700 text-gray-300 hover:bg-gray-800'
+                                : 'border-zinc-700 text-zinc-300 hover:bg-zinc-800'
                             }`}
                           >
                             {format.charAt(0).toUpperCase() + format.slice(1)}
@@ -406,18 +435,18 @@ export default function MorningReviewDashboard() {
 
                     {/* Quick Actions */}
                     <div>
-                      <label className="text-xs text-gray-400 block mb-1">Quick Actions</label>
+                      <label className="text-xs text-zinc-400 block mb-1">Quick Actions</label>
                       <div className="grid grid-cols-2 gap-2">
-                        <button className="text-xs py-1.5 px-3 border border-gray-700 rounded text-gray-300 hover:bg-gray-800">
+                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
                           Make Shorter
                         </button>
-                        <button className="text-xs py-1.5 px-3 border border-gray-700 rounded text-gray-300 hover:bg-gray-800">
+                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
                           Add Emojis
                         </button>
-                        <button className="text-xs py-1.5 px-3 border border-gray-700 rounded text-gray-300 hover:bg-gray-800">
+                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
                           Professional
                         </button>
-                        <button className="text-xs py-1.5 px-3 border border-gray-700 rounded text-gray-300 hover:bg-gray-800">
+                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
                           Trending Tags
                         </button>
                       </div>
@@ -426,18 +455,18 @@ export default function MorningReviewDashboard() {
                 </ScrollArea>
 
                 {/* Actions */}
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-800">
-                  <button className="text-xs text-gray-500 hover:text-gray-300">
+                <div className="flex items-center justify-between pt-4 mt-4 border-t border-zinc-800">
+                  <button className="text-xs text-zinc-500 hover:text-zinc-300">
                     Regenerate
                   </button>
                   <div className="flex space-x-2">
                     <button
                       onClick={handleSaveContent}
-                      className="text-xs py-1.5 px-4 bg-white text-black rounded hover:bg-gray-200"
+                      className="text-xs py-1.5 px-4 bg-white text-black rounded hover:bg-zinc-200"
                     >
                       Save
                     </button>
-                    <button className="text-xs py-1.5 px-4 border border-white text-white rounded hover:bg-gray-800">
+                    <button className="text-xs py-1.5 px-4 border border-white text-white rounded hover:bg-zinc-800">
                       Schedule Now
                     </button>
                   </div>

@@ -81,69 +81,45 @@ export default function NewsDashboard() {
 
   if (loading && articles.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="animate-pulse text-sm text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="animate-pulse text-sm text-zinc-400">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      {/* Minimal Header */}
-      <div className="border-b border-gray-800">
-        <div className="px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8">
-              <h1 className="text-sm font-medium text-white">News Dashboard</h1>
-              <nav className="flex items-center space-x-6 text-sm">
-                <a href="/dashboard/morning" className="text-gray-400 hover:text-white transition-colors">
-                  Morning
-                </a>
-                <a href="/dashboard/news" className="text-white">
-                  Articles
-                </a>
-              </nav>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-gray-500">
-                {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-zinc-950 pb-24">
       {/* Stats Bar */}
-      <div className="px-6 py-4 border-b border-gray-800">
+      <div className="px-6 py-4 border-b border-zinc-800">
         <div className="grid grid-cols-4 gap-4">
           <div>
-            <p className="text-xs text-gray-500">Total</p>
+            <p className="text-xs text-zinc-500">Total</p>
             <p className="text-xl font-semibold text-white">{stats.total}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Pending</p>
+            <p className="text-xs text-zinc-500">Pending</p>
             <p className="text-xl font-semibold text-white">{stats.pending}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Classified</p>
+            <p className="text-xs text-zinc-500">Classified</p>
             <p className="text-xl font-semibold text-white">{stats.classified}</p>
           </div>
           <div>
-            <p className="text-xs text-gray-500">Posted</p>
+            <p className="text-xs text-zinc-500">Posted</p>
             <p className="text-xl font-semibold text-white">{stats.posted}</p>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="px-6 py-4 border-b border-gray-800">
+      <div className="px-6 py-4 border-b border-zinc-800">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             {/* Filter */}
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="text-xs px-3 py-1.5 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:border-gray-500"
+              className="text-xs px-3 py-1.5 border border-zinc-700 rounded-md bg-zinc-900 text-white focus:outline-none focus:border-zinc-500"
             >
               <option value="all">All Articles</option>
               <option value="pending">Pending</option>
@@ -156,21 +132,21 @@ export default function NewsDashboard() {
               <button
                 onClick={() => runPipeline('scrape')}
                 disabled={loading}
-                className="text-xs px-3 py-1.5 border border-gray-700 rounded text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="text-xs px-3 py-1.5 border border-zinc-700 rounded-md text-zinc-300 hover:bg-zinc-800 transition-colors disabled:opacity-50"
               >
                 Scrape News
               </button>
               <button
                 onClick={() => runPipeline('classify')}
                 disabled={loading}
-                className="text-xs px-3 py-1.5 border border-gray-700 rounded text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="text-xs px-3 py-1.5 border border-zinc-700 rounded-md text-zinc-300 hover:bg-zinc-800 transition-colors disabled:opacity-50"
               >
                 Classify All
               </button>
               <button
                 onClick={() => runPipeline('generate')}
                 disabled={loading}
-                className="text-xs px-3 py-1.5 bg-white text-black rounded hover:bg-gray-200 transition-colors disabled:opacity-50"
+                className="text-xs px-3 py-1.5 bg-zinc-100 text-zinc-900 rounded-md hover:bg-white transition-colors disabled:opacity-50"
               >
                 Generate Instagram
               </button>
@@ -179,7 +155,7 @@ export default function NewsDashboard() {
           <button
             onClick={fetchArticles}
             disabled={loading}
-            className="text-xs text-gray-500 hover:text-gray-300"
+            className="text-xs text-zinc-500 hover:text-zinc-300"
           >
             Refresh
           </button>
@@ -190,62 +166,62 @@ export default function NewsDashboard() {
       <div className="px-6 py-4">
         {articles.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-sm text-gray-500">No articles found</p>
+            <p className="text-sm text-zinc-500">No articles found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Title</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Source</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Category</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Status</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Relevance</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Created</th>
-                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Actions</th>
+                <tr className="border-b border-zinc-800">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Title</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Source</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Category</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Status</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Relevance</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Created</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {articles.map((article) => (
-                  <tr key={article.id} className="border-b border-gray-900 hover:bg-gray-900">
+                  <tr key={article.id} className="border-b border-zinc-900 hover:bg-zinc-900/50 transition-colors">
                     <td className="py-3 px-4">
                       <p className="text-sm text-white line-clamp-2">{article.title}</p>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="text-xs text-gray-400">{article.source || 'Unknown'}</span>
+                      <span className="text-xs text-zinc-400">{article.source || 'Unknown'}</span>
                     </td>
                     <td className="py-3 px-4">
                       {article.category ? (
-                        <span className="text-xs px-2 py-0.5 bg-gray-800 text-gray-300 rounded">
+                        <span className="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded">
                           {article.category}
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-500">-</span>
+                        <span className="text-xs text-zinc-500">-</span>
                       )}
                     </td>
                     <td className="py-3 px-4">
                       <span className={`text-xs px-2 py-0.5 rounded ${
                         article.status === 'posted'
-                          ? 'bg-gray-700 text-white'
+                          ? 'bg-zinc-700 text-white'
                           : article.status === 'classified'
-                          ? 'bg-gray-800 text-gray-200'
-                          : 'bg-gray-900 text-gray-400'
+                          ? 'bg-zinc-800 text-zinc-200'
+                          : 'bg-zinc-900 text-zinc-400'
                       }`}>
                         {article.status || 'pending'}
                       </span>
                     </td>
                     <td className="py-3 px-4">
                       {article.relevance_score ? (
-                        <span className="text-xs text-gray-300">
+                        <span className="text-xs text-zinc-300">
                           {Math.round(article.relevance_score * 100)}%
                         </span>
                       ) : (
-                        <span className="text-xs text-gray-500">-</span>
+                        <span className="text-xs text-zinc-500">-</span>
                       )}
                     </td>
                     <td className="py-3 px-4">
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-zinc-400">
                         {new Date(article.created_at).toLocaleDateString()}
                       </span>
                     </td>
@@ -254,7 +230,7 @@ export default function NewsDashboard() {
                         {article.status === 'pending' && (
                           <button
                             onClick={() => classifyArticle(article.id)}
-                            className="text-xs text-gray-400 hover:text-white"
+                            className="text-xs text-zinc-400 hover:text-white"
                           >
                             Classify
                           </button>
@@ -262,7 +238,7 @@ export default function NewsDashboard() {
                         {article.instagram_post_id && (
                           <a
                             href={`/dashboard/instagram/${article.instagram_post_id}`}
-                            className="text-xs text-gray-300 hover:text-white"
+                            className="text-xs text-zinc-300 hover:text-white"
                           >
                             View Post
                           </a>
@@ -275,6 +251,38 @@ export default function NewsDashboard() {
             </table>
           </div>
         )}
+      </div>
+
+      {/* Floating Dock - Fixed Bottom Navigation */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        <div className="bg-zinc-900/90 backdrop-blur-lg border border-zinc-800 rounded-lg shadow-xl p-2">
+          <div className="flex items-center gap-4">
+            {/* Navigation */}
+            <nav className="flex items-center gap-1">
+              <a href="/dashboard/morning" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
+                Feed
+              </a>
+              <a href="/dashboard/pipeline" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
+                Pipeline
+              </a>
+              <a href="/dashboard/news" className="px-3 py-1.5 rounded-md text-xs font-medium text-zinc-100 bg-zinc-800">
+                Articles
+              </a>
+            </nav>
+
+            {/* Divider */}
+            <div className="w-px h-4 bg-zinc-700"></div>
+
+            {/* Article Stats */}
+            <div className="flex items-center gap-3 text-xs text-zinc-500">
+              <span>{stats.total} total</span>
+              <span>•</span>
+              <span>{stats.pending} pending</span>
+              <span>•</span>
+              <span>{stats.posted} posted</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
