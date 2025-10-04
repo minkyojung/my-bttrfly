@@ -35,47 +35,47 @@ export default async function DashboardPage() {
     .select('*', { count: 'exact', head: true });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-zinc-950 p-8 pb-24">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-8">뉴스 큐레이션 대시보드</h1>
+        <h1 className="text-3xl font-bold mb-8 text-white">뉴스 큐레이션 대시보드</h1>
 
         {/* 통계 카드 */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-sm font-medium text-gray-500">전체 기사</h3>
-            <p className="text-3xl font-bold mt-2">{totalArticles || 0}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-zinc-900 p-6 rounded-md border border-zinc-800">
+            <h3 className="text-sm font-medium text-zinc-500">전체 기사</h3>
+            <p className="text-3xl font-bold mt-2 text-white">{totalArticles || 0}</p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-sm font-medium text-gray-500">분류 완료</h3>
-            <p className="text-3xl font-bold mt-2">{classifiedArticles || 0}</p>
+          <div className="bg-zinc-900 p-6 rounded-md border border-zinc-800">
+            <h3 className="text-sm font-medium text-zinc-500">분류 완료</h3>
+            <p className="text-3xl font-bold mt-2 text-white">{classifiedArticles || 0}</p>
           </div>
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h3 className="text-sm font-medium text-gray-500">인스타그램 포스트</h3>
-            <p className="text-3xl font-bold mt-2">{instagramPostsCount || 0}</p>
+          <div className="bg-zinc-900 p-6 rounded-md border border-zinc-800">
+            <h3 className="text-sm font-medium text-zinc-500">인스타그램 포스트</h3>
+            <p className="text-3xl font-bold mt-2 text-white">{instagramPostsCount || 0}</p>
           </div>
         </div>
 
         {/* 최근 기사 */}
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-semibold">최근 기사</h2>
+        <div className="bg-zinc-900 rounded-md border border-zinc-800 mb-8">
+          <div className="p-6 border-b border-zinc-800">
+            <h2 className="text-xl font-semibold text-white">최근 기사</h2>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-zinc-800">
             {articles?.map((article) => (
-              <div key={article.id} className="p-6 hover:bg-gray-50">
+              <div key={article.id} className="p-6 hover:bg-zinc-800/50 transition-colors">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
-                    <h3 className="text-lg font-medium text-gray-900">
+                    <h3 className="text-lg font-medium text-zinc-100">
                       <a
                         href={article.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="hover:text-blue-600"
+                        className="hover:text-zinc-300"
                       >
                         {article.title}
                       </a>
                     </h3>
-                    <div className="mt-2 flex items-center gap-4 text-sm text-gray-500">
+                    <div className="mt-2 flex items-center gap-4 text-sm text-zinc-500">
                       <span className="font-medium">{article.source}</span>
                       <span>{article.author}</span>
                       <span>
@@ -85,16 +85,16 @@ export default async function DashboardPage() {
                     </div>
                     {article.category && (
                       <div className="mt-2 flex items-center gap-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-zinc-800 text-zinc-300">
                           {article.category}
                         </span>
                         {article.subcategory && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-zinc-500">
                             {article.subcategory}
                           </span>
                         )}
                         {article.relevance_score && (
-                          <span className="text-sm text-gray-500">
+                          <span className="text-sm text-zinc-500">
                             Score: {article.relevance_score}/10
                           </span>
                         )}
@@ -102,12 +102,12 @@ export default async function DashboardPage() {
                     )}
                   </div>
                   <span
-                    className={`ml-4 px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    className={`ml-4 px-2.5 py-0.5 rounded-md text-xs font-medium ${
                       article.status === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-yellow-900/50 text-yellow-300'
                         : article.status === 'classified'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'bg-green-900/50 text-green-300'
+                        : 'bg-zinc-800 text-zinc-400'
                     }`}
                   >
                     {article.status}
@@ -119,11 +119,11 @@ export default async function DashboardPage() {
         </div>
 
         {/* 인스타그램 포스트 */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-2xl font-semibold">인스타그램 포스트</h2>
+        <div className="bg-zinc-900 rounded-md border border-zinc-800">
+          <div className="p-6 border-b border-zinc-800">
+            <h2 className="text-xl font-semibold text-white">인스타그램 포스트</h2>
           </div>
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-zinc-800">
             {instagramPosts?.map((post: any) => (
               <div key={post.id} className="p-6">
                 <div className="flex gap-4">
@@ -131,33 +131,33 @@ export default async function DashboardPage() {
                     <img
                       src={post.image_url}
                       alt={post.alt_text}
-                      className="w-24 h-24 object-cover rounded"
+                      className="w-24 h-24 object-cover rounded-md"
                     />
                   )}
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900">{post.title}</h3>
-                    <p className="mt-1 text-sm text-gray-600">{post.caption}</p>
+                    <h3 className="font-medium text-zinc-100">{post.title}</h3>
+                    <p className="mt-1 text-sm text-zinc-400">{post.caption}</p>
                     <div className="mt-2 flex flex-wrap gap-1">
                       {post.hashtags?.slice(0, 5).map((tag: string) => (
                         <span
                           key={tag}
-                          className="text-xs text-blue-600 hover:text-blue-800"
+                          className="text-xs text-zinc-500"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <div className="mt-2 text-xs text-gray-500">
+                    <div className="mt-2 text-xs text-zinc-600">
                       Source: {post.article?.title}
                     </div>
                   </div>
                   <span
-                    className={`px-2.5 py-0.5 h-fit rounded-full text-xs font-medium ${
+                    className={`px-2.5 py-0.5 h-fit rounded-md text-xs font-medium ${
                       post.status === 'draft'
-                        ? 'bg-yellow-100 text-yellow-800'
+                        ? 'bg-yellow-900/50 text-yellow-300'
                         : post.status === 'scheduled'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-green-100 text-green-800'
+                        ? 'bg-blue-900/50 text-blue-300'
+                        : 'bg-green-900/50 text-green-300'
                     }`}
                   >
                     {post.status}
