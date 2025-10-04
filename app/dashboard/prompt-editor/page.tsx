@@ -93,6 +93,7 @@ export default function PromptEditor() {
   });
 
   const [generatedSummary, setGeneratedSummary] = useState<string>('');
+  const [originalSummary, setOriginalSummary] = useState<string>('');
   const [customVariables, setCustomVariables] = useState<Record<string, string>>({
     company: 'OpenAI',
     title: 'GPT-5 출시',
@@ -165,6 +166,12 @@ export default function PromptEditor() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, selectedTemplate, customVariables, testArticle, systemPrompt]);
+
+  useEffect(() => {
+    // Generate original summary only on client side
+    setOriginalSummary(generateSmartSummary(testArticle as any));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [testArticle]);
 
   const updateTemplateVariables = (template: PromptTemplate): PromptTemplate => {
     const allText = `${template.hook} ${template.bullets.join(' ')} ${template.impact}`;
@@ -587,7 +594,7 @@ export default function PromptEditor() {
               <p className="text-xs text-zinc-400 mb-1">원본 요약:</p>
               <div className="bg-zinc-950 rounded p-3 border border-zinc-800">
                 <p className="text-xs text-zinc-100 leading-relaxed whitespace-pre-line">
-                  {generateSmartSummary(testArticle as any)}
+                  {originalSummary || '요약 생성 중...'}
                 </p>
               </div>
             </div>
