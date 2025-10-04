@@ -122,26 +122,36 @@ export default function PromptEditor() {
   const [editingTemplate, setEditingTemplate] = useState<PromptTemplate | null>(null);
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
-  const generateFreetextSummary = () => {
-    // Replace variables in system prompt
-    let processedPrompt = systemPrompt;
-    processedPrompt = processedPrompt.replace(/{title}/g, testArticle.title);
-    processedPrompt = processedPrompt.replace(/{source}/g, testArticle.source || '알 수 없음');
-    processedPrompt = processedPrompt.replace(/{category}/g, testArticle.category || '일반');
-    processedPrompt = processedPrompt.replace(/{keywords}/g, testArticle.keywords?.join(', ') || '');
+  const generateFreetextSummary = async () => {
+    try {
+      setGeneratedSummary('요약 생성 중...');
 
-    // Simulate summary generation based on prompt with actual test article
-    const summary = `📍 삼성전자가 3나노 GAA 기술로 TSMC 추격에 나섰습니다.
+      // Call the new API endpoint
+      const response = await fetch('/api/generate-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          systemPrompt: systemPrompt,
+          article: testArticle
+        })
+      });
 
-• 성능: 5나노 대비 전력효율 50%↑, 성능 30%↑, 면적 35%↓
-• 기술: 업계 최초 GAA 트랜지스터 구조 상용화 성공
-• 고객: 퀄컴, 엔비디아, IBM 등과 협력 논의 중
-• 투자: 2027년까지 150조원 투입, 평택·테일러 생산라인 구축
-• 목표: 2025년까지 3나노 고객사 10개 이상 확보
+      const data = await response.json();
 
-→ AI칩과 HPC 수요 급증 속에서 TSMC의 3나노 양산 지연은 삼성에게 시장 재편의 기회가 될 전망입니다.`;
-
-    setGeneratedSummary(summary);
+      if (data.success) {
+        // Display the AI-generated summary
+        setGeneratedSummary(data.summary);
+      } else {
+        // Show error message
+        setGeneratedSummary(`오류: ${data.error || '요약 생성 실패'}\n${data.details || ''}`);
+        console.error('Summary generation error:', data);
+      }
+    } catch (error) {
+      console.error('API call error:', error);
+      setGeneratedSummary('API 호출 중 오류가 발생했습니다.');
+    }
   };
 
   const generateCustomSummary = () => {
