@@ -2,6 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { generateSmartSummary } from '@/lib/utils/summary-generator';
+import {
+  CATEGORIES,
+  Category,
+  DEFAULT_CATEGORY_PROMPTS,
+  getCategoryPrompt,
+  saveCategoryPrompt,
+  hasCustomPrompt,
+  resetCategoryPrompt
+} from '@/lib/prompts/category-prompts';
+import {
+  getPromptHistory,
+  getCategoryHistory,
+  saveToHistory,
+  deleteHistoryEntry,
+  formatHistoryTimestamp,
+  PromptHistoryEntry
+} from '@/lib/prompts/prompt-history';
 
 interface TestArticle {
   id: string;
@@ -77,9 +94,24 @@ const DEFAULT_SYSTEM_PROMPT = `당신은 뉴스 기사를 한국어로 요약하
 
 export default function PromptEditor() {
   const [mode, setMode] = useState<'template' | 'freetext'>('freetext');
+  const [selectedCategory, setSelectedCategory] = useState<Category>('general');
   const [templates, setTemplates] = useState<PromptTemplate[]>(DEFAULT_TEMPLATES);
   const [selectedTemplate, setSelectedTemplate] = useState<PromptTemplate | null>(templates[0]);
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
+  const [promptHistory, setPromptHistory] = useState<PromptHistoryEntry[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+
+  // Load category-specific prompt on mount and category change
+  useEffect(() => {
+    const categoryPrompt = getCategoryPrompt(selectedCategory);
+    setSystemPrompt(categoryPrompt);
+  }, [selectedCategory]);
+
+  // Load history on mount and when category changes
+  useEffect(() => {
+    const history = getCategoryHistory(selectedCategory);
+    setPromptHistory(history);
+  }, [selectedCategory]);
   const [testArticle, setTestArticle] = useState<TestArticle>({
     id: 'test-1',
     title: '삼성전자, 차세대 3나노 GAA 공정 양산 본격화... TSMC와 격차 좁히기 나서',
@@ -237,6 +269,24 @@ export default function PromptEditor() {
       <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-2">
         <div className="flex items-center gap-3">
           <h1 className="text-sm font-semibold text-white">프롬프트 에디터</h1>
+
+          {/* Category Selector */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500">카테고리:</span>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value as Category)}
+              className="text-xs px-2 py-1 bg-zinc-800 text-white rounded border border-zinc-700 focus:outline-none focus:border-blue-500"
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {DEFAULT_CATEGORY_PROMPTS[cat].label}
+                  {hasCustomPrompt(cat) ? ' ✓' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex bg-zinc-800 rounded p-0.5">
             <button
               onClick={() => setMode('template')}
@@ -484,15 +534,20 @@ export default function PromptEditor() {
                 ▶ Run
               </button>
               <button
-                onClick={() => setSystemPrompt(DEFAULT_SYSTEM_PROMPT)}
+                onClick={() => {
+                  resetCategoryPrompt(selectedCategory);
+                  setSystemPrompt(DEFAULT_CATEGORY_PROMPTS[selectedCategory].systemPrompt);
+                  alert(`${DEFAULT_CATEGORY_PROMPTS[selectedCategory].label} 카테고리 기본값으로 초기화됨`);
+                }}
                 className="text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700"
               >
-                초기화
+                기본값으로 초기화
               </button>
               <button
                 onClick={() => {
-                  const saved = localStorage.getItem('saved_system_prompt');
-                  if (saved) setSystemPrompt(saved);
+                  const saved = getCategoryPrompt(selectedCategory);
+                  setSystemPrompt(saved);
+                  alert(`${DEFAULT_CATEGORY_PROMPTS[selectedCategory].label} 카테고리 프롬프트 불러옴`);
                 }}
                 className="text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700"
               >
@@ -500,14 +555,79 @@ export default function PromptEditor() {
               </button>
               <button
                 onClick={() => {
-                  localStorage.setItem('saved_system_prompt', systemPrompt);
-                  alert('저장됨');
+                  saveCategoryPrompt(selectedCategory, systemPrompt);
+                  saveToHistory(selectedCategory, systemPrompt);
+                  setPromptHistory(getCategoryHistory(selectedCategory));
+                  alert(`${DEFAULT_CATEGORY_PROMPTS[selectedCategory].label} 카테고리 프롬프트 저장됨`);
                 }}
                 className="text-xs px-2 py-1 bg-white text-black rounded hover:bg-zinc-200"
               >
                 저장
               </button>
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                {showHistory ? '히스토리 닫기' : '히스토리 보기'}
+              </button>
             </div>
+
+            {/* Prompt History */}
+            {showHistory && (
+              <div className="mt-3 border-t border-zinc-800 pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-semibold text-white">프롬프트 히스토리 ({promptHistory.length})</h3>
+                  <button
+                    onClick={() => {
+                      if (confirm('모든 히스토리를 삭제하시겠습니까?')) {
+                        promptHistory.forEach(entry => deleteHistoryEntry(entry.id));
+                        setPromptHistory([]);
+                      }
+                    }}
+                    className="text-xs text-red-500 hover:text-red-400"
+                  >
+                    전체 삭제
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {promptHistory.length === 0 ? (
+                    <p className="text-xs text-zinc-500 text-center py-4">저장된 히스토리가 없습니다</p>
+                  ) : (
+                    promptHistory.map((entry) => (
+                      <div
+                        key={entry.id}
+                        className="p-2 bg-zinc-900 rounded border border-zinc-800 hover:border-zinc-700 cursor-pointer group"
+                        onClick={() => {
+                          setSystemPrompt(entry.prompt);
+                          setShowHistory(false);
+                        }}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-xs text-zinc-400 mb-1">
+                              {formatHistoryTimestamp(entry.timestamp)}
+                            </p>
+                            <p className="text-xs text-zinc-300 line-clamp-2">
+                              {entry.prompt.substring(0, 100)}...
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteHistoryEntry(entry.id);
+                              setPromptHistory(getCategoryHistory(selectedCategory));
+                            }}
+                            className="ml-2 text-xs text-zinc-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

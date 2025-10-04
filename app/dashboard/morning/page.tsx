@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateSmartSummary } from '@/lib/utils/summary-generator';
+import { getCategoryPrompt, Category } from '@/lib/prompts/category-prompts';
 
 interface Article {
   id: string;
@@ -56,41 +57,81 @@ export default function MorningReviewDashboard() {
           })
           .sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
 
-        // Generate summaries using AI API with saved prompt
-        const savedPrompt = localStorage.getItem('saved_system_prompt');
-        const articlesWithSummaries = await Promise.all(
-          todayArticles.map(async (article: Article) => {
-            if (article.summary) {
-              return article;
-            }
+        // Generate summaries using category-specific batch AI API
+        // Group articles by category for optimized batch processing
+        const articlesNeedingSummaries = todayArticles.filter((a: Article) => !a.summary);
+        const articlesWithExistingSummaries = todayArticles.filter((a: Article) => a.summary);
 
-            try {
-              // Call AI API for summary generation
-              const summaryRes = await fetch('/api/generate-summary', {
+        let articlesWithSummaries = [...articlesWithExistingSummaries];
+
+        if (articlesNeedingSummaries.length > 0) {
+          try {
+            // Group articles by category
+            const articlesByCategory = articlesNeedingSummaries.reduce((acc, article) => {
+              const category = (article.category?.toLowerCase() || 'general') as Category;
+              if (!acc[category]) acc[category] = [];
+              acc[category].push(article);
+              return acc;
+            }, {} as Record<Category, Article[]>);
+
+            console.log(`Batch generating summaries for ${articlesNeedingSummaries.length} articles in ${Object.keys(articlesByCategory).length} categories...`);
+
+            // Process each category with its specific prompt
+            const batchPromises = Object.entries(articlesByCategory).map(async ([category, articles]) => {
+              const categoryPrompt = getCategoryPrompt(category as Category);
+
+              const batchRes = await fetch('/api/generate-batch-summaries', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                  systemPrompt: savedPrompt,
-                  article
+                  systemPrompt: categoryPrompt,
+                  articles
                 })
               });
-              const summaryData = await summaryRes.json();
+              return batchRes.json();
+            });
 
-              return {
-                ...article,
-                summary: summaryData.success ? summaryData.summary : generateSmartSummary(article)
-              };
-            } catch (error) {
-              console.error('Failed to generate AI summary, falling back to template:', error);
-              return {
-                ...article,
-                summary: generateSmartSummary(article)
-              };
-            }
-          })
+            const batchResults = await Promise.all(batchPromises);
+
+            // Collect all summaries
+            const summariesById = new Map();
+            let totalSuccessful = 0;
+            let totalProcessed = 0;
+
+            batchResults.forEach(batchData => {
+              if (batchData.success && batchData.results) {
+                batchData.results.forEach((r: any) => {
+                  summariesById.set(r.id, r.summary);
+                });
+                totalSuccessful += batchData.successful;
+                totalProcessed += batchData.processed;
+              }
+            });
+
+            const newlySummarized = articlesNeedingSummaries.map((article: Article) => ({
+              ...article,
+              summary: summariesById.get(article.id) || generateSmartSummary(article)
+            }));
+
+            articlesWithSummaries = [...articlesWithSummaries, ...newlySummarized];
+            console.log(`✅ Category-based batch processing: ${totalSuccessful}/${totalProcessed} successful`);
+
+          } catch (error) {
+            console.error('Failed to generate batch summaries, falling back to templates:', error);
+            const fallbackSummaries = articlesNeedingSummaries.map((article: Article) => ({
+              ...article,
+              summary: generateSmartSummary(article)
+            }));
+            articlesWithSummaries = [...articlesWithSummaries, ...fallbackSummaries];
+          }
+        }
+
+        // Restore original sort order
+        const sortedArticles = articlesWithSummaries.sort((a: Article, b: Article) =>
+          (b.relevance_score || 0) - (a.relevance_score || 0)
         );
 
-        setArticles(articlesWithSummaries);
+        setArticles(sortedArticles);
       } else {
         setArticles([]);
       }
