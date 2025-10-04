@@ -1,12 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function NewsDashboard() {
   const [articles, setArticles] = useState<any[]>([]);
@@ -79,264 +73,208 @@ export default function NewsDashboard() {
         fetchArticles();
       }
     } catch (error) {
-      console.error(`Pipeline step ${step} failed:`, error);
+      console.error('Pipeline error:', error);
     } finally {
       setLoading(false);
     }
   }
 
-  const sentimentVariant = (sentiment: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (sentiment) {
-      case 'positive': return 'default';
-      case 'negative': return 'destructive';
-      default: return 'secondary';
-    }
-  };
-
-  const statusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-    switch (status) {
-      case 'pending': return 'secondary';
-      case 'classified': return 'default';
-      case 'posted': return 'default';
-      case 'failed': return 'destructive';
-      default: return 'outline';
-    }
-  };
+  if (loading && articles.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="animate-pulse text-sm text-gray-400">Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background font-sans">
-      <div className="border-b">
-        <div className="flex h-16 items-center px-6">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold">News Dashboard</h1>
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <Button
-              onClick={() => runPipeline('scrape')}
-              disabled={loading}
-              variant="outline"
-              size="sm"
-            >
-              Scrape
-            </Button>
-            <Button
-              onClick={() => runPipeline('classify')}
-              disabled={loading}
-              variant="outline"
-              size="sm"
-            >
-              Classify
-            </Button>
-            <Button
-              onClick={() => runPipeline('generate')}
-              disabled={loading}
-              size="sm"
-            >
-              Generate
-            </Button>
+    <div className="min-h-screen bg-gray-950">
+      {/* Minimal Header */}
+      <div className="border-b border-gray-800">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-8">
+              <h1 className="text-sm font-medium text-white">News Dashboard</h1>
+              <nav className="flex items-center space-x-6 text-sm">
+                <a href="/dashboard/morning" className="text-gray-400 hover:text-white transition-colors">
+                  Morning
+                </a>
+                <a href="/dashboard/news" className="text-white">
+                  Articles
+                </a>
+              </nav>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-500">
+                {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto py-6 space-y-6">
+      {/* Stats Bar */}
+      <div className="px-6 py-4 border-b border-gray-800">
         <div className="grid grid-cols-4 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Total
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Pending
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.pending}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Classified
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.classified}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Posted
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.posted}</div>
-            </CardContent>
-          </Card>
+          <div>
+            <p className="text-xs text-gray-500">Total</p>
+            <p className="text-xl font-semibold text-white">{stats.total}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Pending</p>
+            <p className="text-xl font-semibold text-white">{stats.pending}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Classified</p>
+            <p className="text-xl font-semibold text-white">{stats.classified}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-500">Posted</p>
+            <p className="text-xl font-semibold text-white">{stats.posted}</p>
+          </div>
         </div>
+      </div>
 
-        <Tabs defaultValue="articles" className="w-full">
-          <TabsList>
-            <TabsTrigger value="articles">Articles</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          </TabsList>
+      {/* Controls */}
+      <div className="px-6 py-4 border-b border-gray-800">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            {/* Filter */}
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              className="text-xs px-3 py-1.5 border border-gray-700 rounded bg-gray-900 text-white focus:outline-none focus:border-gray-500"
+            >
+              <option value="all">All Articles</option>
+              <option value="pending">Pending</option>
+              <option value="classified">Classified</option>
+              <option value="posted">Posted</option>
+            </select>
 
-          <TabsContent value="articles" className="space-y-4">
-            <div className="flex items-center gap-4">
-              <Select value={filter} onValueChange={setFilter}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter by status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="classified">Classified</SelectItem>
-                  <SelectItem value="posted">Posted</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Pipeline Actions */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => runPipeline('scrape')}
+                disabled={loading}
+                className="text-xs px-3 py-1.5 border border-gray-700 rounded text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                Scrape News
+              </button>
+              <button
+                onClick={() => runPipeline('classify')}
+                disabled={loading}
+                className="text-xs px-3 py-1.5 border border-gray-700 rounded text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50"
+              >
+                Classify All
+              </button>
+              <button
+                onClick={() => runPipeline('generate')}
+                disabled={loading}
+                className="text-xs px-3 py-1.5 bg-white text-black rounded hover:bg-gray-200 transition-colors disabled:opacity-50"
+              >
+                Generate Instagram
+              </button>
             </div>
+          </div>
+          <button
+            onClick={fetchArticles}
+            disabled={loading}
+            className="text-xs text-gray-500 hover:text-gray-300"
+          >
+            Refresh
+          </button>
+        </div>
+      </div>
 
-            <Card>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40%]">Title</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Sentiment</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Score</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {articles.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                        No articles found
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    articles.map((article) => (
-                      <TableRow key={article.id}>
-                        <TableCell className="font-medium">
-                          <a
-                            href={article.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hover:underline"
-                          >
-                            {article.title?.substring(0, 80)}...
-                          </a>
-                        </TableCell>
-                        <TableCell>
-                          {article.category && (
-                            <Badge variant="outline">{article.category}</Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {article.sentiment && (
-                            <Badge variant={sentimentVariant(article.sentiment)}>
-                              {article.sentiment}
-                            </Badge>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={statusVariant(article.status)}>
-                            {article.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-sm">
-                          {article.relevance_score || '-'}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(article.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {article.status === 'pending' && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => classifyArticle(article.id)}
-                            >
-                              Classify
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="analytics">
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Category Distribution</CardTitle>
-                  <CardDescription>
-                    Articles by category
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {Array.from(new Set(articles.map(a => a.category).filter(Boolean))).map(cat => (
-                      <div key={cat} className="flex items-center justify-between">
-                        <span className="text-sm">{cat}</span>
-                        <span className="text-sm font-mono text-muted-foreground">
-                          {articles.filter(a => a.category === cat).length}
+      {/* Articles Table */}
+      <div className="px-6 py-4">
+        {articles.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-sm text-gray-500">No articles found</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-800">
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Title</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Source</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Category</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Status</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Relevance</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Created</th>
+                  <th className="text-left py-3 px-4 text-xs font-medium text-gray-400">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {articles.map((article) => (
+                  <tr key={article.id} className="border-b border-gray-900 hover:bg-gray-900">
+                    <td className="py-3 px-4">
+                      <p className="text-sm text-white line-clamp-2">{article.title}</p>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="text-xs text-gray-400">{article.source || 'Unknown'}</span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {article.category ? (
+                        <span className="text-xs px-2 py-0.5 bg-gray-800 text-gray-300 rounded">
+                          {article.category}
                         </span>
+                      ) : (
+                        <span className="text-xs text-gray-500">-</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        article.status === 'posted'
+                          ? 'bg-gray-700 text-white'
+                          : article.status === 'classified'
+                          ? 'bg-gray-800 text-gray-200'
+                          : 'bg-gray-900 text-gray-400'
+                      }`}>
+                        {article.status || 'pending'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      {article.relevance_score ? (
+                        <span className="text-xs text-gray-300">
+                          {Math.round(article.relevance_score * 100)}%
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-500">-</span>
+                      )}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="text-xs text-gray-400">
+                        {new Date(article.created_at).toLocaleDateString()}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center space-x-2">
+                        {article.status === 'pending' && (
+                          <button
+                            onClick={() => classifyArticle(article.id)}
+                            className="text-xs text-gray-400 hover:text-white"
+                          >
+                            Classify
+                          </button>
+                        )}
+                        {article.instagram_post_id && (
+                          <a
+                            href={`/dashboard/instagram/${article.instagram_post_id}`}
+                            className="text-xs text-gray-300 hover:text-white"
+                          >
+                            View Post
+                          </a>
+                        )}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Sentiment Analysis</CardTitle>
-                  <CardDescription>
-                    Overall sentiment breakdown
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Positive</span>
-                      <span className="text-sm font-mono text-muted-foreground">
-                        {articles.filter(a => a.sentiment === 'positive').length}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Neutral</span>
-                      <span className="text-sm font-mono text-muted-foreground">
-                        {articles.filter(a => a.sentiment === 'neutral').length}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Negative</span>
-                      <span className="text-sm font-mono text-muted-foreground">
-                        {articles.filter(a => a.sentiment === 'negative').length}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
