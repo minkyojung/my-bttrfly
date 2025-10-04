@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 
 export default function CompleteTestPage() {
   const [loading, setLoading] = useState<string | null>(null);
-  const [results, setResults] = useState<any>({});
-  const [articles, setArticles] = useState<any[]>([]);
-  const [instagramPosts, setInstagramPosts] = useState<any[]>([]);
+  const [results, setResults] = useState<Record<string, unknown>>({});
+  const [articles, setArticles] = useState<Array<{ id: string; title?: string; url?: string; category?: string; status?: string; sentiment?: string; relevance_score?: number; [key: string]: unknown }>>([]);
+  const [instagramPosts, setInstagramPosts] = useState<Array<{ id: string; title?: string; caption?: string; status?: string; [key: string]: unknown }>>([]);
 
   useEffect(() => {
     fetchData();

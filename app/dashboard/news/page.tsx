@@ -2,8 +2,20 @@
 
 import { useState, useEffect } from 'react';
 
+interface Article {
+  id: string;
+  status: string;
+  title: string;
+  source?: string;
+  created_at?: string;
+  category?: string;
+  relevance_score?: number;
+  instagram_post_id?: string;
+  [key: string]: unknown;
+}
+
 export default function NewsDashboard() {
-  const [articles, setArticles] = useState<any[]>([]);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState('all');
   const [stats, setStats] = useState({
@@ -25,7 +37,7 @@ export default function NewsDashboard() {
 
       let filtered = data.articles || [];
       if (filter !== 'all') {
-        filtered = filtered.filter((a: any) => a.status === filter);
+        filtered = filtered.filter((a: Article) => a.status === filter);
       }
 
       setArticles(filtered);
@@ -33,9 +45,9 @@ export default function NewsDashboard() {
       const allArticles = data.articles || [];
       setStats({
         total: allArticles.length,
-        pending: allArticles.filter((a: any) => a.status === 'pending').length,
-        classified: allArticles.filter((a: any) => a.status === 'classified').length,
-        posted: allArticles.filter((a: any) => a.status === 'posted').length,
+        pending: allArticles.filter((a: Article) => a.status === 'pending').length,
+        classified: allArticles.filter((a: Article) => a.status === 'classified').length,
+        posted: allArticles.filter((a: Article) => a.status === 'posted').length,
       });
     } catch (error) {
       console.error('Failed to fetch articles:', error);
@@ -222,7 +234,7 @@ export default function NewsDashboard() {
                     </td>
                     <td className="py-3 px-4">
                       <span className="text-xs text-zinc-400">
-                        {new Date(article.created_at).toLocaleDateString()}
+                        {article.created_at ? new Date(article.created_at).toLocaleDateString() : '-'}
                       </span>
                     </td>
                     <td className="py-3 px-4">

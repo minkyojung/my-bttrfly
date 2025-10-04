@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
               subcategory: classification.subcategory,
               sentiment: classification.sentiment,
               keywords: classification.keywords,
-              relevance_score: classification.relevanceScore,
+              relevance_score: classification.relevance_score,
               status: 'classified',
             })
             .eq('id', article.id);
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
             failed++;
           } else {
             classified++;
-            console.log(`✅ Classified as ${classification.category} (score: ${classification.relevanceScore})`);
+            console.log(`✅ Classified as ${classification.category} (score: ${classification.relevance_score})`);
           }
         } catch (error) {
           console.error(`Failed to classify article ${article.id}:`, error);

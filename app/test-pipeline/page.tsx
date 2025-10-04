@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export default function TestPipelinePage() {
   const [loading, setLoading] = useState<string | null>(null);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Array<{ step: string; data?: unknown; error?: string; timestamp: string }>>([]);
 
   async function runStep(step: string, endpoint: string) {
     setLoading(step);

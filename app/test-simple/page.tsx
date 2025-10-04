@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 
 export default function SimpleTestPage() {
   const [loading, setLoading] = useState<string | null>(null);
-  const [dbStatus, setDbStatus] = useState<any>(null);
-  const [scrapeResult, setScrapeResult] = useState<any>(null);
-  const [classifyResult, setClassifyResult] = useState<any>(null);
-  const [articles, setArticles] = useState<any[]>([]);
+  const [dbStatus, setDbStatus] = useState<unknown>(null);
+  const [scrapeResult, setScrapeResult] = useState<unknown>(null);
+  const [classifyResult, setClassifyResult] = useState<unknown>(null);
+  const [articles, setArticles] = useState<Array<{ id: string; title?: string; url?: string; status?: string; category?: string; sentiment?: string; [key: string]: unknown }>>([]);
 
   // 페이지 로드시 DB 상태 확인
   useEffect(() => {
@@ -138,7 +138,7 @@ export default function SimpleTestPage() {
       {/* 결과 표시 */}
       <div style={{ marginTop: '2rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
         {/* DB 테스트 결과 */}
-        {dbStatus && (
+        {!!dbStatus && (
           <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
             <h3>DB 연결 상태</h3>
             <pre style={{ background: '#1f2937', color: '#f3f4f6', padding: '1rem', borderRadius: '4px', overflow: 'auto', fontSize: '12px' }}>
@@ -148,7 +148,7 @@ export default function SimpleTestPage() {
         )}
 
         {/* RSS 수집 결과 */}
-        {scrapeResult && (
+        {!!scrapeResult && (
           <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
             <h3>RSS 수집 결과</h3>
             <pre style={{ background: '#1f2937', color: '#f3f4f6', padding: '1rem', borderRadius: '4px', overflow: 'auto', fontSize: '12px' }}>
@@ -158,7 +158,7 @@ export default function SimpleTestPage() {
         )}
 
         {/* AI 분류 결과 */}
-        {classifyResult && (
+        {!!classifyResult && (
           <div style={{ background: '#f9fafb', padding: '1rem', borderRadius: '8px', border: '1px solid #e5e7eb', gridColumn: 'span 2' }}>
             <h3>AI 분류 결과</h3>
             <pre style={{ background: '#1f2937', color: '#f3f4f6', padding: '1rem', borderRadius: '4px', overflow: 'auto', fontSize: '12px' }}>

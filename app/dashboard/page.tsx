@@ -124,7 +124,7 @@ export default async function DashboardPage() {
             <h2 className="text-xl font-semibold text-white">인스타그램 포스트</h2>
           </div>
           <div className="divide-y divide-zinc-800">
-            {instagramPosts?.map((post: any) => (
+            {instagramPosts?.map((post: { id: string; title?: string; caption?: string; hashtags?: string[]; image_url?: string; alt_text?: string; status?: string; article?: { title?: string }; [key: string]: unknown }) => (
               <div key={post.id} className="p-6">
                 <div className="flex gap-4">
                   {post.image_url && (

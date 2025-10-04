@@ -49,7 +49,7 @@ export default function ContentPipeline() {
       const postsData = await postsRes.json();
 
       // Convert articles to pipeline items
-      const newsPoolItems: ContentItem[] = articlesData.articles?.filter((a: any) => !a.instagram_post_id).map((article: any) => ({
+      const newsPoolItems: ContentItem[] = articlesData.articles?.filter((a: { instagram_post_id?: string }) => !a.instagram_post_id).map((article: { id: string; title: string; created_at: string; thumbnail?: string; source?: string }) => ({
         id: `article-${article.id}`,
         title: article.title,
         status: 'news_pool',
@@ -60,7 +60,7 @@ export default function ContentPipeline() {
       })) || [];
 
       // Convert posts to pipeline items
-      const postItems: ContentItem[] = postsData.posts?.map((post: any) => ({
+      const postItems: ContentItem[] = postsData.posts?.map((post: { id: string; title: string; caption?: string; hashtags?: string; format?: string; status?: string; scheduled_for?: string; image_url?: string; alt_text?: string; article_id?: string; created_at?: string; thumbnail?: string }) => ({
         id: `post-${post.id}`,
         title: post.title,
         caption: post.caption,

@@ -67,7 +67,7 @@ export default function MorningReviewDashboard() {
         if (articlesNeedingSummaries.length > 0) {
           try {
             // Group articles by category
-            const articlesByCategory = articlesNeedingSummaries.reduce((acc, article) => {
+            const articlesByCategory = articlesNeedingSummaries.reduce((acc: Record<Category, Article[]>, article: Article) => {
               const category = (article.category?.toLowerCase() || 'general') as Category;
               if (!acc[category]) acc[category] = [];
               acc[category].push(article);
@@ -100,7 +100,7 @@ export default function MorningReviewDashboard() {
 
             batchResults.forEach(batchData => {
               if (batchData.success && batchData.results) {
-                batchData.results.forEach((r: any) => {
+                batchData.results.forEach((r: { id: string; summary: string }) => {
                   summariesById.set(r.id, r.summary);
                 });
                 totalSuccessful += batchData.successful;
