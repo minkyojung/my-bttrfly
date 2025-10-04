@@ -2,19 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db/supabase';
 import { fetchRSSFeed, POPULAR_RSS_FEEDS } from '@/lib/scraping/rss-fetcher';
 import { extractArticleContent } from '@/lib/extraction/content-extractor';
+import { randomDelay } from '@/lib/scraping/rate-limiter';
 
 /**
  * Cron Job: RSS 피드에서 뉴스 수집 및 DB 저장
  * 스케줄: 매 2시간마다
+ *
+ * ✅ 전체 본문 추출 활성화 - 고품질 AI 요약을 위해 필수
  */
 export async function GET(request: NextRequest) {
-  // Cron secret 검증 (프로덕션에서 활성화)
-  // const authHeader = request.headers.get('authorization');
-  // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-  //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  // }
-
-  console.log('🚀 Starting RSS scraping job...');
+  // Cron secret 검증
+  const authHeader = request.headers.get('authorization');
+  if (process.env.NODE_ENV === 'production' && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   try {
     // 모든 RSS 피드 수집
@@ -25,11 +26,10 @@ export async function GET(request: NextRequest) {
 
     let totalArticles = 0;
     let newArticles = 0;
+    let extractedArticles = 0;
 
     for (const feedUrl of allFeeds) {
       try {
-        console.log(`📡 Fetching feed: ${feedUrl}`);
-
         const articles = await fetchRSSFeed(feedUrl);
 
         for (const article of articles) {
@@ -52,18 +52,27 @@ export async function GET(request: NextRequest) {
             continue; // 이미 존재하는 기사
           }
 
-          // 콘텐츠 추출 (선택적 - RSS에 전문이 없는 경우)
+          // 콘텐츠 추출 - 전체 본문을 위해 항상 웹 스크래핑 시도
           let fullContent = article.fullContent || article.content;
           let thumbnail = article.thumbnail;
 
-          // RSS에 전문이 없으면 웹 스크래핑으로 추출 (시간이 걸릴 수 있으므로 일단 skip)
-          // if (!fullContent || fullContent.length < 200) {
-          //   const extracted = await extractArticleContent(article.link);
-          //   if (extracted) {
-          //     fullContent = extracted.content;
-          //     thumbnail = extracted.thumbnail || thumbnail;
-          //   }
-          // }
+          // RSS 요약본이 짧으면 웹 스크래핑으로 전체 본문 추출
+          if (!fullContent || fullContent.length < 500) {
+            try {
+              const extracted = await extractArticleContent(article.link);
+
+              if (extracted && extracted.content && extracted.content.length > (fullContent?.length || 0)) {
+                fullContent = extracted.content;
+                thumbnail = extracted.thumbnail || thumbnail;
+                extractedArticles++;
+              }
+
+              // Rate limiting: 추출 후 1-3초 대기
+              await randomDelay(1000, 3000);
+            } catch {
+              // RSS 요약본으로 fallback
+            }
+          }
 
           // DB에 저장
           const { error } = await supabaseAdmin.from('articles').insert({
@@ -78,35 +87,28 @@ export async function GET(request: NextRequest) {
             status: 'pending',
           });
 
-          if (error) {
-            console.error('Failed to insert article:', error);
-          } else {
+          if (!error) {
             newArticles++;
           }
 
           totalArticles++;
-
-          // Rate limiting: 기사 간 500ms 대기
-          await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
-        // 피드 간 1초 대기
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-      } catch (error) {
-        console.error(`Failed to fetch feed ${feedUrl}:`, error);
+        // 피드 간 2초 대기
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+      } catch {
+        // Continue to next feed on error
       }
     }
-
-    console.log(`✅ Scraping completed: ${newArticles}/${totalArticles} new articles`);
 
     return NextResponse.json({
       success: true,
       totalArticles,
       newArticles,
+      extractedArticles,
       feeds: allFeeds.length,
     });
   } catch (error) {
-    console.error('❌ Scraping job failed:', error);
     return NextResponse.json(
       {
         error: 'Scraping failed',
