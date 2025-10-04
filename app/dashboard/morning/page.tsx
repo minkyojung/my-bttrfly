@@ -190,7 +190,7 @@ export default function MorningReviewDashboard() {
 
                   {/* Korean Summary - NEW */}
                   <div className="mb-3 p-3 bg-zinc-900/50 rounded-md border border-zinc-800">
-                    <p className="text-sm text-zinc-300 leading-relaxed">
+                    <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
                       {article.summary}
                     </p>
                   </div>

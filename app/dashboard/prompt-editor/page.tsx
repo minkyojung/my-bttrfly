@@ -56,9 +56,30 @@ const DEFAULT_TEMPLATES: PromptTemplate[] = [
   }
 ];
 
+const DEFAULT_SYSTEM_PROMPT = `당신은 뉴스 기사를 한국어로 요약하는 AI입니다.
+
+다음 구조로 3-5줄의 간결한 요약을 생성하세요:
+
+1. 📍 Hook: 가장 중요한 포인트를 한 문장으로 (임팩트 있게)
+2. Bullets: 핵심 사실들을 불렛 포인트로 (• 로 시작)
+3. → Impact: 이것이 왜 중요한지/무엇을 의미하는지
+
+변수 사용 예시:
+- {title}: 기사 제목
+- {source}: 출처
+- {category}: 카테고리
+- {keywords}: 키워드들
+
+주의사항:
+- 첫 문장에서 독자의 관심을 끌어야 함
+- 불렛 포인트는 명확하고 구체적이어야 함
+- 마지막은 전체적인 의미/영향을 설명`;
+
 export default function PromptEditor() {
+  const [mode, setMode] = useState<'template' | 'freetext'>('template');
   const [templates, setTemplates] = useState<PromptTemplate[]>(DEFAULT_TEMPLATES);
   const [selectedTemplate, setSelectedTemplate] = useState<PromptTemplate | null>(templates[0]);
+  const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
   const [testArticle, setTestArticle] = useState<TestArticle>({
     id: 'test-1',
     title: 'OpenAI가 GPT-5 출시를 예고했다',
@@ -87,10 +108,33 @@ export default function PromptEditor() {
   const [isCreatingNew, setIsCreatingNew] = useState(false);
 
   useEffect(() => {
-    if (selectedTemplate) {
+    if (mode === 'template' && selectedTemplate) {
       generateCustomSummary();
+    } else if (mode === 'freetext') {
+      generateFreetextSummary();
     }
-  }, [selectedTemplate, customVariables, testArticle]);
+  }, [mode, selectedTemplate, customVariables, testArticle, systemPrompt]);
+
+  const generateFreetextSummary = () => {
+    // Replace variables in system prompt
+    let processedPrompt = systemPrompt;
+    processedPrompt = processedPrompt.replace(/{title}/g, testArticle.title);
+    processedPrompt = processedPrompt.replace(/{source}/g, testArticle.source || '알 수 없음');
+    processedPrompt = processedPrompt.replace(/{category}/g, testArticle.category || '일반');
+    processedPrompt = processedPrompt.replace(/{keywords}/g, testArticle.keywords?.join(', ') || '');
+
+    // Simulate summary generation based on prompt
+    const summary = `📍 ${testArticle.title}의 핵심은 혁신적인 기술 발전입니다.
+
+• 핵심: GPT-5는 이전 모델 대비 10배 성능 향상
+• 출시: 2025년 상반기 정식 릴리즈 예정
+• 영향: AI 산업 전반의 패러다임 변화 예상
+• 기대: 더 자연스러운 대화와 복잡한 작업 수행 가능
+
+→ 이번 발표로 AI 경쟁이 더욱 치열해질 전망이며, 기업들의 AI 도입이 가속화될 것으로 보입니다.`;
+
+    setGeneratedSummary(summary);
+  };
 
   const generateCustomSummary = () => {
     if (!selectedTemplate) return;
@@ -111,27 +155,6 @@ export default function PromptEditor() {
     setGeneratedSummary(summary);
   };
 
-  const handleSaveTemplate = () => {
-    if (!editingTemplate) return;
-
-    if (isCreatingNew) {
-      const newTemplate = { ...editingTemplate, id: `custom-${Date.now()}` };
-      setTemplates([...templates, newTemplate]);
-    } else {
-      setTemplates(templates.map(t => t.id === editingTemplate.id ? editingTemplate : t));
-    }
-
-    setEditingTemplate(null);
-    setIsCreatingNew(false);
-  };
-
-  const handleDeleteTemplate = (id: string) => {
-    setTemplates(templates.filter(t => t.id !== id));
-    if (selectedTemplate?.id === id) {
-      setSelectedTemplate(templates[0]);
-    }
-  };
-
   const extractVariables = (text: string): string[] => {
     const regex = /\$\{([^}]+)\}/g;
     const variables = new Set<string>();
@@ -142,205 +165,322 @@ export default function PromptEditor() {
     return Array.from(variables);
   };
 
-  const updateTemplateVariables = (template: PromptTemplate) => {
-    const allText = template.hook + template.bullets.join('') + template.impact;
-    template.variables = extractVariables(allText);
-    return template;
+  const updateTemplateVariables = (template: PromptTemplate): PromptTemplate => {
+    const allText = `${template.hook} ${template.bullets.join(' ')} ${template.impact}`;
+    const variables = extractVariables(allText);
+    return { ...template, variables };
+  };
+
+  const handleSaveTemplate = () => {
+    if (!editingTemplate) return;
+
+    if (isCreatingNew) {
+      const newId = `custom-${Date.now()}`;
+      const newTemplate = { ...editingTemplate, id: newId };
+      setTemplates([...templates, newTemplate]);
+      setSelectedTemplate(newTemplate);
+    } else {
+      setTemplates(templates.map(t =>
+        t.id === editingTemplate.id ? editingTemplate : t
+      ));
+      if (selectedTemplate?.id === editingTemplate.id) {
+        setSelectedTemplate(editingTemplate);
+      }
+    }
+
+    setEditingTemplate(null);
+    setIsCreatingNew(false);
+  };
+
+  const handleDeleteTemplate = (id: string) => {
+    setTemplates(templates.filter(t => t.id !== id));
+    if (selectedTemplate?.id === id) {
+      setSelectedTemplate(templates[0] || null);
+    }
   };
 
   return (
     <div className="min-h-screen bg-zinc-950 pb-24">
-      <div className="grid grid-cols-12 h-screen">
-        {/* Left: Template Editor */}
-        <div className="col-span-3 border-r border-zinc-800 p-4 overflow-y-auto">
-          <div className="mb-4">
-            <h2 className="text-sm font-medium text-white mb-3">프롬프트 템플릿</h2>
+      {/* Mode Toggle */}
+      <div className="bg-zinc-900 border-b border-zinc-800 p-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-lg font-semibold text-white">프롬프트 에디터</h1>
+          <div className="flex bg-zinc-800 rounded-lg p-1">
             <button
-              onClick={() => {
-                const newTemplate: PromptTemplate = {
-                  id: '',
-                  name: 'New Template',
-                  category: 'general',
-                  hook: '${title}에 대한 중요한 소식입니다.',
-                  bullets: ['• 핵심: ${key}'],
-                  impact: '→ ${impact}',
-                  variables: []
-                };
-                setEditingTemplate(newTemplate);
-                setIsCreatingNew(true);
-              }}
-              className="w-full text-xs px-3 py-2 bg-zinc-800 text-zinc-100 rounded-md hover:bg-zinc-700 mb-3"
+              onClick={() => setMode('template')}
+              className={`px-4 py-2 text-sm rounded-md transition-all ${
+                mode === 'template'
+                  ? 'bg-white text-black'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
             >
-              + 새 템플릿 추가
+              템플릿 모드
             </button>
+            <button
+              onClick={() => setMode('freetext')}
+              className={`px-4 py-2 text-sm rounded-md transition-all ${
+                mode === 'freetext'
+                  ? 'bg-white text-black'
+                  : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              프리텍스트 모드
+            </button>
+          </div>
+          <div className="ml-auto text-xs text-zinc-500">
+            {mode === 'template'
+              ? '템플릿 기반으로 변수를 채워 요약을 생성합니다.'
+              : '시스템 프롬프트를 직접 작성하여 요약을 생성합니다.'}
+          </div>
+        </div>
+      </div>
 
-            {/* Template List */}
-            <div className="space-y-2">
-              {templates.map(template => (
-                <div
-                  key={template.id}
-                  className={`p-3 rounded-md cursor-pointer border transition-all ${
-                    selectedTemplate?.id === template.id
-                      ? 'bg-zinc-800 border-zinc-600'
-                      : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
-                  }`}
-                  onClick={() => setSelectedTemplate(template)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <p className="text-xs font-medium text-white">{template.name}</p>
-                      <p className="text-xs text-zinc-500 mt-1">{template.category}</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingTemplate(template);
-                          setIsCreatingNew(false);
-                        }}
-                        className="text-xs text-zinc-400 hover:text-white px-2 py-1"
-                      >
-                        편집
-                      </button>
-                      {!template.id.startsWith('tech-') && !template.id.startsWith('biz-') && (
+      <div className="grid grid-cols-12 h-[calc(100vh-5rem)]">
+        {/* Left Panel */}
+        {mode === 'template' ? (
+          /* Template Mode - Template List */
+          <div className="col-span-3 border-r border-zinc-800 p-4 overflow-y-auto">
+            <div className="mb-4">
+              <h2 className="text-sm font-medium text-white mb-3">프롬프트 템플릿</h2>
+              <button
+                onClick={() => {
+                  const newTemplate: PromptTemplate = {
+                    id: '',
+                    name: 'New Template',
+                    category: 'general',
+                    hook: '${title}에 대한 중요한 소식입니다.',
+                    bullets: ['• 핵심: ${key}'],
+                    impact: '→ ${impact}',
+                    variables: []
+                  };
+                  setEditingTemplate(newTemplate);
+                  setIsCreatingNew(true);
+                }}
+                className="w-full text-xs px-3 py-2 bg-zinc-800 text-zinc-100 rounded-md hover:bg-zinc-700 mb-3"
+              >
+                + 새 템플릿 추가
+              </button>
+
+              {/* Template List */}
+              <div className="space-y-2">
+                {templates.map(template => (
+                  <div
+                    key={template.id}
+                    className={`p-3 rounded-md cursor-pointer border transition-all ${
+                      selectedTemplate?.id === template.id
+                        ? 'bg-zinc-800 border-zinc-600'
+                        : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                    }`}
+                    onClick={() => setSelectedTemplate(template)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-white">{template.name}</p>
+                        <p className="text-xs text-zinc-500 mt-1">{template.category}</p>
+                      </div>
+                      <div className="flex gap-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleDeleteTemplate(template.id);
+                            setEditingTemplate(template);
+                            setIsCreatingNew(false);
                           }}
-                          className="text-xs text-red-400 hover:text-red-300 px-2 py-1"
+                          className="text-xs text-zinc-400 hover:text-white px-2 py-1"
                         >
-                          삭제
+                          편집
                         </button>
-                      )}
+                        {!template.id.startsWith('tech-') && !template.id.startsWith('biz-') && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTemplate(template.id);
+                            }}
+                            className="text-xs text-red-400 hover:text-red-300 px-2 py-1"
+                          >
+                            삭제
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Template Editor Modal */}
-          {editingTemplate && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-zinc-900 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-                <h3 className="text-sm font-medium text-white mb-4">
-                  {isCreatingNew ? '새 템플릿 만들기' : '템플릿 수정'}
-                </h3>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs text-zinc-400 block mb-1">이름</label>
-                    <input
-                      type="text"
-                      value={editingTemplate.name}
-                      onChange={(e) => setEditingTemplate({...editingTemplate, name: e.target.value})}
-                      className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-zinc-400 block mb-1">카테고리</label>
-                    <select
-                      value={editingTemplate.category}
-                      onChange={(e) => setEditingTemplate({...editingTemplate, category: e.target.value})}
-                      className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
-                    >
-                      <option value="technology">Technology</option>
-                      <option value="business">Business</option>
-                      <option value="general">General</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Hook (첫 문장)</label>
-                    <input
-                      type="text"
-                      value={editingTemplate.hook}
-                      onChange={(e) => setEditingTemplate(updateTemplateVariables({...editingTemplate, hook: e.target.value}))}
-                      className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
-                      placeholder="${company}이(가) ${title} 발표..."
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Bullets (불렛포인트)</label>
-                    {editingTemplate.bullets.map((bullet, idx) => (
-                      <div key={idx} className="flex gap-2 mb-2">
-                        <input
-                          type="text"
-                          value={bullet}
-                          onChange={(e) => {
-                            const newBullets = [...editingTemplate.bullets];
-                            newBullets[idx] = e.target.value;
-                            setEditingTemplate(updateTemplateVariables({...editingTemplate, bullets: newBullets}));
-                          }}
-                          className="flex-1 px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
-                        />
-                        <button
-                          onClick={() => {
-                            const newBullets = editingTemplate.bullets.filter((_, i) => i !== idx);
-                            setEditingTemplate(updateTemplateVariables({...editingTemplate, bullets: newBullets}));
-                          }}
-                          className="px-3 py-2 text-xs bg-red-900/50 text-red-300 rounded-md hover:bg-red-900/70"
-                        >
-                          삭제
-                        </button>
-                      </div>
-                    ))}
-                    <button
-                      onClick={() => {
-                        setEditingTemplate(updateTemplateVariables({
-                          ...editingTemplate,
-                          bullets: [...editingTemplate.bullets, '• 새 항목: ${variable}']
-                        }));
-                      }}
-                      className="text-xs text-zinc-400 hover:text-white"
-                    >
-                      + 불렛 추가
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="text-xs text-zinc-400 block mb-1">Impact (영향/시사점)</label>
-                    <input
-                      type="text"
-                      value={editingTemplate.impact}
-                      onChange={(e) => setEditingTemplate(updateTemplateVariables({...editingTemplate, impact: e.target.value}))}
-                      className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
-                      placeholder="→ 시장 영향..."
-                    />
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-zinc-400 mb-2">발견된 변수: {editingTemplate.variables.join(', ')}</p>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 mt-6">
-                  <button
-                    onClick={() => {
-                      setEditingTemplate(null);
-                      setIsCreatingNew(false);
-                    }}
-                    className="px-4 py-2 text-xs bg-zinc-800 text-zinc-300 rounded-md hover:bg-zinc-700"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={handleSaveTemplate}
-                    className="px-4 py-2 text-xs bg-white text-black rounded-md hover:bg-zinc-200"
-                  >
-                    저장
-                  </button>
-                </div>
+                ))}
               </div>
             </div>
-          )}
-        </div>
+
+            {/* Template Editor Modal */}
+            {editingTemplate && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-zinc-900 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                  <h3 className="text-sm font-medium text-white mb-4">
+                    {isCreatingNew ? '새 템플릿 만들기' : '템플릿 수정'}
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">이름</label>
+                      <input
+                        type="text"
+                        value={editingTemplate.name}
+                        onChange={(e) => setEditingTemplate({...editingTemplate, name: e.target.value})}
+                        className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">카테고리</label>
+                      <select
+                        value={editingTemplate.category}
+                        onChange={(e) => setEditingTemplate({...editingTemplate, category: e.target.value})}
+                        className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
+                      >
+                        <option value="technology">Technology</option>
+                        <option value="business">Business</option>
+                        <option value="general">General</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Hook (첫 문장)</label>
+                      <input
+                        type="text"
+                        value={editingTemplate.hook}
+                        onChange={(e) => setEditingTemplate(updateTemplateVariables({...editingTemplate, hook: e.target.value}))}
+                        className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
+                        placeholder="${company}이(가) ${title} 발표..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Bullets (불렛포인트)</label>
+                      {editingTemplate.bullets.map((bullet, idx) => (
+                        <div key={idx} className="flex gap-2 mb-2">
+                          <input
+                            type="text"
+                            value={bullet}
+                            onChange={(e) => {
+                              const newBullets = [...editingTemplate.bullets];
+                              newBullets[idx] = e.target.value;
+                              setEditingTemplate(updateTemplateVariables({...editingTemplate, bullets: newBullets}));
+                            }}
+                            className="flex-1 px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
+                          />
+                          <button
+                            onClick={() => {
+                              const newBullets = editingTemplate.bullets.filter((_, i) => i !== idx);
+                              setEditingTemplate(updateTemplateVariables({...editingTemplate, bullets: newBullets}));
+                            }}
+                            className="px-3 py-2 text-xs bg-red-900/50 text-red-300 rounded-md hover:bg-red-900/70"
+                          >
+                            삭제
+                          </button>
+                        </div>
+                      ))}
+                      <button
+                        onClick={() => {
+                          setEditingTemplate(updateTemplateVariables({
+                            ...editingTemplate,
+                            bullets: [...editingTemplate.bullets, '• 새 항목: ${variable}']
+                          }));
+                        }}
+                        className="text-xs text-zinc-400 hover:text-white"
+                      >
+                        + 불렛 추가
+                      </button>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-zinc-400 block mb-1">Impact (영향/시사점)</label>
+                      <input
+                        type="text"
+                        value={editingTemplate.impact}
+                        onChange={(e) => setEditingTemplate(updateTemplateVariables({...editingTemplate, impact: e.target.value}))}
+                        className="w-full px-3 py-2 text-sm bg-zinc-800 text-white rounded-md border border-zinc-700 focus:border-zinc-500 focus:outline-none"
+                        placeholder="→ 시장 영향..."
+                      />
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-zinc-400 mb-2">발견된 변수: {editingTemplate.variables.join(', ')}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 mt-6">
+                    <button
+                      onClick={() => {
+                        setEditingTemplate(null);
+                        setIsCreatingNew(false);
+                      }}
+                      className="px-4 py-2 text-xs bg-zinc-800 text-zinc-300 rounded-md hover:bg-zinc-700"
+                    >
+                      취소
+                    </button>
+                    <button
+                      onClick={handleSaveTemplate}
+                      className="px-4 py-2 text-xs bg-white text-black rounded-md hover:bg-zinc-200"
+                    >
+                      저장
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Freetext Mode - System Prompt Editor */
+          <div className="col-span-5 border-r border-zinc-800 p-4 overflow-y-auto">
+            <h2 className="text-sm font-medium text-white mb-3">시스템 프롬프트</h2>
+            <div className="mb-4">
+              <div className="bg-zinc-900/50 rounded-lg p-3 mb-3 border border-zinc-800">
+                <p className="text-xs text-zinc-400 mb-2">
+                  <strong>사용 가능한 변수:</strong>
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <code className="text-xs bg-zinc-800 px-2 py-1 rounded">{'{title}'}</code>
+                  <code className="text-xs bg-zinc-800 px-2 py-1 rounded">{'{source}'}</code>
+                  <code className="text-xs bg-zinc-800 px-2 py-1 rounded">{'{category}'}</code>
+                  <code className="text-xs bg-zinc-800 px-2 py-1 rounded">{'{keywords}'}</code>
+                </div>
+              </div>
+
+              <textarea
+                value={systemPrompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
+                className="w-full h-[calc(100vh-16rem)] px-4 py-3 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none font-mono resize-none"
+                placeholder="시스템 프롬프트를 입력하세요..."
+              />
+
+              <div className="mt-3 flex gap-2">
+                <button
+                  onClick={() => setSystemPrompt(DEFAULT_SYSTEM_PROMPT)}
+                  className="text-xs px-3 py-2 bg-zinc-800 text-zinc-300 rounded-md hover:bg-zinc-700"
+                >
+                  기본값으로 초기화
+                </button>
+                <button
+                  onClick={() => {
+                    const saved = localStorage.getItem('saved_system_prompt');
+                    if (saved) setSystemPrompt(saved);
+                  }}
+                  className="text-xs px-3 py-2 bg-zinc-800 text-zinc-300 rounded-md hover:bg-zinc-700"
+                >
+                  저장된 프롬프트 불러오기
+                </button>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('saved_system_prompt', systemPrompt);
+                    alert('프롬프트가 저장되었습니다.');
+                  }}
+                  className="text-xs px-3 py-2 bg-white text-black rounded-md hover:bg-zinc-200"
+                >
+                  현재 프롬프트 저장
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Middle: Test Article & Variables */}
-        <div className="col-span-4 border-r border-zinc-800 p-4 overflow-y-auto">
+        <div className={`${mode === 'template' ? 'col-span-4' : 'col-span-3'} border-r border-zinc-800 p-4 overflow-y-auto`}>
           <h2 className="text-sm font-medium text-white mb-4">테스트 기사</h2>
 
           {/* Test Article Input */}
@@ -357,21 +497,20 @@ export default function PromptEditor() {
 
             <div>
               <label className="text-xs text-zinc-400 block mb-1">설명</label>
-              <textarea
+              <input
+                type="text"
                 value={testArticle.description}
                 onChange={(e) => setTestArticle({...testArticle, description: e.target.value})}
-                className="w-full px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none resize-none"
-                rows={2}
+                className="w-full px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs text-zinc-400 block mb-1">본문</label>
+              <label className="text-xs text-zinc-400 block mb-1">내용</label>
               <textarea
                 value={testArticle.content}
                 onChange={(e) => setTestArticle({...testArticle, content: e.target.value})}
-                className="w-full px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none resize-none"
-                rows={4}
+                className="w-full px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none h-24 resize-none"
               />
             </div>
 
@@ -400,114 +539,92 @@ export default function PromptEditor() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-zinc-400 block mb-1">감정</label>
-                <select
-                  value={testArticle.sentiment}
-                  onChange={(e) => setTestArticle({...testArticle, sentiment: e.target.value as any})}
-                  className="w-full px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none"
-                >
-                  <option value="positive">Positive</option>
-                  <option value="negative">Negative</option>
-                  <option value="neutral">Neutral</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs text-zinc-400 block mb-1">관련성 점수</label>
-                <input
-                  type="number"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={testArticle.relevance_score}
-                  onChange={(e) => setTestArticle({...testArticle, relevance_score: parseFloat(e.target.value)})}
-                  className="w-full px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none"
-                />
-              </div>
+            <div>
+              <label className="text-xs text-zinc-400 block mb-1">키워드 (쉼표로 구분)</label>
+              <input
+                type="text"
+                value={testArticle.keywords?.join(', ')}
+                onChange={(e) => setTestArticle({...testArticle, keywords: e.target.value.split(',').map(k => k.trim())})}
+                className="w-full px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none"
+              />
             </div>
           </div>
 
-          {/* Variables Editor */}
-          <div className="border-t border-zinc-800 pt-4">
-            <h3 className="text-sm font-medium text-white mb-3">변수 값 설정</h3>
-            <div className="space-y-2">
-              {selectedTemplate?.variables.map(variable => (
-                <div key={variable} className="flex items-center gap-2">
-                  <label className="text-xs text-zinc-400 w-24">${variable}</label>
-                  <input
-                    type="text"
-                    value={customVariables[variable] || ''}
-                    onChange={(e) => setCustomVariables({...customVariables, [variable]: e.target.value})}
-                    className="flex-1 px-2 py-1 text-sm bg-zinc-900 text-white rounded border border-zinc-800 focus:border-zinc-600 focus:outline-none"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Variables Section - Only in Template Mode */}
+          {mode === 'template' && selectedTemplate && (
+            <>
+              <h3 className="text-sm font-medium text-white mb-3">변수 설정</h3>
+              <div className="space-y-2">
+                {selectedTemplate.variables.map(variable => (
+                  <div key={variable} className="flex items-center gap-2">
+                    <label className="text-xs text-zinc-400 w-24">{variable}:</label>
+                    <input
+                      type="text"
+                      value={customVariables[variable] || ''}
+                      onChange={(e) => setCustomVariables({...customVariables, [variable]: e.target.value})}
+                      className="flex-1 px-3 py-2 text-sm bg-zinc-900 text-white rounded-md border border-zinc-800 focus:border-zinc-600 focus:outline-none"
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right: Preview */}
-        <div className="col-span-5 p-4 overflow-y-auto">
-          <h2 className="text-sm font-medium text-white mb-4">요약 미리보기</h2>
+        <div className={`${mode === 'template' ? 'col-span-5' : 'col-span-4'} p-4 overflow-y-auto`}>
+          <h2 className="text-sm font-medium text-white mb-4">생성된 요약 미리보기</h2>
 
-          {/* Current Template Info */}
-          <div className="mb-4 p-3 bg-zinc-900 rounded-md">
-            <p className="text-xs text-zinc-400">현재 템플릿</p>
-            <p className="text-sm text-white mt-1">{selectedTemplate?.name}</p>
-          </div>
-
-          {/* Generated Summary */}
-          <div className="p-4 bg-zinc-900/50 rounded-lg border border-zinc-800">
-            <pre className="text-sm text-zinc-100 whitespace-pre-wrap font-sans">
-              {generatedSummary || '템플릿을 선택하고 변수를 설정하면 요약이 표시됩니다.'}
-            </pre>
-          </div>
-
-          {/* Original vs Custom Comparison */}
-          <div className="mt-6">
-            <h3 className="text-sm font-medium text-white mb-3">기본 생성기 비교</h3>
-            <div className="p-4 bg-zinc-900/30 rounded-lg border border-zinc-800">
-              <p className="text-xs text-zinc-400 mb-2">generateSmartSummary() 결과:</p>
-              <pre className="text-sm text-zinc-300 whitespace-pre-wrap font-sans">
-                {generateSmartSummary(testArticle)}
-              </pre>
+          {mode === 'template' && selectedTemplate && (
+            <div className="mb-4 p-3 bg-zinc-900 rounded-md border border-zinc-800">
+              <p className="text-xs text-zinc-500 mb-1">선택된 템플릿</p>
+              <p className="text-sm text-white">{selectedTemplate.name} ({selectedTemplate.category})</p>
             </div>
-          </div>
+          )}
 
-          {/* Tips */}
-          <div className="mt-6 p-4 bg-blue-950/30 rounded-lg border border-blue-900/50">
-            <h4 className="text-xs font-medium text-blue-300 mb-2">💡 변수 사용 팁</h4>
-            <ul className="text-xs text-blue-200/70 space-y-1">
-              <li>• ${`{variable}`} 형식으로 변수 추가</li>
-              <li>• 구체적인 숫자와 수치 사용 권장</li>
-              <li>• Hook은 15-20자 내외로 임팩트 있게</li>
-              <li>• 불렛은 4개 이하로 유지</li>
-              <li>• Impact는 → 로 시작하여 시사점 명확히</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+          {mode === 'freetext' && (
+            <div className="mb-4 p-3 bg-zinc-900 rounded-md border border-zinc-800">
+              <p className="text-xs text-zinc-500 mb-1">모드</p>
+              <p className="text-sm text-white">시스템 프롬프트 직접 입력</p>
+            </div>
+          )}
 
-      {/* Floating Dock */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40">
-        <div className="bg-zinc-900/90 backdrop-blur-lg border border-zinc-800 rounded-lg shadow-xl p-2">
-          <div className="flex items-center gap-4">
-            <nav className="flex items-center gap-1">
-              <a href="/dashboard/morning" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
-                Feed
-              </a>
-              <a href="/dashboard/pipeline" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
-                Pipeline
-              </a>
-              <a href="/dashboard/news" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
-                Articles
-              </a>
-              <a href="/dashboard/prompt-editor" className="px-3 py-1.5 rounded-md text-xs font-medium text-zinc-100 bg-zinc-800">
-                Prompt Editor
-              </a>
-            </nav>
+          <div className="bg-zinc-900 rounded-lg p-6 border border-zinc-800">
+            <h3 className="text-base font-semibold text-white mb-4">{testArticle.title}</h3>
+
+            <div className="mb-4 pb-4 border-b border-zinc-800">
+              <p className="text-sm text-zinc-400 mb-2">생성된 요약:</p>
+              <div className="bg-zinc-950 rounded-md p-4 border border-zinc-800">
+                <p className="text-sm text-zinc-100 leading-relaxed whitespace-pre-line">
+                  {generatedSummary || '요약을 생성하려면 템플릿을 선택하거나 시스템 프롬프트를 입력하세요.'}
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <p className="text-sm text-zinc-400 mb-2">원본 요약 (generateSmartSummary 함수):</p>
+              <div className="bg-zinc-950 rounded-md p-4 border border-zinc-800">
+                <p className="text-sm text-zinc-100 leading-relaxed whitespace-pre-line">
+                  {generateSmartSummary(testArticle as any)}
+                </p>
+              </div>
+            </div>
+
+            {mode === 'template' && (
+              <div className="mt-4 p-3 bg-zinc-800/50 rounded-md">
+                <p className="text-xs text-zinc-400">
+                  팁: 변수를 수정하면 실시간으로 요약이 업데이트됩니다.
+                </p>
+              </div>
+            )}
+
+            {mode === 'freetext' && (
+              <div className="mt-4 p-3 bg-zinc-800/50 rounded-md">
+                <p className="text-xs text-zinc-400">
+                  팁: 시스템 프롬프트의 변수 ({'{title}'}, {'{source}'} 등)는 자동으로 테스트 기사의 내용으로 치환됩니다.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
