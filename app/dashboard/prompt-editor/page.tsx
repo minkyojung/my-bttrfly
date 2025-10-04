@@ -82,27 +82,41 @@ export default function PromptEditor() {
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT);
   const [testArticle, setTestArticle] = useState<TestArticle>({
     id: 'test-1',
-    title: 'OpenAI가 GPT-5 출시를 예고했다',
-    description: '차세대 AI 모델이 곧 공개될 예정',
-    content: 'OpenAI가 차세대 언어 모델인 GPT-5를 2025년 상반기에 출시할 예정이라고 발표했다. 이번 모델은 기존 GPT-4 대비 10배 향상된 성능을 보여줄 것으로 예상된다.',
-    source: 'OpenAI',
+    title: '삼성전자, 차세대 3나노 GAA 공정 양산 본격화... TSMC와 격차 좁히기 나서',
+    description: '업계 최초 게이트올어라운드(GAA) 기술 적용한 3나노 공정으로 파운드리 시장 공략',
+    content: `삼성전자가 차세대 3나노 GAA(Gate-All-Around) 공정 양산을 본격화하며 글로벌 파운드리 시장에서 TSMC와의 격차를 좁히기 위한 승부수를 던졌다.
+
+삼성전자는 15일 경기도 화성캠퍼스에서 3나노 2세대 공정 양산 기념식을 개최하고, 주요 고객사들에게 안정적인 수율과 성능 개선을 입증했다고 밝혔다. 이번 3나노 2세대 공정은 기존 5나노 대비 전력 효율은 50% 향상되고, 성능은 30% 개선되었으며, 면적은 35% 축소된 것이 특징이다.
+
+특히 업계 최초로 상용화에 성공한 GAA 트랜지스터 구조는 기존 FinFET 대비 누설 전류를 획기적으로 줄여 모바일 기기의 배터리 수명 연장에 기여할 것으로 기대된다. 삼성전자는 이미 퀄컴, 엔비디아, IBM 등 주요 팹리스 업체들과 협력을 논의 중이며, 2025년까지 3나노 공정 고객사를 10개 이상 확보할 계획이다.
+
+업계 관계자는 "TSMC가 3나노 양산에서 예상보다 어려움을 겪고 있는 상황에서 삼성의 GAA 기술 안정화는 파운드리 시장 판도를 바꿀 수 있는 기회"라며 "특히 AI 칩과 고성능 컴퓨팅(HPC) 분야에서 수요가 급증하고 있어 삼성에게 유리한 상황"이라고 분석했다.
+
+삼성전자는 2027년까지 파운드리 사업에 150조원을 투자하고, 평택과 테일러(미국 텍사스)에 신규 생산라인을 구축할 예정이다. 또한 2나노 공정 개발도 순조롭게 진행되고 있어 2025년 하반기 시험 생산을 목표로 하고 있다.`,
+    source: '전자신문',
     category: 'technology',
-    keywords: ['AI', 'GPT', '언어모델', '인공지능'],
+    keywords: ['삼성전자', '파운드리', '3나노', 'GAA', 'TSMC', '반도체', 'AI칩', '퀄컴', '엔비디아'],
     sentiment: 'positive',
-    relevance_score: 0.9
+    relevance_score: 0.95
   });
 
   const [generatedSummary, setGeneratedSummary] = useState<string>('');
   const [originalSummary, setOriginalSummary] = useState<string>('');
   const [customVariables, setCustomVariables] = useState<Record<string, string>>({
-    company: 'OpenAI',
-    title: 'GPT-5 출시',
-    keyword1: 'AI',
-    performance: '10',
+    company: '삼성전자',
+    title: '3나노 GAA 양산',
+    keyword1: '반도체',
+    performance: '30',
     cost: '50',
-    quarter: '2025년 1분기',
-    market: 'AI',
-    growth: '35'
+    quarter: '2025년 상반기',
+    market: '파운드리',
+    growth: '25',
+    revenue: '150조',
+    strategy: '기술 선도',
+    discount: '30',
+    timeline: '2025년',
+    stock: '5',
+    savings: '20'
   });
 
   const [editingTemplate, setEditingTemplate] = useState<PromptTemplate | null>(null);
@@ -116,15 +130,16 @@ export default function PromptEditor() {
     processedPrompt = processedPrompt.replace(/{category}/g, testArticle.category || '일반');
     processedPrompt = processedPrompt.replace(/{keywords}/g, testArticle.keywords?.join(', ') || '');
 
-    // Simulate summary generation based on prompt
-    const summary = `📍 ${testArticle.title}의 핵심은 혁신적인 기술 발전입니다.
+    // Simulate summary generation based on prompt with actual test article
+    const summary = `📍 삼성전자가 3나노 GAA 기술로 TSMC 추격에 나섰습니다.
 
-• 핵심: GPT-5는 이전 모델 대비 10배 성능 향상
-• 출시: 2025년 상반기 정식 릴리즈 예정
-• 영향: AI 산업 전반의 패러다임 변화 예상
-• 기대: 더 자연스러운 대화와 복잡한 작업 수행 가능
+• 성능: 5나노 대비 전력효율 50%↑, 성능 30%↑, 면적 35%↓
+• 기술: 업계 최초 GAA 트랜지스터 구조 상용화 성공
+• 고객: 퀄컴, 엔비디아, IBM 등과 협력 논의 중
+• 투자: 2027년까지 150조원 투입, 평택·테일러 생산라인 구축
+• 목표: 2025년까지 3나노 고객사 10개 이상 확보
 
-→ 이번 발표로 AI 경쟁이 더욱 치열해질 전망이며, 기업들의 AI 도입이 가속화될 것으로 보입니다.`;
+→ AI칩과 HPC 수요 급증 속에서 TSMC의 3나노 양산 지연은 삼성에게 시장 재편의 기회가 될 전망입니다.`;
 
     setGeneratedSummary(summary);
   };
@@ -161,11 +176,10 @@ export default function PromptEditor() {
   useEffect(() => {
     if (mode === 'template' && selectedTemplate) {
       generateCustomSummary();
-    } else if (mode === 'freetext') {
-      generateFreetextSummary();
     }
+    // For freetext mode, user must click Run button
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, selectedTemplate, customVariables, testArticle, systemPrompt]);
+  }, [mode, selectedTemplate, customVariables, testArticle]);
 
   useEffect(() => {
     // Generate original summary only on client side
@@ -453,6 +467,12 @@ export default function PromptEditor() {
             />
 
             <div className="mt-2 flex gap-1">
+              <button
+                onClick={() => generateFreetextSummary()}
+                className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                ▶ Run
+              </button>
               <button
                 onClick={() => setSystemPrompt(DEFAULT_SYSTEM_PROMPT)}
                 className="text-xs px-2 py-1 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700"
