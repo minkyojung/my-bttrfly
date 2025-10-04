@@ -54,13 +54,43 @@ export default function MorningReviewDashboard() {
             const articleDate = new Date(article.created_at).toDateString();
             return articleDate === today;
           })
-          .map((article: Article) => ({
-            ...article,
-            summary: article.summary || generateSmartSummary(article)
-          }))
           .sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
 
-        setArticles(todayArticles);
+        // Generate summaries using AI API with saved prompt
+        const savedPrompt = localStorage.getItem('saved_system_prompt');
+        const articlesWithSummaries = await Promise.all(
+          todayArticles.map(async (article: Article) => {
+            if (article.summary) {
+              return article;
+            }
+
+            try {
+              // Call AI API for summary generation
+              const summaryRes = await fetch('/api/generate-summary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  systemPrompt: savedPrompt,
+                  article
+                })
+              });
+              const summaryData = await summaryRes.json();
+
+              return {
+                ...article,
+                summary: summaryData.success ? summaryData.summary : generateSmartSummary(article)
+              };
+            } catch (error) {
+              console.error('Failed to generate AI summary, falling back to template:', error);
+              return {
+                ...article,
+                summary: generateSmartSummary(article)
+              };
+            }
+          })
+        );
+
+        setArticles(articlesWithSummaries);
       } else {
         setArticles([]);
       }
@@ -135,6 +165,37 @@ export default function MorningReviewDashboard() {
 
   return (
     <div className="min-h-screen bg-zinc-950 pb-24">
+      {/* Prompt Status Bar */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {typeof window !== 'undefined' && localStorage.getItem('saved_system_prompt') ? (
+              <span className="text-xs text-green-500">✓ 커스텀 프롬프트 사용 중</span>
+            ) : (
+              <span className="text-xs text-zinc-500">기본 프롬프트 사용 중</span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => window.location.href = '/dashboard/prompt-editor'}
+              className="text-xs px-3 py-1 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 transition-colors"
+            >
+              프롬프트 편집
+            </button>
+            <button
+              onClick={() => {
+                setLoading(true);
+                fetchTodayArticles();
+              }}
+              className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              disabled={loading}
+            >
+              {loading ? '새로고침 중...' : '요약 새로고침'}
+            </button>
+          </div>
+        </div>
+      </div>
+
       {/* Feed Content - Cleaner Instagram Style */}
       <div className="pt-6 px-4">
         {filteredArticles.length === 0 ? (
