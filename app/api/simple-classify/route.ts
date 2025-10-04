@@ -6,11 +6,11 @@ export async function GET(request: NextRequest) {
   console.log('🤖 Starting AI classification...');
 
   try {
-    // 1. Pending 상태 기사 가져오기 (최대 3개)
+    // 1. 분류가 필요한 기사 가져오기 (pending 상태 또는 category가 없는 기사)
     const { data: articles, error: fetchError } = await supabaseAdmin
       .from('articles')
       .select('*')
-      .eq('status', 'pending')
+      .or('status.eq.pending,category.is.null')
       .limit(3);
 
     if (fetchError) {
