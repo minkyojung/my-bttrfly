@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { generateSmartSummary } from '@/lib/utils/summary-generator';
 
 interface Article {
   id: string;
@@ -25,18 +26,6 @@ interface InstagramContent {
   hashtags: string[];
   format: 'post' | 'reel' | 'story';
   originalArticle: Article;
-}
-
-// 간단한 요약 생성 함수 (실제로는 AI API를 사용해야 함)
-function generateKoreanSummary(article: Article): string {
-  // 임시 요약 생성 로직
-  const templates = [
-    `${article.source || '해당 매체'}에서 보도한 바에 따르면, ${article.title}에 대한 새로운 소식이 전해졌습니다. 이번 발표는 업계에 상당한 영향을 미칠 것으로 예상되며, 전문가들은 향후 동향을 주목하고 있습니다.`,
-    `최근 ${article.category || '해당 분야'}에서 ${article.title}과 관련된 중요한 발전이 있었습니다. 이는 기존 방식에 변화를 가져올 수 있는 혁신적인 접근으로 평가받고 있으며, 관련 업계의 관심이 집중되고 있습니다.`,
-    `${article.title}에 대한 새로운 정보가 공개되었습니다. 전문가들은 이번 소식이 시장에 긍정적인 영향을 미칠 것으로 전망하고 있으며, 소비자들의 반응도 주목됩니다.`,
-  ];
-
-  return templates[Math.floor(Math.random() * templates.length)];
 }
 
 export default function MorningReviewDashboard() {
@@ -67,7 +56,7 @@ export default function MorningReviewDashboard() {
           })
           .map((article: Article) => ({
             ...article,
-            summary: article.summary || generateKoreanSummary(article)
+            summary: article.summary || generateSmartSummary(article)
           }))
           .sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
 
