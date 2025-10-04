@@ -124,7 +124,7 @@ function generateBusinessSummary(article: Article): StructuredSummary {
         `• M&A: ${generateRandomNumber(1, 10)}조원 규모 인수합병 추진`,
         `• 인력: ${generateRandomNumber(500, 5000)}명 구조조정 및 재배치`,
         `• 시너지: 통합 후 연 ${generateRandomNumber(20, 40)}% 성장 목표`,
-        `• 승인: 공정위 심사 ${getCurrentQuarter() + 1} 예정`
+        `• 승인: 공정위 심사 ${getNextQuarter()} 예정`
       ],
       impact: `→ 산업 재편 가속화, ${keywords[1] || '관련'} 중소기업 생존전략 재검토 필요`,
       formatted: ''
@@ -195,6 +195,9 @@ function generateGeneralSummary(article: Article): StructuredSummary {
 
 // 구조화된 요약을 포맷팅
 function formatStructuredSummary(summary: StructuredSummary): string {
+  if (!summary || !summary.bullets) {
+    return '요약을 생성할 수 없습니다.';
+  }
   const bullets = summary.bullets.join('\n');
   return `📍 ${summary.hook}\n\n${bullets}\n\n${summary.impact}`;
 }
@@ -218,6 +221,16 @@ function extractKeyInfo(title: string): string {
 }
 
 function selectTemplateByRelevance(templates: StructuredSummary[], article: Article): StructuredSummary {
+  // 템플릿이 없거나 비어있으면 기본 템플릿 반환
+  if (!templates || templates.length === 0) {
+    return {
+      hook: '뉴스 요약을 생성할 수 없습니다.',
+      bullets: ['• 템플릿을 찾을 수 없습니다.'],
+      impact: '→ 관리자에게 문의하세요.',
+      formatted: ''
+    };
+  }
+
   const score = article.relevance_score || 0.5;
   const sentiment = article.sentiment || 'neutral';
 
@@ -229,7 +242,10 @@ function selectTemplateByRelevance(templates: StructuredSummary[], article: Arti
     index = Math.min(index + 1, templates.length - 1);
   }
 
-  return templates[index];
+  // 인덱스가 범위를 벗어나는 경우 처리
+  index = Math.max(0, Math.min(index, templates.length - 1));
+
+  return templates[index] || templates[0];
 }
 
 function getSentimentPercent(sentiment?: string): number {
@@ -262,6 +278,14 @@ function getCurrentQuarter(): string {
   const month = new Date().getMonth();
   const quarter = Math.floor(month / 3) + 1;
   return `${getCurrentYear()}년 ${quarter}분기`;
+}
+
+function getNextQuarter(): string {
+  const month = new Date().getMonth();
+  const currentQuarter = Math.floor(month / 3) + 1;
+  const nextQuarter = currentQuarter === 4 ? 1 : currentQuarter + 1;
+  const year = currentQuarter === 4 ? getCurrentYear() + 1 : getCurrentYear();
+  return `${year}년 ${nextQuarter}분기`;
 }
 
 // 요약 품질 검증
