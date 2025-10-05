@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { generateSmartSummary } from '@/lib/utils/summary-generator';
@@ -19,6 +19,9 @@ interface Article {
   sentiment?: 'positive' | 'negative' | 'neutral';
   relevance_score?: number;
   summary?: string;
+  status?: string;
+  instagram_post_id?: string;
+  [key: string]: unknown;
 }
 
 interface InstagramContent {
@@ -29,117 +32,263 @@ interface InstagramContent {
   originalArticle: Article;
 }
 
-export default function MorningReviewDashboard() {
+type ViewMode = 'feed' | 'table' | 'pipeline';
+type DateFilter = 'today' | 'week' | 'all';
+type StatusFilter = 'all' | 'pending' | 'classified' | 'posted';
+
+export default function UnifiedDashboard() {
+  // View & Filter State
+  const [view, setView] = useState<ViewMode>('feed');
+  const [dateFilter, setDateFilter] = useState<DateFilter>('today');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Data State
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [pipelineLoading, setPipelineLoading] = useState<string | null>(null);
   const [processingArticle, setProcessingArticle] = useState<string | null>(null);
+  const [expandedArticles, setExpandedArticles] = useState<Set<string>>(new Set());
+  const [fullContentMap, setFullContentMap] = useState<Map<string, string>>(new Map());
+  const [loadingFullContent, setLoadingFullContent] = useState<Set<string>>(new Set());
+
+  // Modal State
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [generatedContent, setGeneratedContent] = useState<InstagramContent | null>(null);
   const [editedContent, setEditedContent] = useState<InstagramContent | null>(null);
-  const [contentFormat, setContentFormat] = useState<'post' | 'reel' | 'story'>('post');
 
+  // Command Palette
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+
+  // Context Menu
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; article: Article } | null>(null);
+
+  // Stats
+  const [stats, setStats] = useState({
+    total: 0,
+    today: 0,
+    pending: 0,
+    classified: 0,
+    posted: 0,
+  });
+
+  // Keyboard Shortcuts
   useEffect(() => {
-    fetchTodayArticles();
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Command Palette
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(true);
+        return;
+      }
+
+      // Skip if typing in input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      switch (e.key.toLowerCase()) {
+        case 's':
+          e.preventDefault();
+          handleScrape();
+          break;
+        case 'c':
+          e.preventDefault();
+          handleClassify();
+          break;
+        case 'g':
+          e.preventDefault();
+          handleGenerateAll();
+          break;
+        case 'v':
+          e.preventDefault();
+          cycleView();
+          break;
+        case 'r':
+          e.preventDefault();
+          fetchArticles();
+          break;
+        case 'f':
+          e.preventDefault();
+          document.getElementById('search-input')?.focus();
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [view]);
+
+  // Close context menu on click
+  useEffect(() => {
+    const handleClick = () => setContextMenu(null);
+    window.addEventListener('click', handleClick);
+    return () => window.removeEventListener('click', handleClick);
   }, []);
 
-  const fetchTodayArticles = async () => {
+  useEffect(() => {
+    fetchArticles();
+  }, [dateFilter, statusFilter]);
+
+  const cycleView = () => {
+    const views: ViewMode[] = ['feed', 'table', 'pipeline'];
+    const currentIndex = views.indexOf(view);
+    setView(views[(currentIndex + 1) % views.length]);
+  };
+
+  const fetchArticles = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/dashboard/articles');
       const data = await res.json();
 
       if (data.success && data.articles) {
-        const today = new Date().toDateString();
-        const todayArticles = data.articles
-          .filter((article: Article) => {
+        let filtered = data.articles;
+
+        // Apply date filter
+        if (dateFilter === 'today') {
+          const today = new Date().toDateString();
+          filtered = filtered.filter((article: Article) => {
             const articleDate = new Date(article.created_at).toDateString();
             return articleDate === today;
-          })
-          .sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
-
-        // Generate summaries using category-specific batch AI API
-        // Group articles by category for optimized batch processing
-        const articlesNeedingSummaries = todayArticles.filter((a: Article) => !a.summary);
-        const articlesWithExistingSummaries = todayArticles.filter((a: Article) => a.summary);
-
-        let articlesWithSummaries = [...articlesWithExistingSummaries];
-
-        if (articlesNeedingSummaries.length > 0) {
-          try {
-            // Group articles by category
-            const articlesByCategory = articlesNeedingSummaries.reduce((acc: Record<Category, Article[]>, article: Article) => {
-              const category = (article.category?.toLowerCase() || 'general') as Category;
-              if (!acc[category]) acc[category] = [];
-              acc[category].push(article);
-              return acc;
-            }, {} as Record<Category, Article[]>);
-
-            console.log(`Batch generating summaries for ${articlesNeedingSummaries.length} articles in ${Object.keys(articlesByCategory).length} categories...`);
-
-            // Process each category with its specific prompt
-            const batchPromises = Object.entries(articlesByCategory).map(async ([category, articles]) => {
-              const categoryPrompt = getCategoryPrompt(category as Category);
-
-              const batchRes = await fetch('/api/generate-batch-summaries', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  systemPrompt: categoryPrompt,
-                  articles
-                })
-              });
-              return batchRes.json();
-            });
-
-            const batchResults = await Promise.all(batchPromises);
-
-            // Collect all summaries
-            const summariesById = new Map();
-            let totalSuccessful = 0;
-            let totalProcessed = 0;
-
-            batchResults.forEach(batchData => {
-              if (batchData.success && batchData.results) {
-                batchData.results.forEach((r: { id: string; summary: string }) => {
-                  summariesById.set(r.id, r.summary);
-                });
-                totalSuccessful += batchData.successful;
-                totalProcessed += batchData.processed;
-              }
-            });
-
-            const newlySummarized = articlesNeedingSummaries.map((article: Article) => ({
-              ...article,
-              summary: summariesById.get(article.id) || generateSmartSummary(article)
-            }));
-
-            articlesWithSummaries = [...articlesWithSummaries, ...newlySummarized];
-            console.log(`✅ Category-based batch processing: ${totalSuccessful}/${totalProcessed} successful`);
-
-          } catch (error) {
-            console.error('Failed to generate batch summaries, falling back to templates:', error);
-            const fallbackSummaries = articlesNeedingSummaries.map((article: Article) => ({
-              ...article,
-              summary: generateSmartSummary(article)
-            }));
-            articlesWithSummaries = [...articlesWithSummaries, ...fallbackSummaries];
-          }
+          });
+        } else if (dateFilter === 'week') {
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          filtered = filtered.filter((article: Article) => {
+            return new Date(article.created_at) >= weekAgo;
+          });
         }
 
-        // Restore original sort order
-        const sortedArticles = articlesWithSummaries.sort((a: Article, b: Article) =>
-          (b.relevance_score || 0) - (a.relevance_score || 0)
-        );
+        // Apply status filter
+        if (statusFilter !== 'all') {
+          filtered = filtered.filter((a: Article) => a.status === statusFilter);
+        }
 
-        setArticles(sortedArticles);
+        // Sort by relevance
+        filtered = filtered.sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
+
+        // Generate summaries for feed view
+        if (view === 'feed') {
+          const articlesNeedingSummaries = filtered.filter((a: Article) => !a.summary);
+          const articlesWithExistingSummaries = filtered.filter((a: Article) => a.summary);
+
+          let articlesWithSummaries = [...articlesWithExistingSummaries];
+
+          if (articlesNeedingSummaries.length > 0) {
+            try {
+              const articlesByCategory = articlesNeedingSummaries.reduce((acc: Record<Category, Article[]>, article: Article) => {
+                const category = (article.category?.toLowerCase() || 'general') as Category;
+                if (!acc[category]) acc[category] = [];
+                acc[category].push(article);
+                return acc;
+              }, {} as Record<Category, Article[]>);
+
+              const batchPromises = Object.entries(articlesByCategory).map(async ([category, articles]) => {
+                const categoryPrompt = getCategoryPrompt(category as Category);
+
+                const batchRes = await fetch('/api/generate-batch-summaries', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    systemPrompt: categoryPrompt,
+                    articles
+                  })
+                });
+                return batchRes.json();
+              });
+
+              const batchResults = await Promise.all(batchPromises);
+
+              const summariesById = new Map();
+              batchResults.forEach(batchData => {
+                if (batchData.success && batchData.results) {
+                  batchData.results.forEach((r: { id: string; summary: string }) => {
+                    summariesById.set(r.id, r.summary);
+                  });
+                }
+              });
+
+              const newlySummarized = articlesNeedingSummaries.map((article: Article) => ({
+                ...article,
+                summary: summariesById.get(article.id) || generateSmartSummary(article)
+              }));
+
+              articlesWithSummaries = [...articlesWithSummaries, ...newlySummarized];
+            } catch (error) {
+              const fallbackSummaries = articlesNeedingSummaries.map((article: Article) => ({
+                ...article,
+                summary: generateSmartSummary(article)
+              }));
+              articlesWithSummaries = [...articlesWithSummaries, ...fallbackSummaries];
+            }
+          }
+
+          filtered = articlesWithSummaries.sort((a: Article, b: Article) =>
+            (b.relevance_score || 0) - (a.relevance_score || 0)
+          );
+        }
+
+        setArticles(filtered);
+
+        // Calculate stats
+        const allArticles = data.articles;
+        const today = new Date().toDateString();
+        setStats({
+          total: allArticles.length,
+          today: allArticles.filter((a: Article) => new Date(a.created_at).toDateString() === today).length,
+          pending: allArticles.filter((a: Article) => a.status === 'pending').length,
+          classified: allArticles.filter((a: Article) => a.status === 'classified').length,
+          posted: allArticles.filter((a: Article) => a.status === 'posted').length,
+        });
       } else {
         setArticles([]);
       }
     } catch (error) {
-      console.error('Failed to fetch articles:', error);
       setArticles([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleScrape = async () => {
+    setPipelineLoading('scrape');
+    try {
+      const res = await fetch('/api/simple-scrape');
+      if (res.ok) {
+        await fetchArticles();
+      }
+    } catch (error) {
+      // Error handled
+    } finally {
+      setPipelineLoading(null);
+    }
+  };
+
+  const handleClassify = async () => {
+    setPipelineLoading('classify');
+    try {
+      const res = await fetch('/api/simple-classify');
+      if (res.ok) {
+        await fetchArticles();
+      }
+    } catch (error) {
+      // Error handled
+    } finally {
+      setPipelineLoading(null);
+    }
+  };
+
+  const handleGenerateAll = async () => {
+    setPipelineLoading('generate');
+    try {
+      const res = await fetch('/api/cron/generate-instagram');
+      if (res.ok) {
+        await fetchArticles();
+      }
+    } catch (error) {
+      // Error handled
+    } finally {
+      setPipelineLoading(null);
     }
   };
 
@@ -166,7 +315,7 @@ export default function MorningReviewDashboard() {
       setGeneratedContent(content);
       setEditedContent(content);
     } catch (error) {
-      console.error('Failed to generate content:', error);
+      // Error handled
     } finally {
       setProcessingArticle(null);
     }
@@ -185,18 +334,85 @@ export default function MorningReviewDashboard() {
       setSelectedArticle(null);
       setGeneratedContent(null);
       setEditedContent(null);
+      await fetchArticles();
     } catch (error) {
-      console.error('Failed to save content:', error);
+      // Error handled
     }
   };
 
-  const filteredArticles = articles.filter(article =>
-    selectedCategory === 'all' || article.category?.toLowerCase() === selectedCategory
-  );
+  const classifyArticle = async (id: string) => {
+    try {
+      const res = await fetch('/api/classify-single', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      if (res.ok) {
+        await fetchArticles();
+      }
+    } catch (error) {
+      // Error handled
+    }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, article: Article) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, article });
+  };
+
+  const handleToggleFullContent = async (articleId: string) => {
+    // If already expanded, just collapse it
+    if (expandedArticles.has(articleId)) {
+      setExpandedArticles(prev => {
+        const next = new Set(prev);
+        next.delete(articleId);
+        return next;
+      });
+      return;
+    }
+
+    // If we already have the full content, just expand it
+    if (fullContentMap.has(articleId)) {
+      setExpandedArticles(prev => new Set(prev).add(articleId));
+      return;
+    }
+
+    // Otherwise, fetch the full content
+    setLoadingFullContent(prev => new Set(prev).add(articleId));
+
+    try {
+      const res = await fetch('/api/extract-full-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articleId }),
+      });
+
+      const data = await res.json();
+
+      if (data.success && data.content) {
+        setFullContentMap(prev => new Map(prev).set(articleId, data.content));
+        setExpandedArticles(prev => new Set(prev).add(articleId));
+      }
+    } catch (error) {
+      console.error('Failed to fetch full content:', error);
+    } finally {
+      setLoadingFullContent(prev => {
+        const next = new Set(prev);
+        next.delete(articleId);
+        return next;
+      });
+    }
+  };
+
+  const filteredArticles = articles.filter(article => {
+    if (selectedCategory !== 'all' && article.category?.toLowerCase() !== selectedCategory) return false;
+    if (searchQuery && !article.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
 
   const categories = ['all', 'technology', 'business', 'general'];
 
-  if (loading) {
+  if (loading && articles.length === 0) {
     return (
       <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
         <div className="animate-pulse text-sm text-zinc-400">Loading...</div>
@@ -206,51 +422,175 @@ export default function MorningReviewDashboard() {
 
   return (
     <div className="min-h-screen bg-zinc-950 pb-24">
-      {/* Prompt Status Bar */}
-      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-3 sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {typeof window !== 'undefined' && localStorage.getItem('saved_system_prompt') ? (
-              <span className="text-xs text-green-500">✓ 커스텀 프롬프트 사용 중</span>
-            ) : (
-              <span className="text-xs text-zinc-500">기본 프롬프트 사용 중</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
+      {/* Action Bar */}
+      <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-2 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          {/* Pipeline Actions */}
+          <div className="flex items-center gap-1.5">
             <button
-              onClick={() => window.location.href = '/dashboard/prompt-editor'}
-              className="text-xs px-3 py-1 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 transition-colors"
+              onClick={handleScrape}
+              disabled={!!pipelineLoading}
+              className="text-xs px-3 py-1.5 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
-              프롬프트 편집
+              Scrape {pipelineLoading === 'scrape' && <span className="animate-pulse">...</span>}
+              <kbd className="ml-1 px-1 py-0.5 text-[10px] bg-zinc-700 rounded">S</kbd>
             </button>
             <button
-              onClick={() => {
-                setLoading(true);
-                fetchTodayArticles();
-              }}
-              className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              disabled={loading}
+              onClick={handleClassify}
+              disabled={!!pipelineLoading}
+              className="text-xs px-3 py-1.5 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
             >
-              {loading ? '새로고침 중...' : '요약 새로고침'}
+              Classify {pipelineLoading === 'classify' && <span className="animate-pulse">...</span>}
+              <kbd className="ml-1 px-1 py-0.5 text-[10px] bg-zinc-700 rounded">C</kbd>
+            </button>
+            <button
+              onClick={handleGenerateAll}
+              disabled={!!pipelineLoading}
+              className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+            >
+              Generate {pipelineLoading === 'generate' && <span className="animate-pulse">...</span>}
+              <kbd className="ml-1 px-1 py-0.5 text-[10px] bg-blue-700 rounded">G</kbd>
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="flex items-center gap-3 text-xs text-zinc-400">
+            <span className="flex items-center gap-1">
+              <span className="text-zinc-500">Total:</span>
+              <span className="text-white font-medium">{stats.total}</span>
+            </span>
+            <span className="text-zinc-700">•</span>
+            <span className="flex items-center gap-1">
+              <span className="text-zinc-500">Today:</span>
+              <span className="text-white font-medium">{stats.today}</span>
+            </span>
+            <span className="text-zinc-700">•</span>
+            <span className="flex items-center gap-1">
+              <span className="text-zinc-500">Pending:</span>
+              <span className="text-amber-500 font-medium">{stats.pending}</span>
+            </span>
+            <span className="text-zinc-700">•</span>
+            <span className="flex items-center gap-1">
+              <span className="text-zinc-500">Posted:</span>
+              <span className="text-green-500 font-medium">{stats.posted}</span>
+            </span>
+          </div>
+
+          {/* Refresh */}
+          <button
+            onClick={fetchArticles}
+            disabled={loading}
+            className="text-xs px-3 py-1.5 bg-zinc-800 text-zinc-300 rounded hover:bg-zinc-700 transition-colors disabled:opacity-50 flex items-center gap-1.5"
+          >
+            {loading ? '...' : 'Refresh'}
+            <kbd className="ml-1 px-1 py-0.5 text-[10px] bg-zinc-700 rounded">R</kbd>
+          </button>
+        </div>
+      </div>
+
+      {/* Control Panel */}
+      <div className="bg-zinc-900/50 border-b border-zinc-800 px-4 py-2">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
+          {/* View Switcher */}
+          <div className="flex items-center gap-1 bg-zinc-900 rounded-lg p-1">
+            <button
+              onClick={() => setView('feed')}
+              className={`text-xs px-3 py-1.5 rounded transition-all ${
+                view === 'feed'
+                  ? 'bg-white text-black font-medium'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              Feed
+            </button>
+            <button
+              onClick={() => setView('table')}
+              className={`text-xs px-3 py-1.5 rounded transition-all ${
+                view === 'table'
+                  ? 'bg-white text-black font-medium'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              Table
+            </button>
+          </div>
+
+          {/* Filters */}
+          <div className="flex items-center gap-1.5">
+            {/* Search */}
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Search... (F)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="text-xs px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded focus:outline-none focus:border-zinc-600 w-48"
+            />
+
+            {/* Date Filter */}
+            <select
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value as DateFilter)}
+              className="text-xs px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded focus:outline-none focus:border-zinc-600"
+            >
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="all">All Time</option>
+            </select>
+
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+              className="text-xs px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded focus:outline-none focus:border-zinc-600"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="classified">Classified</option>
+              <option value="posted">Posted</option>
+            </select>
+
+            {/* Category Filter */}
+            {view === 'feed' && (
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="text-xs px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded focus:outline-none focus:border-zinc-600"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </option>
+                ))}
+              </select>
+            )}
+
+            {/* Command Palette Trigger */}
+            <button
+              onClick={() => setCommandPaletteOpen(true)}
+              className="text-xs px-3 py-1.5 bg-zinc-900 border border-zinc-800 text-zinc-400 rounded hover:border-zinc-600 hover:text-zinc-200 transition-all flex items-center gap-1.5"
+            >
+              ⌘K
             </button>
           </div>
         </div>
       </div>
 
-      {/* Feed Content - Cleaner Instagram Style */}
-      <div className="pt-6 px-4">
+      {/* Content Area */}
+      <div className="px-4 pt-6">
         {filteredArticles.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-sm text-zinc-500">No articles for today</p>
+            <p className="text-sm text-zinc-500">No articles found</p>
           </div>
-        ) : (
+        ) : view === 'feed' ? (
+          // Feed View
           <div className="max-w-2xl mx-auto">
             {filteredArticles.map((article) => (
               <article
                 key={article.id}
                 className="mb-6 rounded-lg overflow-hidden border border-zinc-900 hover:border-zinc-700 transition-all hover:shadow-lg cursor-pointer group"
+                onContextMenu={(e) => handleContextMenu(e, article)}
               >
-                {/* Thumbnail First for Visual Priority */}
                 {article.thumbnail && (
                   <div className="w-full aspect-[16/10] bg-zinc-900 overflow-hidden">
                     <img
@@ -261,19 +601,13 @@ export default function MorningReviewDashboard() {
                   </div>
                 )}
 
-                {/* Content */}
                 <div className="p-5 bg-zinc-950 group-hover:bg-zinc-900/50 transition-colors">
-                  {/* Meta Information - Subtle */}
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-zinc-500">
-                      {article.source || 'Unknown'}
-                    </span>
+                    <span className="text-xs text-zinc-500">{article.source || 'Unknown'}</span>
                     {article.category && (
                       <>
                         <span className="text-xs text-zinc-600">•</span>
-                        <span className="text-xs text-zinc-500">
-                          {article.category}
-                        </span>
+                        <span className="text-xs text-zinc-500">{article.category}</span>
                       </>
                     )}
                     <span className="text-xs text-zinc-600">•</span>
@@ -285,19 +619,47 @@ export default function MorningReviewDashboard() {
                     </span>
                   </div>
 
-                  {/* Title - Prominent */}
                   <h2 className="text-lg font-semibold text-zinc-100 leading-snug mb-3">
                     {article.title}
                   </h2>
 
-                  {/* Korean Summary - NEW */}
-                  <div className="mb-3 p-3 bg-zinc-900/50 rounded-md border border-zinc-800">
-                    <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
-                      {article.summary}
-                    </p>
-                  </div>
+                  {(article.summary || article.content) && (
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-zinc-500">
+                          {expandedArticles.has(article.id) ? '원문' : '요약'}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleFullContent(article.id);
+                          }}
+                          disabled={loadingFullContent.has(article.id)}
+                          className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-50"
+                        >
+                          {loadingFullContent.has(article.id)
+                            ? '로딩 중...'
+                            : expandedArticles.has(article.id)
+                              ? '요약 보기'
+                              : '원문 보기'}
+                        </button>
+                      </div>
+                      <div className="p-3 bg-zinc-900/50 rounded-md border border-zinc-800">
+                        {loadingFullContent.has(article.id) ? (
+                          <div className="flex items-center justify-center py-8">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-400"></div>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                            {expandedArticles.has(article.id)
+                              ? (fullContentMap.get(article.id) || article.content)
+                              : article.summary}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-                  {/* Keywords as Tags */}
                   {article.keywords && article.keywords.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {article.keywords.slice(0, 5).map((keyword, idx) => (
@@ -308,7 +670,6 @@ export default function MorningReviewDashboard() {
                     </div>
                   )}
 
-                  {/* Minimal Action Bar */}
                   <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
                     <div className="flex items-center gap-2">
                       {article.relevance_score && (
@@ -346,50 +707,181 @@ export default function MorningReviewDashboard() {
               </article>
             ))}
           </div>
+        ) : (
+          // Table View
+          <div className="max-w-7xl mx-auto">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-zinc-800">
+                    <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Title</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Source</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Category</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Status</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Relevance</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Created</th>
+                    <th className="text-left py-3 px-4 text-xs font-medium text-zinc-400">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredArticles.map((article) => (
+                    <tr
+                      key={article.id}
+                      className="border-b border-zinc-900 hover:bg-zinc-900/50 transition-colors"
+                      onContextMenu={(e) => handleContextMenu(e, article)}
+                    >
+                      <td className="py-3 px-4">
+                        <p className="text-sm text-white line-clamp-2">{article.title}</p>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-xs text-zinc-400">{article.source || 'Unknown'}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        {article.category ? (
+                          <span className="text-xs px-2 py-0.5 bg-zinc-800 text-zinc-300 rounded">
+                            {article.category}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-500">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`text-xs px-2 py-0.5 rounded ${
+                          article.status === 'posted'
+                            ? 'bg-zinc-700 text-white'
+                            : article.status === 'classified'
+                            ? 'bg-zinc-800 text-zinc-200'
+                            : 'bg-zinc-900 text-zinc-400'
+                        }`}>
+                          {article.status || 'pending'}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        {article.relevance_score ? (
+                          <span className="text-xs text-zinc-300">
+                            {Math.round(article.relevance_score * 100)}%
+                          </span>
+                        ) : (
+                          <span className="text-xs text-zinc-500">-</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="text-xs text-zinc-400">
+                          {new Date(article.created_at).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center space-x-2">
+                          {article.status === 'pending' && (
+                            <button
+                              onClick={() => classifyArticle(article.id)}
+                              className="text-xs text-zinc-400 hover:text-white"
+                            >
+                              Classify
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleGenerateContent(article)}
+                            className="text-xs text-zinc-300 hover:text-white"
+                          >
+                            Generate
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Floating Dock - Fixed Bottom Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <div className="bg-zinc-900/90 backdrop-blur-lg border border-zinc-800 rounded-lg shadow-xl p-2">
-          <div className="flex items-center gap-4">
-            {/* Navigation */}
-            <nav className="flex items-center gap-1">
-              <a href="/dashboard/morning" className="px-3 py-1.5 rounded-md text-xs font-medium text-zinc-100 bg-zinc-800">
-                Feed
-              </a>
-              <a href="/dashboard/pipeline" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
-                Pipeline
-              </a>
-              <a href="/dashboard/news" className="px-3 py-1.5 rounded-md text-xs text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all">
-                Articles
-              </a>
-            </nav>
-
-            {/* Divider */}
-            <div className="w-px h-4 bg-zinc-700"></div>
-
-            {/* Category Filter (Conditional for Feed View) */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="text-xs px-2 py-1 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700 focus:outline-none focus:border-zinc-600"
-            >
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </option>
-              ))}
-            </select>
-
-            <span className="text-xs text-zinc-500">
-              {filteredArticles.length}
-            </span>
-          </div>
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          className="fixed bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl py-1 z-50"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+        >
+          <button
+            onClick={() => {
+              classifyArticle(contextMenu.article.id);
+              setContextMenu(null);
+            }}
+            className="w-full text-left px-4 py-2 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+          >
+            Classify this
+          </button>
+          <button
+            onClick={() => {
+              handleGenerateContent(contextMenu.article);
+              setContextMenu(null);
+            }}
+            className="w-full text-left px-4 py-2 text-xs text-zinc-300 hover:bg-zinc-800 transition-colors"
+          >
+            Generate Instagram
+          </button>
+          <div className="border-t border-zinc-800 my-1"></div>
+          <button
+            className="w-full text-left px-4 py-2 text-xs text-red-400 hover:bg-zinc-800 transition-colors"
+          >
+            Delete
+          </button>
         </div>
-      </div>
+      )}
 
-      {/* Content Editor Modal - Zinc Theme */}
+      {/* Command Palette */}
+      <Dialog open={commandPaletteOpen} onOpenChange={setCommandPaletteOpen}>
+        <DialogContent className="max-w-2xl p-0 gap-0 bg-zinc-900 border-zinc-800">
+          <DialogTitle className="sr-only">Command Palette</DialogTitle>
+          <div className="p-4">
+            <input
+              type="text"
+              placeholder="Type a command..."
+              className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 text-white rounded-lg focus:outline-none focus:border-zinc-600"
+              autoFocus
+            />
+            <div className="mt-4 space-y-1">
+              <button
+                onClick={() => { handleScrape(); setCommandPaletteOpen(false); }}
+                className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors flex items-center justify-between"
+              >
+                <span>Scrape News</span>
+                <kbd className="text-xs bg-zinc-800 px-2 py-1 rounded">S</kbd>
+              </button>
+              <button
+                onClick={() => { handleClassify(); setCommandPaletteOpen(false); }}
+                className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors flex items-center justify-between"
+              >
+                <span>Classify All</span>
+                <kbd className="text-xs bg-zinc-800 px-2 py-1 rounded">C</kbd>
+              </button>
+              <button
+                onClick={() => { handleGenerateAll(); setCommandPaletteOpen(false); }}
+                className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors flex items-center justify-between"
+              >
+                <span>Generate Instagram</span>
+                <kbd className="text-xs bg-zinc-800 px-2 py-1 rounded">G</kbd>
+              </button>
+              <div className="border-t border-zinc-800 my-2"></div>
+              <button
+                onClick={() => { setView('feed'); setCommandPaletteOpen(false); }}
+                className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+              >
+                Switch to Feed View
+              </button>
+              <button
+                onClick={() => { setView('table'); setCommandPaletteOpen(false); }}
+                className="w-full text-left px-4 py-2 text-sm text-zinc-300 hover:bg-zinc-800 rounded transition-colors"
+              >
+                Switch to Table View
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Content Editor Modal */}
       <Dialog
         open={!!selectedArticle && !!generatedContent}
         onOpenChange={() => {
@@ -405,35 +897,22 @@ export default function MorningReviewDashboard() {
             <div className="border-r border-zinc-800 p-8 bg-zinc-950 flex items-center justify-center">
               <div className="w-full max-w-sm">
                 <div className="bg-black border border-zinc-800 rounded-lg shadow-sm">
-                  {/* Instagram Header */}
                   <div className="p-3 border-b border-zinc-800 flex items-center space-x-2">
                     <div className="w-8 h-8 bg-zinc-700 rounded-full"></div>
                     <span className="text-xs font-medium text-white">yourhandle</span>
                   </div>
 
-                  {/* Instagram Content */}
                   <div className="aspect-square bg-gradient-to-br from-zinc-800 to-zinc-900 flex items-center justify-center p-6">
                     <p className="text-center text-sm text-zinc-200">
                       {editedContent?.caption.slice(0, 100)}...
                     </p>
                   </div>
 
-                  {/* Instagram Footer */}
                   <div className="p-3 space-y-2">
                     <div className="flex space-x-3">
                       <button className="text-zinc-300">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                      </button>
-                      <button className="text-zinc-300">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                      </button>
-                      <button className="text-zinc-300">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m9.032 4.026a9.001 9.001 0 01-7.432 0m9.032-4.026A9.001 9.001 0 0112 3c-4.474 0-8.268 3.12-9.032 7.326m0 0A9.001 9.001 0 0012 21c4.474 0 8.268-3.12 9.032-7.326" />
                         </svg>
                       </button>
                     </div>
@@ -455,17 +934,12 @@ export default function MorningReviewDashboard() {
             <div className="p-6 bg-zinc-900">
               <div className="h-full flex flex-col">
                 <div className="mb-4">
-                  <h3 className="text-sm font-medium text-white mb-1">
-                    Content Editor
-                  </h3>
-                  <p className="text-xs text-zinc-400">
-                    Edit and customize your Instagram content
-                  </p>
+                  <h3 className="text-sm font-medium text-white mb-1">Content Editor</h3>
+                  <p className="text-xs text-zinc-400">Edit and customize your Instagram content</p>
                 </div>
 
                 <ScrollArea className="flex-1 pr-4">
                   <div className="space-y-4">
-                    {/* Title */}
                     <div>
                       <label className="text-xs text-zinc-400 block mb-1">Title</label>
                       <input
@@ -476,7 +950,6 @@ export default function MorningReviewDashboard() {
                       />
                     </div>
 
-                    {/* Caption */}
                     <div>
                       <label className="text-xs text-zinc-400 block mb-1">Caption</label>
                       <textarea
@@ -487,7 +960,6 @@ export default function MorningReviewDashboard() {
                       />
                     </div>
 
-                    {/* Hashtags */}
                     <div>
                       <label className="text-xs text-zinc-400 block mb-1">Hashtags</label>
                       <input
@@ -501,7 +973,6 @@ export default function MorningReviewDashboard() {
                       />
                     </div>
 
-                    {/* Format */}
                     <div>
                       <label className="text-xs text-zinc-400 block mb-1">Format</label>
                       <div className="flex space-x-2">
@@ -509,7 +980,6 @@ export default function MorningReviewDashboard() {
                           <button
                             key={format}
                             onClick={() => {
-                              setContentFormat(format as 'post' | 'reel' | 'story');
                               setEditedContent(prev => prev ? {...prev, format: format as 'post' | 'reel' | 'story'} : null);
                             }}
                             className={`text-xs px-3 py-1.5 rounded border transition-all ${
@@ -523,29 +993,9 @@ export default function MorningReviewDashboard() {
                         ))}
                       </div>
                     </div>
-
-                    {/* Quick Actions */}
-                    <div>
-                      <label className="text-xs text-zinc-400 block mb-1">Quick Actions</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
-                          Make Shorter
-                        </button>
-                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
-                          Add Emojis
-                        </button>
-                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
-                          Professional
-                        </button>
-                        <button className="text-xs py-1.5 px-3 border border-zinc-700 rounded text-zinc-300 hover:bg-zinc-800">
-                          Trending Tags
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 </ScrollArea>
 
-                {/* Actions */}
                 <div className="flex items-center justify-between pt-4 mt-4 border-t border-zinc-800">
                   <button className="text-xs text-zinc-500 hover:text-zinc-300">
                     Regenerate
@@ -557,9 +1007,6 @@ export default function MorningReviewDashboard() {
                     >
                       Save
                     </button>
-                    <button className="text-xs py-1.5 px-4 border border-white text-white rounded hover:bg-zinc-800">
-                      Schedule Now
-                    </button>
                   </div>
                 </div>
               </div>
@@ -567,6 +1014,22 @@ export default function MorningReviewDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Floating Help */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="bg-zinc-900/90 backdrop-blur-lg border border-zinc-800 rounded-lg shadow-xl p-3 text-xs text-zinc-400">
+          <div className="font-medium text-zinc-300 mb-2">Shortcuts</div>
+          <div className="space-y-1">
+            <div><kbd className="bg-zinc-800 px-1 rounded">⌘K</kbd> Command Palette</div>
+            <div><kbd className="bg-zinc-800 px-1 rounded">S</kbd> Scrape</div>
+            <div><kbd className="bg-zinc-800 px-1 rounded">C</kbd> Classify</div>
+            <div><kbd className="bg-zinc-800 px-1 rounded">G</kbd> Generate</div>
+            <div><kbd className="bg-zinc-800 px-1 rounded">V</kbd> Switch View</div>
+            <div><kbd className="bg-zinc-800 px-1 rounded">R</kbd> Refresh</div>
+            <div><kbd className="bg-zinc-800 px-1 rounded">F</kbd> Search</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

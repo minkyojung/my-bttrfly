@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db/supabase';
 import { fetchRSSFeed } from '@/lib/scraping/rss-fetcher';
+import { extractArticleContent } from '@/lib/extraction/content-extractor';
 
 export async function GET(request: NextRequest) {
   console.log('🚀 Starting simple RSS scraping...');
@@ -43,15 +44,37 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
+        // 전체 본문 추출
+        let fullContent = article.content || article.title;
+        let thumbnail = article.thumbnail;
+        let extractionStatus = 'rss';
+
+        // RSS 요약본이 짧으면 웹 스크래핑으로 전체 본문 추출
+        if (fullContent.length < 500) {
+          console.log(`📖 Extracting full content for: ${article.title.substring(0, 50)}...`);
+          try {
+            const extracted = await extractArticleContent(article.link);
+
+            if (extracted && extracted.content && extracted.content.length > fullContent.length) {
+              fullContent = extracted.content;
+              thumbnail = extracted.thumbnail || thumbnail;
+              extractionStatus = 'extracted';
+              console.log(`✅ Extracted ${extracted.content.length} chars`);
+            }
+          } catch (extractError) {
+            console.log(`⚠️ Extraction failed, using RSS content`);
+          }
+        }
+
         // DB 저장
         const { data: saved, error } = await supabaseAdmin
           .from('articles')
           .insert({
             url: article.link,
             title: article.title,
-            content: article.content || article.title,
-            excerpt: (article.content || article.title).substring(0, 200),
-            thumbnail_url: article.thumbnail,
+            content: fullContent,
+            excerpt: fullContent.substring(0, 300),
+            thumbnail_url: thumbnail,
             source: 'TechCrunch',
             published_at: article.pubDate,
             status: 'pending',
@@ -71,6 +94,8 @@ export async function GET(request: NextRequest) {
             title: article.title,
             status: 'saved',
             id: saved.id,
+            contentLength: fullContent.length,
+            extractionStatus,
           });
         }
       } catch (err) {
