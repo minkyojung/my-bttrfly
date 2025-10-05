@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     // 1. Get article from DB
     const { data: article, error: fetchError } = await supabaseAdmin
       .from('articles')
-      .select('id, url, content')
+      .select('id, url, content, html_content')
       .eq('id', articleId)
       .single();
 
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         content: article.content,
+        htmlContent: article.html_content || '',
         cached: true,
       });
     }
@@ -47,11 +48,12 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // 4. Update DB with full content
+    // 4. Update DB with full content (including HTML)
     await supabaseAdmin
       .from('articles')
       .update({
         content: extracted.content,
+        html_content: extracted.html,
         excerpt: extracted.excerpt,
       })
       .eq('id', articleId);
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       content: extracted.content,
+      htmlContent: extracted.html,
       cached: false,
       contentLength: extracted.content.length,
     });

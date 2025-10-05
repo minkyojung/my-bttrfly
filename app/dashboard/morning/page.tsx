@@ -11,6 +11,8 @@ interface Article {
   title: string;
   description?: string;
   content?: string;
+  html_content?: string;
+  url?: string;
   source?: string;
   category?: string;
   created_at: string;
@@ -50,7 +52,7 @@ export default function UnifiedDashboard() {
   const [pipelineLoading, setPipelineLoading] = useState<string | null>(null);
   const [processingArticle, setProcessingArticle] = useState<string | null>(null);
   const [expandedArticles, setExpandedArticles] = useState<Set<string>>(new Set());
-  const [fullContentMap, setFullContentMap] = useState<Map<string, string>>(new Map());
+  const [fullContentMap, setFullContentMap] = useState<Map<string, { text: string; html: string }>>(new Map());
   const [loadingFullContent, setLoadingFullContent] = useState<Set<string>>(new Set());
   const [selectedArticleForReading, setSelectedArticleForReading] = useState<Article | null>(null);
 
@@ -391,7 +393,10 @@ export default function UnifiedDashboard() {
       const data = await res.json();
 
       if (data.success && data.content) {
-        setFullContentMap(prev => new Map(prev).set(articleId, data.content));
+        setFullContentMap(prev => new Map(prev).set(articleId, {
+          text: data.content,
+          html: data.htmlContent || '',
+        }));
         setExpandedArticles(prev => new Set(prev).add(articleId));
       }
     } catch (error) {
@@ -718,11 +723,25 @@ export default function UnifiedDashboard() {
                         <div className="flex items-center justify-center py-12">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-400"></div>
                         </div>
-                      ) : (
-                        <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
-                          {fullContentMap.get(selectedArticleForReading.id) || selectedArticleForReading.content || selectedArticleForReading.summary}
-                        </div>
-                      )}
+                      ) : (() => {
+                        const cachedContent = fullContentMap.get(selectedArticleForReading.id);
+                        const htmlContent = cachedContent?.html || selectedArticleForReading.html_content;
+
+                        if (htmlContent) {
+                          return (
+                            <div
+                              className="text-sm text-zinc-300 leading-relaxed prose-img:rounded-lg prose-img:my-4"
+                              dangerouslySetInnerHTML={{ __html: htmlContent }}
+                            />
+                          );
+                        }
+
+                        return (
+                          <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                            {cachedContent?.text || selectedArticleForReading.content || selectedArticleForReading.summary}
+                          </div>
+                        );
+                      })()}
                     </div>
 
                     {/* Article Footer */}
