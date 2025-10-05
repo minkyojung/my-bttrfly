@@ -52,6 +52,7 @@ export default function UnifiedDashboard() {
   const [expandedArticles, setExpandedArticles] = useState<Set<string>>(new Set());
   const [fullContentMap, setFullContentMap] = useState<Map<string, string>>(new Map());
   const [loadingFullContent, setLoadingFullContent] = useState<Set<string>>(new Set());
+  const [selectedArticleForReading, setSelectedArticleForReading] = useState<Article | null>(null);
 
   // Modal State
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
@@ -583,129 +584,198 @@ export default function UnifiedDashboard() {
             <p className="text-sm text-zinc-500">No articles found</p>
           </div>
         ) : view === 'feed' ? (
-          // Feed View
-          <div className="max-w-2xl mx-auto">
-            {filteredArticles.map((article) => (
-              <article
-                key={article.id}
-                className="mb-6 rounded-lg overflow-hidden border border-zinc-900 hover:border-zinc-700 transition-all hover:shadow-lg cursor-pointer group"
-                onContextMenu={(e) => handleContextMenu(e, article)}
-              >
-                {article.thumbnail && (
-                  <div className="w-full aspect-[16/10] bg-zinc-900 overflow-hidden">
-                    <img
-                      src={article.thumbnail}
-                      alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                )}
-
-                <div className="p-5 bg-zinc-950 group-hover:bg-zinc-900/50 transition-colors">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xs text-zinc-500">{article.source || 'Unknown'}</span>
-                    {article.category && (
-                      <>
-                        <span className="text-xs text-zinc-600">•</span>
-                        <span className="text-xs text-zinc-500">{article.category}</span>
-                      </>
+          // Feed View - 2 Column Layout
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Article List */}
+              <div className="space-y-4">
+                {filteredArticles.map((article) => (
+                  <article
+                    key={article.id}
+                    onClick={() => {
+                      setSelectedArticleForReading(article);
+                      if (!fullContentMap.has(article.id)) {
+                        handleToggleFullContent(article.id);
+                      }
+                    }}
+                    className={`rounded-lg overflow-hidden bg-zinc-950 hover:bg-zinc-900/50 transition-all cursor-pointer group ${
+                      selectedArticleForReading?.id === article.id ? 'ring-2 ring-blue-500/50' : ''
+                    }`}
+                    onContextMenu={(e) => handleContextMenu(e, article)}
+                  >
+                    {article.thumbnail && (
+                      <div className="w-full aspect-[16/9] bg-zinc-900 overflow-hidden">
+                        <img
+                          src={article.thumbnail}
+                          alt={article.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
                     )}
-                    <span className="text-xs text-zinc-600">•</span>
-                    <span className="text-xs text-zinc-500">
-                      {new Date(article.created_at).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit'
-                      })}
-                    </span>
-                  </div>
 
-                  <h2 className="text-lg font-semibold text-zinc-100 leading-snug mb-3">
-                    {article.title}
-                  </h2>
-
-                  {(article.summary || article.content) && (
-                    <div className="mb-3">
-                      <div className="flex items-center justify-between mb-2">
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-zinc-500">{article.source || 'Unknown'}</span>
+                        {article.category && (
+                          <>
+                            <span className="text-xs text-zinc-600">•</span>
+                            <span className="text-xs text-zinc-500">{article.category}</span>
+                          </>
+                        )}
+                        <span className="text-xs text-zinc-600">•</span>
                         <span className="text-xs text-zinc-500">
-                          {expandedArticles.has(article.id) ? '원문' : '요약'}
+                          {new Date(article.created_at).toLocaleTimeString('en-US', {
+                            hour: 'numeric',
+                            minute: '2-digit'
+                          })}
                         </span>
+                      </div>
+
+                      <h2 className="text-base font-semibold text-zinc-100 leading-snug mb-2">
+                        {article.title}
+                      </h2>
+
+                      {article.summary && (
+                        <p className="text-sm text-zinc-400 line-clamp-2">
+                          {article.summary}
+                        </p>
+                      )}
+
+                      <div className="flex items-center justify-between pt-3 mt-3">
+                        <div className="flex items-center gap-2">
+                          {article.relevance_score && (
+                            <span className="text-xs text-zinc-500">
+                              {Math.round(article.relevance_score * 100)}% relevant
+                            </span>
+                          )}
+                        </div>
+
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleToggleFullContent(article.id);
+                            handleGenerateContent(article);
                           }}
-                          disabled={loadingFullContent.has(article.id)}
-                          className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors disabled:opacity-50"
+                          disabled={processingArticle === article.id}
+                          className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
+                            processingArticle === article.id
+                              ? 'bg-zinc-800 text-zinc-500'
+                              : 'bg-zinc-100 text-zinc-900 hover:bg-white'
+                          }`}
                         >
-                          {loadingFullContent.has(article.id)
-                            ? '로딩 중...'
-                            : expandedArticles.has(article.id)
-                              ? '요약 보기'
-                              : '원문 보기'}
+                          {processingArticle === article.id ? '...' : 'Generate'}
                         </button>
                       </div>
-                      <div className="p-3 bg-zinc-900/50 rounded-md border border-zinc-800">
-                        {loadingFullContent.has(article.id) ? (
-                          <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-400"></div>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
-                            {expandedArticles.has(article.id)
-                              ? (fullContentMap.get(article.id) || article.content)
-                              : article.summary}
-                          </p>
+                    </div>
+                  </article>
+                ))}
+              </div>
+
+              {/* Right Column - Full Article Content */}
+              <div className="lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto">
+                {selectedArticleForReading ? (
+                  <div className="rounded-lg bg-zinc-950 p-6">
+                    {/* Article Header */}
+                    <div className="mb-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs text-zinc-500">
+                          {selectedArticleForReading.source || 'Unknown'}
+                        </span>
+                        {selectedArticleForReading.category && (
+                          <>
+                            <span className="text-xs text-zinc-600">•</span>
+                            <span className="text-xs text-zinc-500">{selectedArticleForReading.category}</span>
+                          </>
                         )}
+                        <span className="text-xs text-zinc-600">•</span>
+                        <span className="text-xs text-zinc-500">
+                          {new Date(selectedArticleForReading.created_at).toLocaleString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+
+                      <h1 className="text-2xl font-bold text-zinc-100 leading-tight mb-4">
+                        {selectedArticleForReading.title}
+                      </h1>
+
+                      {selectedArticleForReading.thumbnail && (
+                        <div className="w-full aspect-[16/9] bg-zinc-900 rounded-lg overflow-hidden mb-4">
+                          <img
+                            src={selectedArticleForReading.thumbnail}
+                            alt={selectedArticleForReading.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Article Content */}
+                    <div className="prose prose-invert prose-zinc max-w-none">
+                      {loadingFullContent.has(selectedArticleForReading.id) ? (
+                        <div className="flex items-center justify-center py-12">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-zinc-400"></div>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                          {fullContentMap.get(selectedArticleForReading.id) || selectedArticleForReading.content || selectedArticleForReading.summary}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Article Footer */}
+                    <div className="mt-6 pt-6">
+                      {selectedArticleForReading.keywords && selectedArticleForReading.keywords.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {selectedArticleForReading.keywords.slice(0, 10).map((keyword, idx) => (
+                            <span key={idx} className="text-xs px-2 py-1 bg-zinc-900 text-zinc-400 rounded">
+                              #{keyword.toLowerCase().replace(/\s+/g, '')}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {selectedArticleForReading.relevance_score && (
+                            <span className="text-xs text-zinc-500">
+                              {Math.round(selectedArticleForReading.relevance_score * 100)}% relevant
+                            </span>
+                          )}
+                          {selectedArticleForReading.sentiment && (
+                            <span className={`text-xs ${
+                              selectedArticleForReading.sentiment === 'positive' ? 'text-emerald-500' :
+                              selectedArticleForReading.sentiment === 'negative' ? 'text-rose-500' :
+                              'text-zinc-500'
+                            }`}>
+                              {selectedArticleForReading.sentiment}
+                            </span>
+                          )}
+                        </div>
+
+                        <a
+                          href={selectedArticleForReading.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs px-3 py-1.5 bg-zinc-800 text-zinc-300 rounded-md hover:bg-zinc-700 transition-colors"
+                        >
+                          원문 링크
+                        </a>
                       </div>
                     </div>
-                  )}
-
-                  {article.keywords && article.keywords.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {article.keywords.slice(0, 5).map((keyword, idx) => (
-                        <span key={idx} className="text-xs text-zinc-500">
-                          #{keyword.toLowerCase().replace(/\s+/g, '')}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-3 border-t border-zinc-800">
-                    <div className="flex items-center gap-2">
-                      {article.relevance_score && (
-                        <span className="text-xs text-zinc-500">
-                          {Math.round(article.relevance_score * 100)}% relevant
-                        </span>
-                      )}
-                      {article.sentiment && (
-                        <span className={`text-xs ${
-                          article.sentiment === 'positive' ? 'text-emerald-500' :
-                          article.sentiment === 'negative' ? 'text-rose-500' :
-                          'text-zinc-500'
-                        }`}>
-                          {article.sentiment}
-                        </span>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleGenerateContent(article);
-                      }}
-                      disabled={processingArticle === article.id}
-                      className={`text-xs px-3 py-1.5 rounded-md font-medium transition-all ${
-                        processingArticle === article.id
-                          ? 'bg-zinc-800 text-zinc-500'
-                          : 'bg-zinc-100 text-zinc-900 hover:bg-white'
-                      }`}
-                    >
-                      {processingArticle === article.id ? '...' : 'Generate'}
-                    </button>
                   </div>
-                </div>
-              </article>
-            ))}
+                ) : (
+                  <div className="rounded-lg bg-zinc-950 p-12 flex items-center justify-center text-center">
+                    <div>
+                      <p className="text-zinc-500 text-sm mb-2">기사를 선택해주세요</p>
+                      <p className="text-zinc-600 text-xs">왼쪽에서 읽고 싶은 기사를 클릭하세요</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         ) : (
           // Table View
