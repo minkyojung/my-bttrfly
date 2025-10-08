@@ -6,9 +6,9 @@ import { classifyArticle } from '@/lib/ai/classifier';
  * Cron Job: pending 상태 기사들을 AI로 분류
  * 스케줄: 매 2시간마다 (15분에 실행)
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Cron secret 검증 (프로덕션에서 활성화)
-  // const authHeader = request.headers.get('authorization');
+  // const authHeader = _request.headers.get('authorization');
   // if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
   //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   // }
