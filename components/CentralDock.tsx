@@ -67,43 +67,30 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
       {/* TOC Popup */}
       {showTocPopup && (
         <div
-          className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-96 max-h-96 overflow-y-auto rounded-lg backdrop-blur-md shadow-lg"
+          className="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 w-80 max-h-72 overflow-y-auto rounded-lg backdrop-blur-md shadow-lg scrollbar-hide"
           style={{
             backgroundColor: 'rgba(var(--bg-color-rgb, 255, 255, 255), 0.95)',
             border: '1px solid var(--border-color)',
           }}
         >
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-bold" style={{ color: 'var(--text-color)' }}>목차</h3>
-              <button
-                onClick={() => setShowTocPopup(false)}
-                className="w-6 h-6 flex items-center justify-center rounded hover:opacity-60 transition-opacity"
-                style={{ color: 'var(--text-color)' }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-              </button>
-            </div>
-            <div className="space-y-2">
+          <div className="p-3">
+            <div className="space-y-1">
               {posts.map((post) => (
                 <button
                   key={post.slug}
                   onClick={() => handlePostClick(post)}
-                  className={`w-full text-left p-2 rounded transition-opacity hover:opacity-100 ${
-                    selectedPost?.slug === post.slug ? 'opacity-100 font-bold' : 'opacity-60'
+                  className={`w-full text-left px-2 py-1.5 rounded transition-all hover:opacity-100 ${
+                    selectedPost?.slug === post.slug ? 'opacity-100 font-medium' : 'opacity-50'
                   }`}
                   style={{
                     color: 'var(--text-color)',
-                    backgroundColor: selectedPost?.slug === post.slug ? 'rgba(var(--bg-color-rgb), 0.5)' : 'transparent'
+                    backgroundColor: selectedPost?.slug === post.slug ? 'rgba(128, 128, 128, 0.1)' : 'transparent'
                   }}
                 >
                   <div className="flex items-baseline gap-2">
-                    <span className="flex-1 text-sm">{post.title}</span>
-                    <span className="text-xs opacity-50">
-                      {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                    <span className="flex-1 text-xs">{post.title}</span>
+                    <span className="text-[10px] opacity-40">
+                      {typeof post.date === 'string' ? post.date.slice(5) : new Date(post.date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
                     </span>
                   </div>
                 </button>
@@ -114,17 +101,20 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
       )}
 
       {/* Central Dock */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+      <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-50">
         <div
-          className="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md shadow-lg"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-full backdrop-blur-md shadow-lg"
           style={{
-            backgroundColor: 'rgba(var(--bg-color-rgb, 255, 255, 255), 0.8)',
+            backgroundColor: 'rgba(var(--bg-color-rgb, 255, 255, 255), 0.85)',
             border: '1px solid var(--border-color)',
           }}
         >
           {/* 폰트 크기 */}
           <button
-            onClick={() => setIsLargeFont(false)}
+            onClick={() => {
+              console.log('Small font clicked');
+              setIsLargeFont(false);
+            }}
             className={`w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity ${!isLargeFont ? 'opacity-100' : 'opacity-40'}`}
             style={{ color: 'var(--text-color)' }}
             title="기본 글씨"
@@ -133,7 +123,10 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
           </button>
 
           <button
-            onClick={() => setIsLargeFont(true)}
+            onClick={() => {
+              console.log('Large font clicked');
+              setIsLargeFont(true);
+            }}
             className={`w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity ${isLargeFont ? 'opacity-100' : 'opacity-40'}`}
             style={{ color: 'var(--text-color)' }}
             title="큰 글씨"
@@ -142,38 +135,44 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
           </button>
 
           {/* 구분선 */}
-          <div className="w-px h-6 opacity-30" style={{ backgroundColor: 'var(--text-color)' }} />
+          <div className="w-px h-5 opacity-20 mx-0.5" style={{ backgroundColor: 'var(--text-color)' }} />
 
           {/* 다크모드 */}
           <button
-            onClick={() => setIsDark(!isDark)}
+            onClick={() => {
+              console.log('Theme clicked, current:', isDark);
+              setIsDark(!isDark);
+            }}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity"
             style={{ color: 'var(--text-color)' }}
             title={isDark ? '라이트 모드' : '다크 모드'}
           >
             {isDark ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <circle cx="12" cy="12" r="5" />
                 <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
               </svg>
             )}
           </button>
 
           {/* 구분선 */}
-          <div className="w-px h-6 opacity-30" style={{ backgroundColor: 'var(--text-color)' }} />
+          <div className="w-px h-5 opacity-20 mx-0.5" style={{ backgroundColor: 'var(--text-color)' }} />
 
           {/* 목차 */}
           <button
-            onClick={() => setShowTocPopup(!showTocPopup)}
+            onClick={() => {
+              console.log('TOC clicked, current:', showTocPopup);
+              setShowTocPopup(!showTocPopup);
+            }}
             className={`w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity ${showTocPopup ? 'opacity-100' : 'opacity-60'}`}
             style={{ color: 'var(--text-color)' }}
             title="목차"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <line x1="8" y1="6" x2="21" y2="6" />
               <line x1="8" y1="12" x2="21" y2="12" />
               <line x1="8" y1="18" x2="21" y2="18" />
