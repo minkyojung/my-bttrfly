@@ -23,6 +23,15 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
   const [isLargeFont, setIsLargeFont] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [showTocPopup, setShowTocPopup] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+
+  // Get all unique tags from posts
+  const allTags = Array.from(new Set(posts.flatMap(post => post.tags))).sort();
+
+  // Filter posts by selected tag
+  const filteredPosts = selectedTag
+    ? posts.filter(post => post.tags.includes(selectedTag))
+    : posts;
 
   useEffect(() => {
     // 저장된 설정 불러오기
@@ -67,34 +76,73 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
       {/* TOC Popup */}
       {showTocPopup && (
         <div
-          className="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 w-80 max-h-72 overflow-y-auto rounded-lg backdrop-blur-md shadow-lg scrollbar-hide"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-80 rounded-lg backdrop-blur-md shadow-lg"
           style={{
             backgroundColor: 'rgba(var(--bg-color-rgb, 255, 255, 255), 0.95)',
             border: '1px solid var(--border-color)',
           }}
         >
           <div className="p-3">
-            <div className="space-y-1">
-              {posts.map((post) => (
+            {/* Tag Filter */}
+            <div className="mb-2">
+              <div className="flex flex-wrap gap-1">
                 <button
-                  key={post.slug}
-                  onClick={() => handlePostClick(post)}
-                  className={`w-full text-left px-2 py-1.5 rounded transition-all hover:opacity-100 ${
-                    selectedPost?.slug === post.slug ? 'opacity-100 font-medium' : 'opacity-50'
+                  onClick={() => setSelectedTag(null)}
+                  className={`px-2 py-1 text-[10px] rounded transition-all ${
+                    selectedTag === null ? 'font-medium' : 'opacity-50 hover:opacity-70'
                   }`}
                   style={{
                     color: 'var(--text-color)',
-                    backgroundColor: selectedPost?.slug === post.slug ? 'rgba(128, 128, 128, 0.1)' : 'transparent'
+                    backgroundColor: selectedTag === null ? 'rgba(128, 128, 128, 0.15)' : 'transparent'
                   }}
                 >
-                  <div className="flex items-baseline gap-2">
-                    <span className="flex-1 text-xs">{post.title}</span>
-                    <span className="text-[10px] opacity-40">
-                      {typeof post.date === 'string' ? post.date.slice(5) : new Date(post.date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
-                    </span>
-                  </div>
+                  전체
                 </button>
-              ))}
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => setSelectedTag(tag)}
+                    className={`px-2 py-1 text-[10px] rounded transition-all ${
+                      selectedTag === tag ? 'font-medium' : 'opacity-50 hover:opacity-70'
+                    }`}
+                    style={{
+                      color: 'var(--text-color)',
+                      backgroundColor: selectedTag === tag ? 'rgba(128, 128, 128, 0.15)' : 'transparent'
+                    }}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Posts List - Max 8 items visible, scrollable */}
+            <div className="max-h-64 overflow-y-auto scrollbar-hide space-y-1">
+              {filteredPosts.length > 0 ? (
+                filteredPosts.map((post) => (
+                  <button
+                    key={post.slug}
+                    onClick={() => handlePostClick(post)}
+                    className={`w-full text-left px-2 py-1.5 rounded transition-all hover:opacity-100 ${
+                      selectedPost?.slug === post.slug ? 'opacity-100 font-bold' : 'opacity-50'
+                    }`}
+                    style={{
+                      color: 'var(--text-color)',
+                    }}
+                  >
+                    <div className="flex items-baseline gap-2">
+                      <span className="flex-1 text-xs">{post.title}</span>
+                      <span className="text-[10px] opacity-40">
+                        {typeof post.date === 'string' ? post.date.slice(5) : new Date(post.date).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
+                      </span>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <div className="text-center py-4 text-xs opacity-50" style={{ color: 'var(--text-color)' }}>
+                  해당 태그의 글이 없습니다
+                </div>
+              )}
             </div>
           </div>
         </div>
