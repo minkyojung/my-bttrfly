@@ -159,10 +159,7 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
         >
           {/* 폰트 크기 */}
           <button
-            onClick={() => {
-              console.log('Small font clicked');
-              setIsLargeFont(false);
-            }}
+            onClick={() => setIsLargeFont(false)}
             className={`w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity ${!isLargeFont ? 'opacity-100' : 'opacity-40'}`}
             style={{ color: 'var(--text-color)' }}
             title="기본 글씨"
@@ -171,10 +168,7 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
           </button>
 
           <button
-            onClick={() => {
-              console.log('Large font clicked');
-              setIsLargeFont(true);
-            }}
+            onClick={() => setIsLargeFont(true)}
             className={`w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity ${isLargeFont ? 'opacity-100' : 'opacity-40'}`}
             style={{ color: 'var(--text-color)' }}
             title="큰 글씨"
@@ -187,10 +181,7 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
 
           {/* 다크모드 */}
           <button
-            onClick={() => {
-              console.log('Theme clicked, current:', isDark);
-              setIsDark(!isDark);
-            }}
+            onClick={() => setIsDark(!isDark)}
             className="w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity"
             style={{ color: 'var(--text-color)' }}
             title={isDark ? '라이트 모드' : '다크 모드'}
@@ -212,10 +203,7 @@ export function CentralDock({ posts, onPostSelect, selectedPost }: CentralDockPr
 
           {/* 목차 */}
           <button
-            onClick={() => {
-              console.log('TOC clicked, current:', showTocPopup);
-              setShowTocPopup(!showTocPopup);
-            }}
+            onClick={() => setShowTocPopup(!showTocPopup)}
             className={`w-8 h-8 flex items-center justify-center rounded-full hover:opacity-70 transition-opacity ${showTocPopup ? 'opacity-100' : 'opacity-60'}`}
             style={{ color: 'var(--text-color)' }}
             title="목차"
