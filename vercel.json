@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/cron/scrape-news",
-      "schedule": "0 */2 * * *"
+      "schedule": "0 9 * * *"
     },
     {
       "path": "/api/cron/classify-articles",
-      "schedule": "15 */2 * * *"
+      "schedule": "0 12 * * *"
     },
     {
       "path": "/api/cron/generate-instagram",
-      "schedule": "30 */2 * * *"
+      "schedule": "0 15 * * *"
     }
   ]
 }
