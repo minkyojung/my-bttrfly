@@ -2,11 +2,13 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, FileText, Trash2 } from 'lucide-react';
+import MarkdownMessage from './components/MarkdownMessage';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   sources?: Source[];
+  isStreaming?: boolean;
 }
 
 interface Source {
@@ -60,16 +62,28 @@ export default function ChatPage() {
       content: input,
     };
 
+    const currentInput = input;
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+
+    // 빈 assistant 메시지 생성 (스트리밍 준비)
+    const assistantMessageIndex = messages.length + 1;
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: 'assistant',
+        content: '',
+        isStreaming: true,
+      },
+    ]);
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: input,
+          message: currentInput,
           history: messages.slice(-6),
         }),
       });
@@ -78,22 +92,77 @@ export default function ChatPage() {
         throw new Error('답변 생성에 실패했습니다.');
       }
 
-      const data = await response.json();
+      // 스트림 읽기
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('스트림을 읽을 수 없습니다.');
+      }
 
-      const assistantMessage: Message = {
-        role: 'assistant',
-        content: data.message,
-        sources: data.sources,
-      };
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let sources: Source[] = [];
+      let accumulatedContent = '';
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        // 청크 디코딩
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const chunk = JSON.parse(line);
+
+            if (chunk.type === 'sources') {
+              sources = chunk.data;
+            } else if (chunk.type === 'content') {
+              accumulatedContent += chunk.data;
+
+              // 실시간 UI 업데이트
+              setMessages((prev) => {
+                const updated = [...prev];
+                updated[assistantMessageIndex] = {
+                  role: 'assistant',
+                  content: accumulatedContent,
+                  sources,
+                  isStreaming: true,
+                };
+                return updated;
+              });
+            } else if (chunk.type === 'done') {
+              // 스트리밍 완료
+              setMessages((prev) => {
+                const updated = [...prev];
+                updated[assistantMessageIndex] = {
+                  ...updated[assistantMessageIndex],
+                  isStreaming: false,
+                };
+                return updated;
+              });
+            } else if (chunk.type === 'error') {
+              throw new Error(chunk.message);
+            }
+          } catch (parseError) {
+            console.error('JSON 파싱 에러:', parseError);
+          }
+        }
+      }
     } catch (error) {
       console.error('Chat error:', error);
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: '죄송합니다. 오류가 발생했습니다. 다시 시도해주세요.',
-      };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[assistantMessageIndex] = {
+          role: 'assistant',
+          content: '죄송합니다. 오류가 발생했습니다. 다시 시도해주세요.',
+          isStreaming: false,
+        };
+        return updated;
+      });
     } finally {
       setIsLoading(false);
     }
@@ -160,7 +229,20 @@ export default function ChatPage() {
                   : 'bg-white border border-gray-200'
               } rounded-lg px-6 py-4 shadow-sm`}
             >
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              {msg.role === 'user' ? (
+                <div className="whitespace-pre-wrap">{msg.content}</div>
+              ) : (
+                <div>
+                  {msg.content ? (
+                    <MarkdownMessage content={msg.content} />
+                  ) : (
+                    <span className="text-gray-400">생각하는 중...</span>
+                  )}
+                  {msg.isStreaming && msg.content && (
+                    <span className="inline-block w-1.5 h-4 bg-gray-400 ml-1 animate-pulse" />
+                  )}
+                </div>
+              )}
 
               {/* 출처 표시 */}
               {msg.sources && msg.sources.length > 0 && (

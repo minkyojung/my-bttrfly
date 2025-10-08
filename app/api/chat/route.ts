@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
           .join('\n')
       : '관련 문서를 찾을 수 없습니다.';
 
-    // 4. GPT-4로 답변 생성
+    // 4. GPT-4로 답변 생성 (스트리밍 모드)
     const systemPrompt = `당신은 William Jung의 글과 프로젝트를 학습한 AI 어시스턴트입니다.
 
 아래 제공된 문서들을 바탕으로 사용자의 질문에 답변해주세요.
@@ -115,15 +115,6 @@ ${context}`;
       { role: 'user', content: message },
     ];
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      temperature: 0.7,
-      max_tokens: 1000,
-    });
-
-    const answer = completion.choices[0].message.content || '답변을 생성할 수 없습니다.';
-
     // 5. 출처 정보 구성
     const sources: Source[] = documents
       ? documents.map((doc: any) => ({
@@ -135,14 +126,64 @@ ${context}`;
         }))
       : [];
 
-    const response: ChatResponse = {
-      message: answer,
-      sources,
-    };
+    // 6. 스트리밍 응답 생성
+    const encoder = new TextEncoder();
 
-    console.log('✅ 답변 생성 완료');
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // 첫 번째 청크: sources 정보 전송
+          controller.enqueue(
+            encoder.encode(JSON.stringify({ type: 'sources', data: sources }) + '\n')
+          );
 
-    return NextResponse.json(response);
+          // 두 번째: OpenAI 스트림 시작
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages,
+            temperature: 0.7,
+            max_tokens: 1000,
+            stream: true, // 스트리밍 모드 활성화
+          });
+
+          // OpenAI 스트림 처리
+          for await (const chunk of completion) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              controller.enqueue(
+                encoder.encode(JSON.stringify({ type: 'content', data: content }) + '\n')
+              );
+            }
+          }
+
+          // 완료 신호
+          controller.enqueue(
+            encoder.encode(JSON.stringify({ type: 'done' }) + '\n')
+          );
+
+          console.log('✅ 스트리밍 답변 생성 완료');
+          controller.close();
+
+        } catch (error) {
+          console.error('스트리밍 에러:', error);
+          controller.enqueue(
+            encoder.encode(JSON.stringify({
+              type: 'error',
+              message: error instanceof Error ? error.message : '답변 생성 중 오류가 발생했습니다.'
+            }) + '\n')
+          );
+          controller.close();
+        }
+      }
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
 
   } catch (error) {
     console.error('Chat API 에러:', error);
