@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, FileText } from 'lucide-react';
+import { Send, Loader2, FileText, Trash2 } from 'lucide-react';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,10 +23,25 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 디버깅
+  // localStorage에서 대화 내역 불러오기 (최초 1회)
   useEffect(() => {
-    console.log('Input:', input, 'Trimmed:', input.trim(), 'Length:', input.trim().length, 'isLoading:', isLoading);
-  }, [input, isLoading]);
+    const saved = localStorage.getItem('bttrfly-chat-history');
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved));
+      } catch (error) {
+        console.error('대화 내역 불러오기 실패:', error);
+        localStorage.removeItem('bttrfly-chat-history');
+      }
+    }
+  }, []);
+
+  // messages 변경 시 localStorage에 자동 저장
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('bttrfly-chat-history', JSON.stringify(messages));
+    }
+  }, [messages]);
 
   // 자동 스크롤
   const scrollToBottom = () => {
@@ -91,14 +106,35 @@ export default function ChatPage() {
     }
   };
 
+  const clearHistory = () => {
+    if (confirm('대화 내역을 모두 삭제하시겠습니까?')) {
+      setMessages([]);
+      localStorage.removeItem('bttrfly-chat-history');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b px-6 py-4">
-        <h1 className="text-2xl font-bold">💬 RAG Chat</h1>
-        <p className="text-sm text-gray-600 mt-1">
-          William의 글과 프로젝트를 학습한 AI와 대화하세요
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">💬 RAG Chat</h1>
+            <p className="text-sm text-gray-600 mt-1">
+              William의 글과 프로젝트를 학습한 AI와 대화하세요
+            </p>
+          </div>
+          {messages.length > 0 && (
+            <button
+              onClick={clearHistory}
+              className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="대화 내역 삭제"
+            >
+              <Trash2 className="w-4 h-4" />
+              초기화
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Messages */}
