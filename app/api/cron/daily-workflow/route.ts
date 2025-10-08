@@ -20,9 +20,9 @@ export async function GET(request: NextRequest) {
   console.log('🚀 Starting daily workflow...');
 
   const results = {
-    scrapeNews: null as any,
-    classifyArticles: null as any,
-    generateInstagram: null as any,
+    scrapeNews: null as Record<string, unknown> | null,
+    classifyArticles: null as Record<string, unknown> | null,
+    generateInstagram: null as Record<string, unknown> | null,
     errors: [] as string[],
   };
 
