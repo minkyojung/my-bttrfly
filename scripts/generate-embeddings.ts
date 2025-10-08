@@ -61,6 +61,54 @@ async function generateEmbedding(text: string): Promise<number[]> {
 }
 
 /**
+ * Contextual Retrieval: 청크에 대한 맥락 생성
+ *
+ * OpenAI GPT-4o-mini를 사용하여 각 청크에 대한 맥락을 생성합니다.
+ * (비용 최적화: Claude 대비 82% 절감)
+ */
+async function generateContext(
+  fullDocument: string,
+  chunk: string,
+  metadata: {
+    title: string;
+    type: string;
+    tags?: string[];
+  }
+): Promise<string> {
+  const prompt = `다음은 "${metadata.title}"라는 ${metadata.type === 'article' ? '글' : '노트'}의 일부입니다.
+
+<전체문서>
+${fullDocument}
+</전체문서>
+
+위 전체 문서의 맥락에서, 다음 청크가 무엇에 관한 내용인지 50-100자로 간결하게 설명해주세요:
+
+<청크>
+${chunk}
+</청크>
+
+설명:`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{
+        role: 'user',
+        content: prompt
+      }],
+      max_tokens: 100,
+      temperature: 0,
+    });
+
+    const context = response.choices[0]?.message?.content?.trim() || '';
+    return context;
+  } catch (error) {
+    console.error('  ⚠️  맥락 생성 실패, 원본 청크만 사용:', error);
+    return '';
+  }
+}
+
+/**
  * 단일 문서 처리
  */
 async function processDocument(filePath: string) {
@@ -85,12 +133,27 @@ async function processDocument(filePath: string) {
     const chunk = chunks[i];
 
     try {
-      // 임베딩 생성
-      const embedding = await generateEmbedding(chunk);
+      // 1. Contextual Retrieval: 맥락 생성
+      console.log(`  → 청크 ${i + 1}/${chunks.length}: 맥락 생성 중...`);
+      const context = await generateContext(content, chunk, { title, type, tags });
 
-      // Supabase에 저장 (배열을 직접 넘기면 자동으로 vector 타입으로 변환됨)
+      // 2. 맥락 + 청크 결합
+      const contentWithContext = context
+        ? `${context}\n\n${chunk}`
+        : chunk;
+
+      if (context) {
+        console.log(`     📝 생성된 맥락: "${context.substring(0, 80)}${context.length > 80 ? '...' : ''}"`);
+      }
+
+      // 3. 맥락이 포함된 텍스트로 임베딩 생성
+      console.log(`     🔢 임베딩 생성 중...`);
+      const embedding = await generateEmbedding(contentWithContext);
+
+      // 4. Supabase에 저장 (원본 content와 content_with_context 모두 저장)
       const { error } = await supabase.from('documents').insert({
-        content: chunk,
+        content: chunk, // 원본 청크 (사용자에게 표시용)
+        content_with_context: contentWithContext, // 맥락 포함 (검색/임베딩용)
         embedding,
         title: chunks.length > 1 ? `${title} (part ${i + 1}/${chunks.length})` : title,
         type,
@@ -101,6 +164,7 @@ async function processDocument(filePath: string) {
           source_file: filePath,
           chunk_index: i,
           total_chunks: chunks.length,
+          context_length: context.length,
           frontmatter,
         },
       });
