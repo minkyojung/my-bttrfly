@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,9 @@ import {
   CATEGORIES,
   DEFAULT_CATEGORY_PROMPTS
 } from '@/lib/prompts/category-prompts';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
 
 interface Article {
   id: string;
@@ -147,7 +150,7 @@ export default function UnifiedDashboard() {
 
   useEffect(() => {
     fetchArticles();
-  }, [dateFilter, statusFilter]);
+  }, []); // 초기 로드 1회만
 
   const cycleView = () => {
     const views: ViewMode[] = ['feed', 'table', 'pipeline'];
@@ -162,96 +165,27 @@ export default function UnifiedDashboard() {
       const data = await res.json();
 
       if (data.success && data.articles) {
-        let filtered = data.articles;
+        let allArticles = data.articles;
 
-        // Apply date filter
-        if (dateFilter === 'today') {
-          const today = new Date().toDateString();
-          filtered = filtered.filter((article: Article) => {
-            const articleDate = new Date(article.created_at).toDateString();
-            return articleDate === today;
-          });
-        } else if (dateFilter === 'week') {
-          const weekAgo = new Date();
-          weekAgo.setDate(weekAgo.getDate() - 7);
-          filtered = filtered.filter((article: Article) => {
-            return new Date(article.created_at) >= weekAgo;
-          });
-        }
+        // Sort by relevance (한 번만)
+        allArticles = allArticles.sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
 
-        // Apply status filter
-        if (statusFilter !== 'all') {
-          filtered = filtered.filter((a: Article) => a.status === statusFilter);
-        }
-
-        // Sort by relevance
-        filtered = filtered.sort((a: Article, b: Article) => (b.relevance_score || 0) - (a.relevance_score || 0));
-
-        // Generate summaries for feed view
+        // Generate summaries for feed view (비동기로 진행, 페이지 로드 블로킹 안 함)
         if (view === 'feed') {
-          const articlesNeedingSummaries = filtered.filter((a: Article) => !a.summary);
-          const articlesWithExistingSummaries = filtered.filter((a: Article) => a.summary);
-
-          let articlesWithSummaries = [...articlesWithExistingSummaries];
+          const articlesNeedingSummaries = allArticles.filter((a: Article) => !a.summary);
 
           if (articlesNeedingSummaries.length > 0) {
-            try {
-              const articlesByCategory = articlesNeedingSummaries.reduce((acc: Record<Category, Article[]>, article: Article) => {
-                const category = normalizeCategory(article.category);
-                if (!acc[category]) acc[category] = [];
-                acc[category].push(article);
-                return acc;
-              }, {} as Record<Category, Article[]>);
-
-              const batchPromises = Object.entries(articlesByCategory).map(async ([category, articles]) => {
-                const categoryPrompt = await getCategoryPrompt(category);
-
-                const batchRes = await fetch('/api/generate-batch-summaries', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    systemPrompt: categoryPrompt,
-                    articles
-                  })
-                });
-                return batchRes.json();
-              });
-
-              const batchResults = await Promise.all(batchPromises);
-
-              const summariesById = new Map();
-              batchResults.forEach(batchData => {
-                if (batchData.success && batchData.results) {
-                  batchData.results.forEach((r: { id: string; summary: string }) => {
-                    summariesById.set(r.id, r.summary);
-                  });
-                }
-              });
-
-              const newlySummarized = articlesNeedingSummaries.map((article: Article) => ({
-                ...article,
-                summary: summariesById.get(article.id) || generateSmartSummary(article)
-              }));
-
-              articlesWithSummaries = [...articlesWithSummaries, ...newlySummarized];
-            } catch (error) {
-              const fallbackSummaries = articlesNeedingSummaries.map((article: Article) => ({
-                ...article,
-                summary: generateSmartSummary(article)
-              }));
-              articlesWithSummaries = [...articlesWithSummaries, ...fallbackSummaries];
-            }
+            // 클라이언트 템플릿으로 먼저 표시
+            allArticles = allArticles.map((article: Article) => ({
+              ...article,
+              summary: article.summary || generateSmartSummary(article)
+            }));
           }
-
-          filtered = articlesWithSummaries.sort((a: Article, b: Article) =>
-            (b.relevance_score || 0) - (a.relevance_score || 0)
-          );
         }
 
-        setArticles(filtered);
+        setArticles(allArticles);
 
         // Calculate stats
-        const allArticles = data.articles;
         const today = new Date().toDateString();
         setStats({
           total: allArticles.length,
@@ -496,11 +430,44 @@ export default function UnifiedDashboard() {
     }
   };
 
-  const filteredArticles = articles.filter(article => {
-    if (selectedCategory !== 'all' && normalizeCategory(article.category) !== selectedCategory) return false;
-    if (searchQuery && !article.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
+  // 클라이언트 사이드 필터링 (useMemo로 최적화)
+  const filteredArticles = useMemo(() => {
+    let result = articles;
+
+    // 날짜 필터
+    if (dateFilter === 'today') {
+      const today = new Date().toDateString();
+      result = result.filter((article: Article) => {
+        const articleDate = new Date(article.created_at).toDateString();
+        return articleDate === today;
+      });
+    } else if (dateFilter === 'week') {
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      result = result.filter((article: Article) => {
+        return new Date(article.created_at) >= weekAgo;
+      });
+    }
+
+    // 상태 필터
+    if (statusFilter !== 'all') {
+      result = result.filter((article: Article) => article.status === statusFilter);
+    }
+
+    // 카테고리 필터
+    if (selectedCategory !== 'all') {
+      result = result.filter((article: Article) => normalizeCategory(article.category) === selectedCategory);
+    }
+
+    // 검색 쿼리
+    if (searchQuery) {
+      result = result.filter((article: Article) =>
+        article.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    return result;
+  }, [articles, dateFilter, statusFilter, selectedCategory, searchQuery]);
 
   const categories = ['all', 'technology', 'business', 'general'];
 
@@ -513,7 +480,7 @@ export default function UnifiedDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 pb-24">
+    <div className={`min-h-screen bg-zinc-950 pb-24 ${inter.className}`}>
       {/* Action Bar */}
       <div className="bg-zinc-900 border-b border-zinc-800 px-4 py-2 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">

@@ -5,7 +5,22 @@ export async function GET(request: NextRequest) {
   try {
     const { data: articles, error } = await supabaseAdmin
       .from('articles')
-      .select('*')
+      .select(`
+        id,
+        title,
+        description,
+        url,
+        source,
+        category,
+        created_at,
+        thumbnail,
+        keywords,
+        sentiment,
+        relevance_score,
+        summary,
+        status,
+        instagram_post_id
+      `)
       .order('created_at', { ascending: false })
       .limit(50);
 
