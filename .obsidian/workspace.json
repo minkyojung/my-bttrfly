@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/posts/2024-03-24-beginner.md",
+                "file": "content/posts/2024-12-31-intersaction.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2024-03-24-beginner"
+              "title": "2024-12-31-intersaction"
             }
           },
           {
@@ -61,8 +61,7 @@
               "title": "2024-09-27-rnr"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -119,8 +118,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "fe9a6e7bad11f90f",
@@ -224,10 +222,12 @@
       "templater-obsidian:Templater": false
     }
   },
-  "active": "503e5c1c986b428f",
+  "active": "22d2ea38d5a02ae6",
   "lastOpenFiles": [
-    "my-bttrfly",
     "content/posts/2024-09-27-rnr.md",
+    "content/posts/2024-07-17-10-principles.md",
+    "content/posts/2024-03-24-beginner.md",
+    "my-bttrfly",
     "content/posts/2024-12-31-intersaction.md",
     "public/fonts/KoPub Batang_Pro Medium.otf",
     "public/fonts/KoPub Batang_Pro Light.otf",
@@ -239,11 +239,8 @@
     "components/ReadingControls.tsx",
     "components/ProfileHistory.tsx",
     "components/PinnedPosts.tsx",
-    "content/posts/2024-07-17-10-principles.md",
     "content/posts/2024.md",
-    "content/posts/2024-03-24-beginner.md",
     "content/intro.md",
-    "components/ThemeProvider.tsx",
     "CHANGELOG.md",
     "public/images/profile.png",
     "public/images/Screenshot 2025-09-15 at 11.40.51 PM.png",
