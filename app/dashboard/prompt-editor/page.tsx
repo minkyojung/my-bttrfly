@@ -68,8 +68,11 @@ export default function PromptEditor() {
 
   // Load category-specific prompt on mount and category change
   useEffect(() => {
-    const categoryPrompt = getCategoryPrompt(selectedCategory);
-    setSystemPrompt(categoryPrompt);
+    const loadPrompt = async () => {
+      const categoryPrompt = await getCategoryPrompt(selectedCategory);
+      setSystemPrompt(categoryPrompt);
+    };
+    loadPrompt();
   }, [selectedCategory]);
 
   // Load history on mount and when category changes
@@ -171,8 +174,8 @@ export default function PromptEditor() {
                 ▶ Run
               </Button>
               <Button
-                onClick={() => {
-                  resetCategoryPrompt(selectedCategory);
+                onClick={async () => {
+                  await resetCategoryPrompt(selectedCategory);
                   setSystemPrompt(DEFAULT_CATEGORY_PROMPTS[selectedCategory].systemPrompt);
                   alert(`${DEFAULT_CATEGORY_PROMPTS[selectedCategory].label} 카테고리 기본값으로 초기화됨`);
                 }}
@@ -181,8 +184,8 @@ export default function PromptEditor() {
                 초기화
               </Button>
               <Button
-                onClick={() => {
-                  const saved = getCategoryPrompt(selectedCategory);
+                onClick={async () => {
+                  const saved = await getCategoryPrompt(selectedCategory);
                   setSystemPrompt(saved);
                   alert(`${DEFAULT_CATEGORY_PROMPTS[selectedCategory].label} 카테고리 프롬프트 불러옴`);
                 }}
@@ -191,8 +194,8 @@ export default function PromptEditor() {
                 불러오기
               </Button>
               <Button
-                onClick={() => {
-                  saveCategoryPrompt(selectedCategory, systemPrompt);
+                onClick={async () => {
+                  await saveCategoryPrompt(selectedCategory, systemPrompt);
                   saveToHistory(selectedCategory, systemPrompt);
                   setPromptHistory(getCategoryHistory(selectedCategory));
                   alert(`${DEFAULT_CATEGORY_PROMPTS[selectedCategory].label} 카테고리 프롬프트 저장됨`);

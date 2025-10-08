@@ -3,8 +3,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
 import { generateSmartSummary } from '@/lib/utils/summary-generator';
-import { getCategoryPrompt, Category } from '@/lib/prompts/category-prompts';
+import {
+  getCategoryPrompt,
+  saveCategoryPrompt,
+  resetCategoryPrompt,
+  normalizeCategory,
+  Category,
+  CATEGORIES,
+  DEFAULT_CATEGORY_PROMPTS
+} from '@/lib/prompts/category-prompts';
 
 interface Article {
   id: string;
@@ -66,6 +75,14 @@ export default function UnifiedDashboard() {
 
   // Context Menu
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; article: Article } | null>(null);
+
+  // Prompt Panel
+  const [isPromptPanelOpen, setIsPromptPanelOpen] = useState(false);
+  const [promptPanelCategory, setPromptPanelCategory] = useState<Category>('general');
+  const [promptPanelText, setPromptPanelText] = useState('');
+  const [promptPanelTestArticle, setPromptPanelTestArticle] = useState<Article | null>(null);
+  const [promptPanelTestResult, setPromptPanelTestResult] = useState('');
+  const [promptPanelTesting, setPromptPanelTesting] = useState(false);
 
   // Stats
   const [stats, setStats] = useState({
@@ -180,14 +197,14 @@ export default function UnifiedDashboard() {
           if (articlesNeedingSummaries.length > 0) {
             try {
               const articlesByCategory = articlesNeedingSummaries.reduce((acc: Record<Category, Article[]>, article: Article) => {
-                const category = (article.category?.toLowerCase() || 'general') as Category;
+                const category = normalizeCategory(article.category);
                 if (!acc[category]) acc[category] = [];
                 acc[category].push(article);
                 return acc;
               }, {} as Record<Category, Article[]>);
 
               const batchPromises = Object.entries(articlesByCategory).map(async ([category, articles]) => {
-                const categoryPrompt = getCategoryPrompt(category as Category);
+                const categoryPrompt = await getCategoryPrompt(category);
 
                 const batchRes = await fetch('/api/generate-batch-summaries', {
                   method: 'POST',
@@ -363,6 +380,75 @@ export default function UnifiedDashboard() {
     setContextMenu({ x: e.clientX, y: e.clientY, article });
   };
 
+  // Prompt Panel Handlers
+  const handleOpenPromptPanel = async () => {
+    setIsPromptPanelOpen(true);
+    const prompt = await getCategoryPrompt(promptPanelCategory);
+    setPromptPanelText(prompt);
+  };
+
+  const handlePromptPanelCategoryChange = async (category: Category) => {
+    setPromptPanelCategory(category);
+    const prompt = await getCategoryPrompt(category);
+    setPromptPanelText(prompt);
+  };
+
+  const handlePromptPanelTest = async () => {
+    if (!promptPanelTestArticle) {
+      alert('테스트할 기사를 선택해주세요');
+      return;
+    }
+
+    setPromptPanelTesting(true);
+    setPromptPanelTestResult('');
+
+    try {
+      const response = await fetch('/api/generate-summary', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemPrompt: promptPanelText,
+          article: promptPanelTestArticle
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to generate summary');
+
+      const data = await response.json();
+      setPromptPanelTestResult(data.summary);
+    } catch (error) {
+      console.error('Error testing prompt:', error);
+      alert('프롬프트 테스트 실패');
+    } finally {
+      setPromptPanelTesting(false);
+    }
+  };
+
+  const handlePromptPanelSave = async () => {
+    const success = await saveCategoryPrompt(promptPanelCategory, promptPanelText);
+    if (success) {
+      alert(`${DEFAULT_CATEGORY_PROMPTS[promptPanelCategory].label} 카테고리 프롬프트 저장됨`);
+    } else {
+      alert('프롬프트 저장 실패');
+    }
+  };
+
+  const handlePromptPanelReset = async () => {
+    const success = await resetCategoryPrompt(promptPanelCategory);
+    if (success) {
+      setPromptPanelText(DEFAULT_CATEGORY_PROMPTS[promptPanelCategory].systemPrompt);
+      alert(`${DEFAULT_CATEGORY_PROMPTS[promptPanelCategory].label} 카테고리 기본값으로 초기화됨`);
+    } else {
+      alert('프롬프트 초기화 실패');
+    }
+  };
+
+  const handlePromptPanelLoad = async () => {
+    const prompt = await getCategoryPrompt(promptPanelCategory);
+    setPromptPanelText(prompt);
+    alert(`${DEFAULT_CATEGORY_PROMPTS[promptPanelCategory].label} 카테고리 프롬프트 불러옴`);
+  };
+
   const handleToggleFullContent = async (articleId: string) => {
     // If already expanded, just collapse it
     if (expandedArticles.has(articleId)) {
@@ -411,7 +497,7 @@ export default function UnifiedDashboard() {
   };
 
   const filteredArticles = articles.filter(article => {
-    if (selectedCategory !== 'all' && article.category?.toLowerCase() !== selectedCategory) return false;
+    if (selectedCategory !== 'all' && normalizeCategory(article.category) !== selectedCategory) return false;
     if (searchQuery && !article.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     return true;
   });
@@ -641,7 +727,7 @@ export default function UnifiedDashboard() {
                       </h2>
 
                       {article.summary && (
-                        <p className="text-sm text-zinc-400 line-clamp-2">
+                        <p className="text-sm text-zinc-400 line-clamp-4">
                           {article.summary}
                         </p>
                       )}
@@ -1103,6 +1189,131 @@ export default function UnifiedDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Floating Prompt Button */}
+      <button
+        onClick={handleOpenPromptPanel}
+        className="fixed bottom-6 left-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all"
+        title="프롬프트 편집기"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      </button>
+
+      {/* Prompt Panel Slide-in */}
+      <div
+        className={`fixed top-0 right-0 h-full w-[500px] bg-zinc-950 border-l border-zinc-800 shadow-2xl z-50 transition-transform duration-300 ease-in-out ${
+          isPromptPanelOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="h-full flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+            <h2 className="text-lg font-semibold text-zinc-100">프롬프트 편집기</h2>
+            <button
+              onClick={() => setIsPromptPanelOpen(false)}
+              className="text-zinc-400 hover:text-zinc-100 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <ScrollArea className="flex-1 p-4">
+            {/* Category Select */}
+            <div className="mb-4">
+              <label className="block text-xs text-zinc-400 mb-2">카테고리</label>
+              <select
+                value={promptPanelCategory}
+                onChange={(e) => handlePromptPanelCategoryChange(e.target.value as Category)}
+                className="w-full bg-zinc-900 text-zinc-100 border border-zinc-800 rounded px-3 py-2 text-sm"
+              >
+                {CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {DEFAULT_CATEGORY_PROMPTS[cat].label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Prompt Text */}
+            <div className="mb-4">
+              <label className="block text-xs text-zinc-400 mb-2">시스템 프롬프트</label>
+              <textarea
+                value={promptPanelText}
+                onChange={(e) => setPromptPanelText(e.target.value)}
+                className="w-full h-64 bg-zinc-900 text-zinc-100 border border-zinc-800 rounded px-3 py-2 text-sm font-mono resize-none"
+                placeholder="프롬프트를 입력하세요..."
+              />
+            </div>
+
+            {/* Test Article Select */}
+            <div className="mb-4">
+              <label className="block text-xs text-zinc-400 mb-2">테스트 기사</label>
+              <select
+                value={promptPanelTestArticle?.id || ''}
+                onChange={(e) => {
+                  const article = articles.find(a => a.id === e.target.value);
+                  setPromptPanelTestArticle(article || null);
+                }}
+                className="w-full bg-zinc-900 text-zinc-100 border border-zinc-800 rounded px-3 py-2 text-sm"
+              >
+                <option value="">기사 선택...</option>
+                {articles.slice(0, 10).map((article) => (
+                  <option key={article.id} value={article.id}>
+                    {article.title.substring(0, 50)}...
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Test Button */}
+            <div className="mb-4">
+              <Button
+                onClick={handlePromptPanelTest}
+                disabled={promptPanelTesting || !promptPanelTestArticle}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+              >
+                {promptPanelTesting ? '테스트 중...' : '▶ 프롬프트 테스트'}
+              </Button>
+            </div>
+
+            {/* Test Result */}
+            {promptPanelTestResult && (
+              <div className="mb-4">
+                <label className="block text-xs text-zinc-400 mb-2">테스트 결과</label>
+                <div className="bg-zinc-900 border border-zinc-800 rounded p-3 text-sm text-zinc-300">
+                  {promptPanelTestResult}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-3 gap-2">
+              <Button
+                onClick={handlePromptPanelReset}
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+              >
+                초기화
+              </Button>
+              <Button
+                onClick={handlePromptPanelLoad}
+                className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300"
+              >
+                불러오기
+              </Button>
+              <Button
+                onClick={handlePromptPanelSave}
+                className="bg-white hover:bg-zinc-200 text-black"
+              >
+                저장
+              </Button>
+            </div>
+          </ScrollArea>
+        </div>
+      </div>
 
       {/* Floating Help */}
       <div className="fixed bottom-6 right-6 z-50">

@@ -13,6 +13,37 @@ export const CATEGORIES = [
 
 export type Category = typeof CATEGORIES[number];
 
+// Helper: Validate and normalize category
+export function normalizeCategory(category: string | null | undefined): Category {
+  if (!category) return 'general';
+
+  const normalized = category.toLowerCase().trim();
+
+  // Check if it's a valid category
+  if (CATEGORIES.includes(normalized as Category)) {
+    return normalized as Category;
+  }
+
+  // Map common variations
+  const categoryMap: Record<string, Category> = {
+    'tech': 'technology',
+    'biz': 'business',
+    'sport': 'sports',
+    'politic': 'politics',
+    'entertainment': 'entertainment',
+    'medical': 'health',
+    'medicine': 'health',
+    'sci': 'science',
+  };
+
+  if (categoryMap[normalized]) {
+    return categoryMap[normalized];
+  }
+
+  // Default fallback
+  return 'general';
+}
+
 export interface CategoryPrompt {
   category: Category;
   label: string;
@@ -157,48 +188,108 @@ export const DEFAULT_CATEGORY_PROMPTS: Record<Category, CategoryPrompt> = {
   }
 };
 
-// LocalStorage key prefix
-export const PROMPT_STORAGE_KEY_PREFIX = 'category_prompt_';
+// Get prompt for category from Supabase or default
+export async function getCategoryPrompt(category: Category | string): Promise<string> {
+  // Normalize category to ensure it's valid
+  const validCategory = typeof category === 'string' ? normalizeCategory(category) : category;
 
-// Get prompt for category from localStorage or default
-export function getCategoryPrompt(category: Category): string {
+  // Server-side: return default
   if (typeof window === 'undefined') {
-    return DEFAULT_CATEGORY_PROMPTS[category].systemPrompt;
+    return DEFAULT_CATEGORY_PROMPTS[validCategory].systemPrompt;
   }
 
-  const saved = localStorage.getItem(`${PROMPT_STORAGE_KEY_PREFIX}${category}`);
-  return saved || DEFAULT_CATEGORY_PROMPTS[category].systemPrompt;
+  // Client-side: fetch from Supabase via API
+  try {
+    const response = await fetch(`/api/prompts/${validCategory}`);
+    if (!response.ok) throw new Error('Failed to fetch prompt');
+
+    const { prompt } = await response.json();
+    return prompt?.system_prompt || DEFAULT_CATEGORY_PROMPTS[validCategory].systemPrompt;
+  } catch (error) {
+    console.error('Error fetching prompt:', error);
+    return DEFAULT_CATEGORY_PROMPTS[validCategory].systemPrompt;
+  }
 }
 
-// Save prompt for category to localStorage
-export function saveCategoryPrompt(category: Category, prompt: string): void {
-  if (typeof window === 'undefined') return;
+// Synchronous version for server-side (returns default)
+export function getCategoryPromptSync(category: Category | string): string {
+  const validCategory = typeof category === 'string' ? normalizeCategory(category) : category;
+  return DEFAULT_CATEGORY_PROMPTS[validCategory].systemPrompt;
+}
 
-  localStorage.setItem(`${PROMPT_STORAGE_KEY_PREFIX}${category}`, prompt);
+// Save prompt for category to Supabase
+export async function saveCategoryPrompt(category: Category | string, prompt: string): Promise<boolean> {
+  const validCategory = typeof category === 'string' ? normalizeCategory(category) : category;
+  if (typeof window === 'undefined') return false;
+
+  try {
+    const response = await fetch('/api/prompts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category: validCategory, systemPrompt: prompt }),
+    });
+
+    if (!response.ok) throw new Error('Failed to save prompt');
+    return true;
+  } catch (error) {
+    console.error('Error saving prompt:', error);
+    return false;
+  }
 }
 
 // Check if category has custom prompt
-export function hasCustomPrompt(category: Category): boolean {
+export async function hasCustomPrompt(category: Category | string): Promise<boolean> {
+  const validCategory = typeof category === 'string' ? normalizeCategory(category) : category;
   if (typeof window === 'undefined') return false;
 
-  return localStorage.getItem(`${PROMPT_STORAGE_KEY_PREFIX}${category}`) !== null;
+  try {
+    const response = await fetch(`/api/prompts/${validCategory}`);
+    if (!response.ok) return false;
+
+    const { prompt } = await response.json();
+    return prompt !== null;
+  } catch (error) {
+    console.error('Error checking custom prompt:', error);
+    return false;
+  }
 }
 
 // Reset to default prompt
-export function resetCategoryPrompt(category: Category): void {
-  if (typeof window === 'undefined') return;
+export async function resetCategoryPrompt(category: Category | string): Promise<boolean> {
+  const validCategory = typeof category === 'string' ? normalizeCategory(category) : category;
+  if (typeof window === 'undefined') return false;
 
-  localStorage.removeItem(`${PROMPT_STORAGE_KEY_PREFIX}${category}`);
+  try {
+    const response = await fetch(`/api/prompts/${validCategory}`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) throw new Error('Failed to reset prompt');
+    return true;
+  } catch (error) {
+    console.error('Error resetting prompt:', error);
+    return false;
+  }
 }
 
 // Get all custom prompts
-export function getAllCustomPrompts(): Record<Category, string | null> {
+export async function getAllCustomPrompts(): Promise<Record<Category, string | null>> {
   if (typeof window === 'undefined') {
     return CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat]: null }), {} as Record<Category, string | null>);
   }
 
-  return CATEGORIES.reduce((acc, cat) => ({
-    ...acc,
-    [cat]: localStorage.getItem(`${PROMPT_STORAGE_KEY_PREFIX}${cat}`)
-  }), {} as Record<Category, string | null>);
+  try {
+    const response = await fetch('/api/prompts');
+    if (!response.ok) throw new Error('Failed to fetch prompts');
+
+    const { prompts } = await response.json() as { prompts: { category: string; system_prompt: string }[] };
+
+    return CATEGORIES.reduce((acc, cat) => {
+      const found = prompts.find(p => p.category === cat);
+      return { ...acc, [cat]: found?.system_prompt || null };
+    }, {} as Record<Category, string | null>);
+  } catch (error) {
+    console.error('Error fetching all prompts:', error);
+    return CATEGORIES.reduce((acc, cat) => ({ ...acc, [cat]: null }), {} as Record<Category, string | null>);
+  }
 }

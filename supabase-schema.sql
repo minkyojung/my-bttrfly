@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS articles (
   content TEXT,
   excerpt TEXT,
   thumbnail_url TEXT,
+  summary TEXT,
 
   -- AI 분류 결과
   category TEXT,
@@ -81,5 +82,25 @@ CREATE TRIGGER update_articles_updated_at
 
 CREATE TRIGGER update_instagram_posts_updated_at
   BEFORE UPDATE ON instagram_posts
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at_column();
+
+-- User Prompts 테이블: 사용자 커스텀 프롬프트 저장
+CREATE TABLE IF NOT EXISTS user_prompts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT DEFAULT 'default',
+  category TEXT NOT NULL,
+  system_prompt TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(user_id, category)
+);
+
+-- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_user_prompts_user_category ON user_prompts(user_id, category);
+
+-- Trigger for updated_at
+CREATE TRIGGER update_user_prompts_updated_at
+  BEFORE UPDATE ON user_prompts
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();

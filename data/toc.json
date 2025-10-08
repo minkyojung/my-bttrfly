@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "name": "Project Alpha",
+      "description": "Web & brand identity design"
+    },
+    {
+      "name": "Project Beta",
+      "description": "Mobile app development"
+    },
+    {
+      "name": "Project Gamma",
+      "description": "eCommerce platform"
+    }
+  ]
+}
