@@ -1,16 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/scrape-news",
+      "path": "/api/cron/daily-workflow",
       "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/cron/classify-articles",
-      "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/cron/generate-instagram",
-      "schedule": "0 15 * * *"
     }
   ]
 }
