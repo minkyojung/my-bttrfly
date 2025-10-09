@@ -224,161 +224,127 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 lg:relative lg:inset-auto flex flex-col h-screen lg:h-full z-50 rounded-lg overflow-hidden shadow-2xl" style={{ backgroundColor: '#f5f5dc' }}>
-      {/* Header - macOS Terminal Style */}
-      <div className="flex items-center justify-between px-4 py-2.5" style={{
-        background: 'linear-gradient(180deg, #e8e8e8 0%, #d0d0d0 100%)',
-        borderBottom: '1px solid #b0b0b0'
+    <div className="fixed inset-0 lg:relative lg:inset-auto flex flex-col h-screen lg:h-full z-50 rounded-lg overflow-hidden" style={{
+      backgroundColor: 'var(--bg-color)',
+      borderColor: 'var(--border-color)'
+    }}>
+      {/* Header - Minimal Terminal Style */}
+      <div className="flex items-center justify-between px-3 py-2 border-b" style={{
+        borderColor: 'var(--border-color)'
       }}>
         <div className="flex items-center gap-2">
-          {/* macOS Window Controls */}
-          <div className="flex gap-2">
-            <button
-              onClick={onClose}
-              className="w-3 h-3 rounded-full transition-opacity hover:opacity-80"
-              style={{ backgroundColor: '#ff5f56' }}
-              title="닫기"
-            />
-            <button
-              className="w-3 h-3 rounded-full transition-opacity hover:opacity-80"
-              style={{ backgroundColor: '#ffbd2e' }}
-              title="최소화"
-            />
-            <button
-              className="w-3 h-3 rounded-full transition-opacity hover:opacity-80"
-              style={{ backgroundColor: '#27c93f' }}
-              title="최대화"
-            />
-          </div>
-          <h2 className="text-xs font-mono ml-2" style={{ color: '#666' }}>
-            william.ai — bash — 80×24
-          </h2>
+          <button
+            onClick={onClose}
+            className="w-2.5 h-2.5 rounded-full transition-opacity hover:opacity-60"
+            style={{ backgroundColor: 'var(--text-color)', opacity: 0.3 }}
+          />
+          <span className="text-xs font-mono opacity-50" style={{ color: 'var(--text-color)' }}>
+            terminal
+          </span>
         </div>
-        <div className="flex items-center gap-2">
-          {messages.length > 0 && (
-            <button
-              onClick={clearHistory}
-              className="p-1.5 rounded hover:bg-black hover:bg-opacity-5 transition-all"
-              style={{ color: '#666' }}
-              title="대화 내역 삭제"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
+        {messages.length > 0 && (
+          <button
+            onClick={clearHistory}
+            className="p-1 rounded transition-opacity hover:opacity-60"
+            style={{ color: 'var(--text-color)', opacity: 0.5 }}
+            title="clear"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        )}
       </div>
 
-      {/* Messages - Terminal Style */}
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 font-mono text-sm" style={{ backgroundColor: '#f5f5dc' }}>
+      {/* Terminal Body - Single Scroll Container */}
+      <div className="flex-1 overflow-y-auto px-3 py-2 font-mono text-xs" style={{
+        backgroundColor: 'var(--bg-color)',
+        color: 'var(--text-color)'
+      }}>
+        {/* Welcome Message */}
         {messages.length === 0 && (
-          <div className="space-y-4 mt-2">
-            <div className="text-sm" style={{ color: '#8b8b8b' }}>
-              <p>Last login: {new Date().toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })} on ttys001</p>
-              <p className="mt-1">william.ai — AI assistant powered by RAG</p>
-              <p className="mt-1">Type a message to start chatting...</p>
-              <p className="mt-4" style={{ color: '#c0c0c0' }}>---</p>
-            </div>
-
-            {/* Quick Prompts - Terminal Style */}
-            <div className="space-y-2">
-              <p className="text-xs" style={{ color: '#8b8b8b' }}>
-                # Quick commands:
-              </p>
-              <div className="space-y-1">
-                {QUICK_PROMPTS.map((prompt, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleSend(prompt)}
-                    className="block w-full text-left px-2 py-1 text-xs rounded transition-colors hover:bg-black hover:bg-opacity-5"
-                    style={{ color: '#5f87af' }}
-                  >
-                    <span style={{ color: '#8b8b8b' }}>$ </span>
-                    {prompt}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {currentPostContext && (
-              <div className="mt-4 p-3 rounded" style={{ backgroundColor: '#e8e8e8' }}>
-                <p className="text-xs mb-2" style={{ color: '#8b8b8b' }}>
-                  # Current context:
-                </p>
-                <p className="text-xs mb-2" style={{ color: '#af875f' }}>
-                  {currentPostContext.title}
-                </p>
-                <button
-                  onClick={() => handleSend(`"${currentPostContext.title}"에 대해 설명해주세요`)}
-                  className="text-xs px-2 py-1 rounded transition-colors hover:bg-black hover:bg-opacity-5"
-                  style={{ color: '#5f87af' }}
-                >
-                  $ Ask about this post
-                </button>
-              </div>
-            )}
+          <div className="mb-4 opacity-50">
+            <p>william.ai terminal</p>
+            <p className="mt-1">type a message to start...</p>
           </div>
         )}
 
+        {/* Quick Prompts */}
+        {messages.length === 0 && (
+          <div className="mb-4 space-y-1">
+            {QUICK_PROMPTS.map((prompt, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleSend(prompt)}
+                className="block w-full text-left hover:opacity-60 transition-opacity"
+              >
+                <span className="opacity-50">$ </span>
+                {prompt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Current Context */}
+        {messages.length === 0 && currentPostContext && (
+          <div className="mb-4 pb-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
+            <p className="opacity-50 mb-1">context:</p>
+            <p className="mb-2">{currentPostContext.title}</p>
+            <button
+              onClick={() => handleSend(`"${currentPostContext.title}"에 대해 설명해주세요`)}
+              className="hover:opacity-60 transition-opacity"
+            >
+              <span className="opacity-50">$ </span>
+              ask about this
+            </button>
+          </div>
+        )}
+
+        {/* Message History */}
         {messages.map((msg, idx) => (
-          <div key={idx} className="space-y-1">
+          <div key={idx} className="mb-3">
             {msg.role === 'user' ? (
-              <div className="flex items-start gap-2">
-                <span style={{ color: '#5f87af' }}>user@bttrfly</span>
-                <span style={{ color: '#8b8b8b' }}>:</span>
-                <span style={{ color: '#5faf87' }}>~</span>
-                <span style={{ color: '#8b8b8b' }}>$</span>
-                <div className="flex-1 whitespace-pre-wrap" style={{ color: '#3a3a3a' }}>
+              <div className="flex items-start gap-1">
+                <span className="opacity-50">$</span>
+                <div className="flex-1 whitespace-pre-wrap">
                   {msg.content}
                 </div>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="mt-1 mb-2">
                 {msg.content ? (
-                  <div>
-                    <div className="flex items-start gap-2">
-                      <span style={{ color: '#5f87af' }}>william.ai</span>
-                      <span style={{ color: '#8b8b8b' }}>:</span>
-                      <span style={{ color: '#5faf87' }}>~</span>
-                      <span style={{ color: '#8b8b8b' }}>$</span>
-                    </div>
-                    <div className="ml-0 mt-1 text-sm leading-relaxed" style={{ color: '#3a3a3a' }}>
-                      <MarkdownMessage content={msg.content} />
-                      {msg.isStreaming && (
-                        <span className="inline-block w-2 h-4 ml-1 animate-pulse" style={{ backgroundColor: '#5f87af' }} />
-                      )}
-                    </div>
+                  <div className="opacity-90">
+                    <MarkdownMessage content={msg.content} />
+                    {msg.isStreaming && (
+                      <span className="inline-block w-1.5 h-3 ml-1 animate-pulse" style={{ backgroundColor: 'var(--text-color)' }} />
+                    )}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2" style={{ color: '#8b8b8b' }}>
+                  <div className="flex items-center gap-2 opacity-50">
                     <span className="animate-pulse">▋</span>
-                    <span className="text-xs">{loadingStage || 'Processing...'}</span>
+                    <span className="text-[10px]">{loadingStage || 'processing...'}</span>
                   </div>
                 )}
 
-                {/* Sources - Terminal Style */}
+                {/* Sources */}
                 {msg.sources && msg.sources.length > 0 && (
-                  <div className="mt-3 ml-0 space-y-1.5">
-                    <div className="text-xs flex items-center gap-2" style={{ color: '#8b8b8b' }}>
-                      <FileText className="w-3 h-3" />
-                      <span>Referenced {msg.sources.length} document(s):</span>
-                    </div>
+                  <div className="mt-2 opacity-60 text-[10px]">
+                    <p className="mb-1">refs ({msg.sources.length}):</p>
                     {msg.sources.map((source, i) => (
                       <div
                         key={source.id}
-                        className="group pl-4 py-2 rounded cursor-pointer transition-colors hover:bg-black hover:bg-opacity-5"
+                        className="pl-2 py-1 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => source.url && window.open(source.url, '_blank')}
                       >
-                        <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="text-xs font-semibold truncate" style={{ color: '#af875f' }}>
+                            <div className="truncate">
                               [{i + 1}] {source.title}
                             </div>
-                            <div className="text-xs mt-1 line-clamp-2" style={{ color: '#8b8b8b' }}>
+                            <div className="line-clamp-1 opacity-70">
                               {source.content}
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 text-xs" style={{ color: '#8b8b8b' }}>
-                            <span className="text-[10px] tabular-nums">{Math.round(source.similarity * 100)}%</span>
+                          <div className="flex-shrink-0">
+                            {Math.round(source.similarity * 100)}%
                           </div>
                         </div>
                       </div>
@@ -390,56 +356,33 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
           </div>
         ))}
 
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input - Terminal Style */}
-      <div className="px-4 py-3 border-t" style={{ backgroundColor: '#f5f5dc', borderColor: '#d0d0d0' }}>
-        <div className="flex items-end gap-2">
-          <div className="flex items-center gap-2 font-mono text-sm flex-shrink-0">
-            <span style={{ color: '#5f87af' }}>user@bttrfly</span>
-            <span style={{ color: '#8b8b8b' }}>:</span>
-            <span style={{ color: '#5faf87' }}>~</span>
-            <span style={{ color: '#8b8b8b' }}>$</span>
-          </div>
+        {/* Current Input Prompt - Part of scroll flow */}
+        <div className="flex items-start gap-1">
+          <span className="opacity-50 flex-shrink-0 pt-0.5">$</span>
           <textarea
+            ref={(el) => {
+              if (el) {
+                messagesEndRef.current = el;
+              }
+            }}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="type your message..."
-            className="flex-1 bg-transparent resize-none focus:outline-none font-mono text-sm placeholder:opacity-40"
+            placeholder=""
+            className="flex-1 bg-transparent resize-none focus:outline-none font-mono text-xs"
             style={{
-              color: '#3a3a3a',
+              color: 'var(--text-color)',
+              minHeight: '1.2em',
+              lineHeight: '1.2em'
             }}
             disabled={isLoading}
             rows={1}
             onInput={(e) => {
               const target = e.target as HTMLTextAreaElement;
               target.style.height = 'auto';
-              target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+              target.style.height = target.scrollHeight + 'px';
             }}
           />
-          <button
-            onClick={() => handleSend()}
-            className="px-3 py-1.5 rounded font-mono text-xs transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1.5 hover:opacity-80"
-            style={{
-              backgroundColor: '#5f87af',
-              color: '#f5f5dc',
-            }}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span className="hidden sm:inline">...</span>
-              </>
-            ) : (
-              <>
-                <Send className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Send</span>
-              </>
-            )}
-          </button>
         </div>
       </div>
     </div>

@@ -165,18 +165,18 @@ export function MainPage({ posts, pinnedPosts }: MainPageProps) {
                   />
                 </div>
 
-                {/* Chat 버튼 - Terminal Style */}
+                {/* Chat 버튼 */}
                 <button
                   onClick={() => setIsChatOpen(true)}
-                  className="w-full mt-6 px-4 py-3 rounded-lg font-mono transition-all hover:opacity-80 flex items-center justify-center gap-2 shadow-md"
+                  className="w-full mt-6 px-4 py-2 rounded font-mono text-xs transition-opacity hover:opacity-60 flex items-center justify-center gap-2 border"
                   style={{
-                    backgroundColor: '#f5f5dc',
-                    color: '#5f87af',
-                    border: '1px solid #d0d0d0',
+                    backgroundColor: 'var(--bg-color)',
+                    color: 'var(--text-color)',
+                    borderColor: 'var(--border-color)',
                   }}
                 >
-                  <MessageSquare className="w-5 h-5" />
-                  <span className="text-sm">Open Terminal Chat</span>
+                  <MessageSquare className="w-4 h-4" />
+                  <span>terminal</span>
                 </button>
               </div>
             </div>
