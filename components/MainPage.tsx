@@ -165,33 +165,18 @@ export function MainPage({ posts, pinnedPosts }: MainPageProps) {
                   />
                 </div>
 
-                {/* Chat 버튼 - E-ink & Pixel Style */}
+                {/* Chat 버튼 - Terminal Style */}
                 <button
                   onClick={() => setIsChatOpen(true)}
-                  className="w-full mt-6 px-4 py-3 border-4 font-mono tracking-wider transition-all hover:translate-x-[2px] hover:translate-y-[2px] active:translate-x-[4px] active:translate-y-[4px] flex items-center justify-center gap-3 relative overflow-hidden"
+                  className="w-full mt-6 px-4 py-3 rounded-lg font-mono transition-all hover:opacity-80 flex items-center justify-center gap-2 shadow-lg"
                   style={{
-                    color: 'var(--text-color)',
-                    borderColor: 'var(--text-color)',
-                    backgroundColor: 'var(--bg-color)',
-                    boxShadow: '4px 4px 0 0 var(--text-color)',
-                    imageRendering: 'pixelated',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '2px 2px 0 0 var(--text-color)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '4px 4px 0 0 var(--text-color)';
+                    backgroundColor: '#1a1a1a',
+                    color: '#00ff00',
+                    border: '1px solid #2d2d2d',
                   }}
                 >
-                  <div
-                    className="absolute inset-0 opacity-[0.03] pointer-events-none"
-                    style={{
-                      backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)',
-                      backgroundSize: '4px 4px',
-                    }}
-                  />
-                  <MessageSquare className="w-5 h-5 relative z-10" style={{ strokeWidth: 3 }} />
-                  <span className="font-bold text-sm uppercase relative z-10">[ AI CHAT ]</span>
+                  <MessageSquare className="w-5 h-5" />
+                  <span className="text-sm">Open Terminal Chat</span>
                 </button>
               </div>
             </div>
