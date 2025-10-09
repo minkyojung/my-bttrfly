@@ -58,6 +58,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const clearHistory = () => {
     if (confirm('대화 내역을 모두 삭제하시겠습니까?')) {
@@ -106,6 +107,13 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-focus input when terminal opens
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isOpen]);
 
   const handleSend = async (messageText?: string) => {
     const textToSend = messageText || input;
@@ -227,6 +235,8 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
     } finally {
       setIsLoading(false);
       setLoadingStage('');
+      // Refocus input after sending
+      setTimeout(() => inputRef.current?.focus(), 0);
     }
   };
 
@@ -324,12 +334,14 @@ Type /help to see available commands or ask any question.`;
           selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend });
           setInput('');
           setShowCommandPalette(false);
+          setTimeout(() => inputRef.current?.focus(), 0);
         }
         return;
       } else if (e.key === 'Escape') {
         e.preventDefault();
         setShowCommandPalette(false);
         setInput('');
+        setTimeout(() => inputRef.current?.focus(), 0);
         return;
       }
     }
@@ -375,10 +387,14 @@ Type /help to see available commands or ask any question.`;
       </div>
 
       {/* Terminal Body - Single Scroll Container */}
-      <div className="flex-1 overflow-y-auto px-3 py-2 font-mono text-xs" style={{
-        backgroundColor: 'var(--bg-color)',
-        color: 'var(--text-color)'
-      }}>
+      <div
+        className="flex-1 overflow-y-auto px-3 py-2 font-mono text-xs"
+        style={{
+          backgroundColor: 'var(--bg-color)',
+          color: 'var(--text-color)'
+        }}
+        onClick={() => inputRef.current?.focus()}
+      >
         {/* Welcome Message */}
         {messages.length === 0 && (
           <div className="mb-4 opacity-50">
@@ -452,14 +468,10 @@ Type /help to see available commands or ask any question.`;
         ))}
 
         {/* Current Input Prompt - Part of scroll flow */}
-        <div className="flex items-baseline gap-1">
+        <div className="flex items-baseline gap-1" ref={messagesEndRef}>
           <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }}>$</span>
           <textarea
-            ref={(el) => {
-              if (el) {
-                messagesEndRef.current = el;
-              }
-            }}
+            ref={inputRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -495,6 +507,7 @@ Type /help to see available commands or ask any question.`;
                   cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend });
                   setInput('');
                   setShowCommandPalette(false);
+                  setTimeout(() => inputRef.current?.focus(), 0);
                 }}
                 onMouseEnter={() => setSelectedCommandIndex(idx)}
               >
