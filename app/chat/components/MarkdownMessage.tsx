@@ -16,7 +16,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
       <ReactMarkdown
         components={{
         // 코드 블록
-        code({ node, inline, className, children, ...props }: any) {
+        code({ inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');
           const language = match ? match[1] : '';
           const codeContent = String(children).replace(/\n$/, '');
@@ -39,7 +39,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         },
 
         // 링크
-        a({ node, children, href, ...props }: any) {
+        a({ children, href, ...props }) {
           return (
             <a
               href={href}
@@ -54,7 +54,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         },
 
         // 리스트
-        ul({ node, children, ...props }: any) {
+        ul({ children, ...props }) {
           return (
             <ul className="list-disc list-inside space-y-1 my-2" {...props}>
               {children}
@@ -62,7 +62,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
           );
         },
 
-        ol({ node, children, ...props }: any) {
+        ol({ children, ...props }) {
           return (
             <ol className="list-decimal list-inside space-y-1 my-2" {...props}>
               {children}
@@ -71,7 +71,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         },
 
         // 제목
-        h1({ node, children, ...props }: any) {
+        h1({ children, ...props }) {
           return (
             <h1 className="text-2xl font-bold mt-4 mb-2" {...props}>
               {children}
@@ -79,7 +79,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
           );
         },
 
-        h2({ node, children, ...props }: any) {
+        h2({ children, ...props }) {
           return (
             <h2 className="text-xl font-bold mt-3 mb-2" {...props}>
               {children}
@@ -87,7 +87,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
           );
         },
 
-        h3({ node, children, ...props }: any) {
+        h3({ children, ...props }) {
           return (
             <h3 className="text-lg font-bold mt-2 mb-1" {...props}>
               {children}
@@ -96,7 +96,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         },
 
         // 단락
-        p({ node, children, ...props }: any) {
+        p({ children, ...props }) {
           return (
             <p className="my-2 leading-relaxed" {...props}>
               {children}
@@ -105,7 +105,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         },
 
         // 인용문
-        blockquote({ node, children, ...props }: any) {
+        blockquote({ children, ...props }) {
           return (
             <blockquote
               className="border-l-4 border-gray-300 pl-4 italic my-2 text-gray-700"
@@ -117,12 +117,12 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         },
 
         // 구분선
-        hr({ node, ...props }: any) {
+        hr({ ...props }) {
           return <hr className="my-4 border-gray-300" {...props} />;
         },
 
         // 테이블
-        table({ node, children, ...props }: any) {
+        table({ children, ...props }) {
           return (
             <div className="overflow-x-auto my-2">
               <table className="min-w-full border border-gray-300" {...props}>
@@ -132,7 +132,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
           );
         },
 
-        thead({ node, children, ...props }: any) {
+        thead({ children, ...props }) {
           return (
             <thead className="bg-gray-100" {...props}>
               {children}
@@ -140,7 +140,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
           );
         },
 
-        th({ node, children, ...props }: any) {
+        th({ children, ...props }) {
           return (
             <th className="border border-gray-300 px-4 py-2 font-semibold" {...props}>
               {children}
@@ -148,7 +148,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
           );
         },
 
-        td({ node, children, ...props }: any) {
+        td({ children, ...props }) {
           return (
             <td className="border border-gray-300 px-4 py-2" {...props}>
               {children}
