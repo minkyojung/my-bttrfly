@@ -202,6 +202,12 @@ async function main() {
     files.unshift(introFile);
   }
 
+  // opinions.md도 추가
+  const opinionsFile = path.join(process.cwd(), 'content', 'opinions.md');
+  if (fs.existsSync(opinionsFile)) {
+    files.push(opinionsFile);
+  }
+
   console.log(`📚 총 ${files.length}개의 파일을 처리합니다.\n`);
 
   // 각 파일 처리

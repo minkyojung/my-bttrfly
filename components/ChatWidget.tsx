@@ -51,9 +51,19 @@ function useTypingEffect(text: string, speed: number = 20, onType?: () => void) 
 function SystemMessage({ content, onType }: { content: string; onType?: () => void }) {
   const { displayedText, isComplete } = useTypingEffect(content, 10, onType);
 
+  // Check if this is an ASCII art greeting (contains the William ASCII art)
+  const isAsciiArt = content.includes('__      __') || content.includes('WILLIAM');
+
   return (
-    <div className="mt-1 mb-2 opacity-70">
-      <div className="whitespace-pre-wrap font-mono text-xs" style={{ lineHeight: '1.5' }}>
+    <div className="mt-1 mb-2" style={{ opacity: isAsciiArt ? 0.5 : 0.7 }}>
+      <div
+        className="whitespace-pre-wrap font-mono text-xs"
+        style={{
+          lineHeight: isAsciiArt ? '1' : '1.5',
+          color: isAsciiArt ? '#d35400' : 'inherit',
+          fontWeight: isAsciiArt ? 'bold' : 'normal'
+        }}
+      >
         {displayedText}
         {!isComplete && <span className="animate-pulse">▋</span>}
       </div>
@@ -226,7 +236,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
 
-      // Show time-based greeting if no messages yet
+      // Show time-based greeting with ASCII art if no messages yet
       if (messages.length === 0) {
         const hour = new Date().getHours();
         let greeting = '';
@@ -238,10 +248,23 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
         } else if (hour >= 17 && hour < 22) {
           greeting = 'Good evening.';
         } else {
-          greeting = 'Good night.';
+          greeting = 'Still up?';
         }
 
-        setMessages([{ role: 'system', content: greeting }]);
+        // Include ASCII art in the greeting
+        const asciiArt = ` __      __ .__ .__ .__  .__
+/  \\    /  \\|__||  ||  | |__|____    _____
+\\   \\/\\/   /|  ||  ||  | |  |\\__  \\  /     \\
+ \\        / |  ||  ||  |_|  | / __ \\|  Y Y  \\
+  \\__/\\  /  |__||__||____/__|(____ /|__|_|__/
+       \\/                         \\/
+                    .ai terminal v1.0
+
+${greeting}
+
+type / for commands`;
+
+        setMessages([{ role: 'system', content: asciiArt }]);
       }
     }
   }, [isOpen]);
@@ -714,22 +737,6 @@ Want to know more about any project? Just ask!`;
         }}
         onClick={() => inputRef.current?.focus()}
       >
-        {/* Welcome Message */}
-        {messages.length === 0 && (
-          <div className="mb-4 opacity-50">
-            <pre className="leading-tight" style={{ lineHeight: '1', color: '#d35400', fontWeight: 'bold' }}>{`
- __      __ .__ .__ .__  .__
-/  \\    /  \\|__||  ||  | |__|____    _____
-\\   \\/\\/   /|  ||  ||  | |  |\\__  \\  /     \\
- \\        / |  ||  ||  |_|  | / __ \\|  Y Y  \\
-  \\__/\\  /  |__||__||____/__|(____ /|__|_|__/
-       \\/                         \\/
-                    .ai terminal v1.0
-            `}</pre>
-            <p className="mt-2">type / for commands</p>
-          </div>
-        )}
-
         {/* Message History */}
         {messages.map((msg, idx) => {
           if (msg.role === 'assistant') {
