@@ -31,6 +31,10 @@ interface Message {
 interface ChatRequest {
   message: string;
   history?: Message[];
+  currentPost?: {
+    title: string;
+    content: string;
+  };
 }
 
 interface Source {
@@ -43,13 +47,13 @@ interface Source {
 
 // Constants
 const MAX_MESSAGE_LENGTH = 4000;
-const MAX_HISTORY_LENGTH = 6;
-const MATCH_THRESHOLD = 0.5; // Increased from 0.2 for better quality
-const MATCH_COUNT = 5;
+const MAX_HISTORY_LENGTH = 10; // Increased from 6 for better context
+const MATCH_THRESHOLD = 0.35; // Decreased from 0.5 for wider search
+const MATCH_COUNT = 8; // Increased from 5 for more context
 
 export async function POST(req: NextRequest) {
   try {
-    const { message, history = [] }: ChatRequest = await req.json();
+    const { message, history = [], currentPost }: ChatRequest = await req.json();
 
     // Input validation
     if (!message || !message.trim()) {
@@ -116,9 +120,14 @@ export async function POST(req: NextRequest) {
       : '관련 문서를 찾을 수 없습니다.';
 
     // 4. GPT-4로 답변 생성 (스트리밍 모드)
+    const currentPostContext = currentPost
+      ? `\n\n[사용자가 현재 읽고 있는 글]\n제목: ${currentPost.title}\n내용: ${currentPost.content.substring(0, 1000)}...\n---\n`
+      : '';
+
     const systemPrompt = `당신은 William Jung의 글과 프로젝트를 학습한 AI 어시스턴트입니다.
 
 아래 제공된 문서들을 바탕으로 사용자의 질문에 답변해주세요.
+${currentPostContext ? '사용자가 현재 읽고 있는 글에 대해 질문할 수도 있으니, 해당 글의 내용도 참고하세요.' : ''}
 
 규칙:
 - 제공된 문서의 내용만을 바탕으로 답변하세요
@@ -126,7 +135,7 @@ export async function POST(req: NextRequest) {
 - 답변 시 어느 출처에서 나온 정보인지 [출처 N] 형태로 표시하세요
 - 자연스럽고 친근한 톤으로 답변하세요
 - 한국어로 답변하세요
-
+${currentPostContext}
 제공된 문서:
 ${context}`;
 
@@ -162,7 +171,7 @@ ${context}`;
           const completion = await openai.chat.completions.create({
             model: 'gpt-4o-mini',
             messages,
-            temperature: 0.7,
+            temperature: 0.5, // Decreased from 0.7 for more consistent responses
             max_tokens: 1000,
             stream: true, // 스트리밍 모드 활성화
           });
