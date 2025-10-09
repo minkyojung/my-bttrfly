@@ -40,32 +40,14 @@ const QUICK_PROMPTS = [
 interface SlashCommand {
   command: string;
   description: string;
-  action: (props: { setMessages: any; setInput: any; clearHistory: () => void; currentPostContext?: any }) => void;
+  action: (props: {
+    setMessages: any;
+    setInput: any;
+    clearHistory: () => void;
+    currentPostContext?: any;
+    handleSend: (message: string) => void;
+  }) => void;
 }
-
-const SLASH_COMMANDS: SlashCommand[] = [
-  {
-    command: '/clear',
-    description: 'Clear chat history',
-    action: ({ clearHistory }) => clearHistory(),
-  },
-  {
-    command: '/help',
-    description: 'Show help information',
-    action: ({ setInput }) => {
-      setInput('terminal에 대해 도움말을 보여주세요');
-    },
-  },
-  {
-    command: '/context',
-    description: 'Show current context',
-    action: ({ currentPostContext, setInput }) => {
-      if (currentPostContext) {
-        setInput(`"${currentPostContext.title}"에 대해 설명해주세요`);
-      }
-    },
-  },
-];
 
 export default function ChatWidget({ isOpen, onClose, currentPostContext }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -76,6 +58,13 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
   const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const clearHistory = () => {
+    if (confirm('대화 내역을 모두 삭제하시겠습니까?')) {
+      setMessages([]);
+      localStorage.removeItem('bttrfly-chat-history');
+    }
+  };
 
   // localStorage에서 대화 내역 불러오기
   useEffect(() => {
@@ -117,23 +106,6 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  // Slash command detection and filtering
-  useEffect(() => {
-    if (input.startsWith('/')) {
-      const searchTerm = input.slice(1).toLowerCase();
-      const filtered = SLASH_COMMANDS.filter(cmd =>
-        cmd.command.toLowerCase().includes(searchTerm) ||
-        cmd.description.toLowerCase().includes(searchTerm)
-      );
-      setFilteredCommands(filtered);
-      setShowCommandPalette(filtered.length > 0);
-      setSelectedCommandIndex(0);
-    } else {
-      setShowCommandPalette(false);
-      setFilteredCommands([]);
-    }
-  }, [input]);
 
   const handleSend = async (messageText?: string) => {
     const textToSend = messageText || input;
@@ -258,6 +230,48 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
     }
   };
 
+  // Define slash commands after handleSend
+  const SLASH_COMMANDS: SlashCommand[] = [
+    {
+      command: '/clear',
+      description: 'Clear chat history',
+      action: ({ clearHistory }) => clearHistory(),
+    },
+    {
+      command: '/help',
+      description: 'Show help information',
+      action: ({ handleSend }) => {
+        handleSend('terminal에 대해 도움말을 보여주세요');
+      },
+    },
+    {
+      command: '/context',
+      description: 'Show current context',
+      action: ({ currentPostContext, handleSend }) => {
+        if (currentPostContext) {
+          handleSend(`"${currentPostContext.title}"에 대해 설명해주세요`);
+        }
+      },
+    },
+  ];
+
+  // Slash command detection and filtering
+  useEffect(() => {
+    if (input.startsWith('/')) {
+      const searchTerm = input.slice(1).toLowerCase();
+      const filtered = SLASH_COMMANDS.filter(cmd =>
+        cmd.command.toLowerCase().includes(searchTerm) ||
+        cmd.description.toLowerCase().includes(searchTerm)
+      );
+      setFilteredCommands(filtered);
+      setShowCommandPalette(filtered.length > 0);
+      setSelectedCommandIndex(0);
+    } else {
+      setShowCommandPalette(false);
+      setFilteredCommands([]);
+    }
+  }, [input, SLASH_COMMANDS]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Command palette navigation
     if (showCommandPalette) {
@@ -275,7 +289,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
         e.preventDefault();
         const selectedCommand = filteredCommands[selectedCommandIndex];
         if (selectedCommand) {
-          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext });
+          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend });
           setInput('');
           setShowCommandPalette(false);
         }
@@ -292,13 +306,6 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
-    }
-  };
-
-  const clearHistory = () => {
-    if (confirm('대화 내역을 모두 삭제하시겠습니까?')) {
-      setMessages([]);
-      localStorage.removeItem('bttrfly-chat-history');
     }
   };
 
@@ -344,38 +351,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
         {messages.length === 0 && (
           <div className="mb-4 opacity-50">
             <p>william.ai terminal</p>
-            <p className="mt-1">type a message to start...</p>
-          </div>
-        )}
-
-        {/* Quick Prompts */}
-        {messages.length === 0 && (
-          <div className="mb-4 space-y-1">
-            {QUICK_PROMPTS.map((prompt, idx) => (
-              <button
-                key={idx}
-                onClick={() => handleSend(prompt)}
-                className="block w-full text-left hover:opacity-60 transition-opacity"
-              >
-                <span className="opacity-50">$ </span>
-                {prompt}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Current Context */}
-        {messages.length === 0 && currentPostContext && (
-          <div className="mb-4 pb-3 border-b" style={{ borderColor: 'var(--border-color)' }}>
-            <p className="opacity-50 mb-1">context:</p>
-            <p className="mb-2">{currentPostContext.title}</p>
-            <button
-              onClick={() => handleSend(`"${currentPostContext.title}"에 대해 설명해주세요`)}
-              className="hover:opacity-60 transition-opacity"
-            >
-              <span className="opacity-50">$ </span>
-              ask about this
-            </button>
+            <p className="mt-1">type / for commands</p>
           </div>
         )}
 
@@ -437,37 +413,6 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
           </div>
         ))}
 
-        {/* Command Palette */}
-        {showCommandPalette && filteredCommands.length > 0 && (
-          <div className="mb-2 border rounded" style={{
-            borderColor: 'var(--border-color)',
-            backgroundColor: 'var(--bg-color)'
-          }}>
-            {filteredCommands.map((cmd, idx) => (
-              <div
-                key={cmd.command}
-                className="px-2 py-1.5 cursor-pointer transition-opacity font-mono text-xs"
-                style={{
-                  backgroundColor: idx === selectedCommandIndex ? 'var(--text-color)' : 'transparent',
-                  color: idx === selectedCommandIndex ? 'var(--bg-color)' : 'var(--text-color)',
-                  opacity: idx === selectedCommandIndex ? 1 : 0.7
-                }}
-                onClick={() => {
-                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext });
-                  setInput('');
-                  setShowCommandPalette(false);
-                }}
-                onMouseEnter={() => setSelectedCommandIndex(idx)}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-semibold">{cmd.command}</span>
-                  <span className="text-[10px] opacity-70">{cmd.description}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Current Input Prompt - Part of scroll flow */}
         <div className="flex items-baseline gap-1">
           <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }}>$</span>
@@ -496,6 +441,31 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
             }}
           />
         </div>
+
+        {/* Command Palette - Below input */}
+        {showCommandPalette && filteredCommands.length > 0 && (
+          <div className="mt-2">
+            {filteredCommands.map((cmd, idx) => (
+              <div
+                key={cmd.command}
+                className="py-0.5 cursor-pointer transition-opacity font-mono text-xs"
+                style={{
+                  color: 'var(--text-color)',
+                  opacity: idx === selectedCommandIndex ? 1 : 0.5
+                }}
+                onClick={() => {
+                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend });
+                  setInput('');
+                  setShowCommandPalette(false);
+                }}
+                onMouseEnter={() => setSelectedCommandIndex(idx)}
+              >
+                <span className={idx === selectedCommandIndex ? "font-bold" : ""}>{cmd.command}</span>
+                <span className="ml-2 text-[10px] opacity-70">- {cmd.description}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
