@@ -48,7 +48,7 @@ interface Source {
 // Constants
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_HISTORY_LENGTH = 10; // Increased from 6 for better context
-const MATCH_THRESHOLD = 0.35; // Decreased from 0.5 for wider search
+const MATCH_THRESHOLD = 0.2; // Decreased for wider search (was 0.35)
 const MATCH_COUNT = 8; // Increased from 5 for more context
 
 export async function POST(req: NextRequest) {
@@ -86,6 +86,11 @@ export async function POST(req: NextRequest) {
         match_count: MATCH_COUNT,
       }
     );
+
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[API] Vector search results:', documents?.length || 0, 'documents found');
+    }
 
     if (searchError) {
       // Log error in development only
