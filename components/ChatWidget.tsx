@@ -36,11 +36,45 @@ const QUICK_PROMPTS = [
   "William의 글쓰기 스타일은?",
 ];
 
+// Slash commands
+interface SlashCommand {
+  command: string;
+  description: string;
+  action: (props: { setMessages: any; setInput: any; clearHistory: () => void; currentPostContext?: any }) => void;
+}
+
+const SLASH_COMMANDS: SlashCommand[] = [
+  {
+    command: '/clear',
+    description: 'Clear chat history',
+    action: ({ clearHistory }) => clearHistory(),
+  },
+  {
+    command: '/help',
+    description: 'Show help information',
+    action: ({ setInput }) => {
+      setInput('terminal에 대해 도움말을 보여주세요');
+    },
+  },
+  {
+    command: '/context',
+    description: 'Show current context',
+    action: ({ currentPostContext, setInput }) => {
+      if (currentPostContext) {
+        setInput(`"${currentPostContext.title}"에 대해 설명해주세요`);
+      }
+    },
+  },
+];
+
 export default function ChatWidget({ isOpen, onClose, currentPostContext }: ChatWidgetProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStage, setLoadingStage] = useState<string>('');
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState(0);
+  const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // localStorage에서 대화 내역 불러오기
@@ -83,6 +117,23 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Slash command detection and filtering
+  useEffect(() => {
+    if (input.startsWith('/')) {
+      const searchTerm = input.slice(1).toLowerCase();
+      const filtered = SLASH_COMMANDS.filter(cmd =>
+        cmd.command.toLowerCase().includes(searchTerm) ||
+        cmd.description.toLowerCase().includes(searchTerm)
+      );
+      setFilteredCommands(filtered);
+      setShowCommandPalette(filtered.length > 0);
+      setSelectedCommandIndex(0);
+    } else {
+      setShowCommandPalette(false);
+      setFilteredCommands([]);
+    }
+  }, [input]);
 
   const handleSend = async (messageText?: string) => {
     const textToSend = messageText || input;
@@ -208,6 +259,36 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Command palette navigation
+    if (showCommandPalette) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedCommandIndex(prev =>
+          prev < filteredCommands.length - 1 ? prev + 1 : prev
+        );
+        return;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedCommandIndex(prev => (prev > 0 ? prev - 1 : prev));
+        return;
+      } else if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const selectedCommand = filteredCommands[selectedCommandIndex];
+        if (selectedCommand) {
+          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext });
+          setInput('');
+          setShowCommandPalette(false);
+        }
+        return;
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setShowCommandPalette(false);
+        setInput('');
+        return;
+      }
+    }
+
+    // Normal message sending
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -302,9 +383,9 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
         {messages.map((msg, idx) => (
           <div key={idx} className="mb-3">
             {msg.role === 'user' ? (
-              <div className="flex items-start gap-1">
-                <span className="opacity-50">$</span>
-                <div className="flex-1 whitespace-pre-wrap">
+              <div className="flex items-baseline gap-1">
+                <span className="opacity-50 font-mono text-xs" style={{ lineHeight: '1.5' }}>$</span>
+                <div className="flex-1 whitespace-pre-wrap font-mono text-xs" style={{ lineHeight: '1.5' }}>
                   {msg.content}
                 </div>
               </div>
@@ -356,9 +437,40 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
           </div>
         ))}
 
+        {/* Command Palette */}
+        {showCommandPalette && filteredCommands.length > 0 && (
+          <div className="mb-2 border rounded" style={{
+            borderColor: 'var(--border-color)',
+            backgroundColor: 'var(--bg-color)'
+          }}>
+            {filteredCommands.map((cmd, idx) => (
+              <div
+                key={cmd.command}
+                className="px-2 py-1.5 cursor-pointer transition-opacity font-mono text-xs"
+                style={{
+                  backgroundColor: idx === selectedCommandIndex ? 'var(--text-color)' : 'transparent',
+                  color: idx === selectedCommandIndex ? 'var(--bg-color)' : 'var(--text-color)',
+                  opacity: idx === selectedCommandIndex ? 1 : 0.7
+                }}
+                onClick={() => {
+                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext });
+                  setInput('');
+                  setShowCommandPalette(false);
+                }}
+                onMouseEnter={() => setSelectedCommandIndex(idx)}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-semibold">{cmd.command}</span>
+                  <span className="text-[10px] opacity-70">{cmd.description}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Current Input Prompt - Part of scroll flow */}
-        <div className="flex items-start gap-1">
-          <span className="opacity-50 flex-shrink-0 pt-0.5">$</span>
+        <div className="flex items-baseline gap-1">
+          <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }}>$</span>
           <textarea
             ref={(el) => {
               if (el) {
@@ -369,11 +481,11 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder=""
-            className="flex-1 bg-transparent resize-none focus:outline-none font-mono text-xs"
+            className="flex-1 bg-transparent resize-none focus:outline-none font-mono text-xs p-0 m-0"
             style={{
               color: 'var(--text-color)',
-              minHeight: '1.2em',
-              lineHeight: '1.2em'
+              lineHeight: '1.5',
+              verticalAlign: 'baseline'
             }}
             disabled={isLoading}
             rows={1}

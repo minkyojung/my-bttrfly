@@ -12,7 +12,7 @@ interface MarkdownMessageProps {
 
 export default function MarkdownMessage({ content }: MarkdownMessageProps) {
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="max-w-none font-mono text-xs" style={{ lineHeight: '1.5' }}>
       <ReactMarkdown
         components={{
         // 코드 블록
@@ -73,7 +73,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         // 제목
         h1({ children, ...props }) {
           return (
-            <h1 className="text-2xl font-bold mt-4 mb-2" {...props}>
+            <h1 className="text-sm font-bold mt-3 mb-1.5" {...props}>
               {children}
             </h1>
           );
@@ -81,7 +81,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
 
         h2({ children, ...props }) {
           return (
-            <h2 className="text-xl font-bold mt-3 mb-2" {...props}>
+            <h2 className="text-xs font-bold mt-2 mb-1" {...props}>
               {children}
             </h2>
           );
@@ -89,7 +89,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
 
         h3({ children, ...props }) {
           return (
-            <h3 className="text-lg font-bold mt-2 mb-1" {...props}>
+            <h3 className="text-xs font-bold mt-1.5 mb-0.5" {...props}>
               {children}
             </h3>
           );
@@ -98,7 +98,7 @@ export default function MarkdownMessage({ content }: MarkdownMessageProps) {
         // 단락
         p({ children, ...props }) {
           return (
-            <p className="my-2 leading-relaxed" {...props}>
+            <p className="my-1" {...props}>
               {children}
             </p>
           );
