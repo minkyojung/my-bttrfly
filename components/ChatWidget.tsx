@@ -5,7 +5,7 @@ import { Send, Loader2, FileText, Trash2, X, Sparkles } from 'lucide-react';
 import MarkdownMessage from '@/app/chat/components/MarkdownMessage';
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   sources?: Source[];
   isStreaming?: boolean;
@@ -233,24 +233,55 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   // Define slash commands after handleSend
   const SLASH_COMMANDS: SlashCommand[] = [
     {
+      command: '/help',
+      description: 'Show available commands',
+      action: ({ setMessages }) => {
+        const helpText = `Available Commands:
+
+/help       - Show this help message
+/clear      - Clear chat history
+/context    - Show current page context
+/about      - About William
+
+You can also type any question to chat with William's AI.`;
+        setMessages(prev => [...prev, { role: 'system', content: helpText }]);
+      },
+    },
+    {
       command: '/clear',
       description: 'Clear chat history',
       action: ({ clearHistory }) => clearHistory(),
     },
     {
-      command: '/help',
-      description: 'Show help information',
-      action: ({ handleSend }) => {
-        handleSend('terminal에 대해 도움말을 보여주세요');
+      command: '/context',
+      description: 'Show current page context',
+      action: ({ currentPostContext, setMessages }) => {
+        if (currentPostContext) {
+          const contextText = `Current Context:
+
+Title: ${currentPostContext.title}
+
+${currentPostContext.content.substring(0, 300)}${currentPostContext.content.length > 300 ? '...' : ''}
+
+Type a question to learn more about this post.`;
+          setMessages(prev => [...prev, { role: 'system', content: contextText }]);
+        } else {
+          setMessages(prev => [...prev, { role: 'system', content: 'No context available. Navigate to a post to set context.' }]);
+        }
       },
     },
     {
-      command: '/context',
-      description: 'Show current context',
-      action: ({ currentPostContext, handleSend }) => {
-        if (currentPostContext) {
-          handleSend(`"${currentPostContext.title}"에 대해 설명해주세요`);
-        }
+      command: '/about',
+      description: 'About William',
+      action: ({ setMessages }) => {
+        const aboutText = `About William:
+
+William is a developer and writer interested in technology, design, and building products.
+
+This terminal interface lets you explore William's writings and ask questions powered by AI.
+
+Type /help to see available commands or ask any question.`;
+        setMessages(prev => [...prev, { role: 'system', content: aboutText }]);
       },
     },
   ];
@@ -363,6 +394,12 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
               <div className="flex items-baseline gap-1">
                 <span className="opacity-50 font-mono text-xs" style={{ lineHeight: '1.5' }}>$</span>
                 <div className="flex-1 whitespace-pre-wrap font-mono text-xs" style={{ lineHeight: '1.5' }}>
+                  {msg.content}
+                </div>
+              </div>
+            ) : msg.role === 'system' ? (
+              <div className="mt-1 mb-2 opacity-70">
+                <div className="whitespace-pre-wrap font-mono text-xs" style={{ lineHeight: '1.5' }}>
                   {msg.content}
                 </div>
               </div>
