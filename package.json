@@ -22,6 +22,7 @@
     "cheerio": "^1.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cohere-ai": "^7.19.0",
     "d3-color": "^3.1.0",
     "d3-delaunay": "^6.0.4",
     "date-fns": "^4.1.0",
