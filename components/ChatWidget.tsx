@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, FileText, Trash2, X, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 import MarkdownMessage from '@/app/chat/components/MarkdownMessage';
 import { useTheme } from '@/components/ThemeProvider';
 import { SnakeGame } from '@/components/SnakeGame';
@@ -89,12 +90,10 @@ interface Source {
 
 interface ChatWidgetProps {
   isOpen: boolean;
-  onClose: () => void;
   currentPostContext?: {
     title: string;
     content: string;
   };
-  compact?: boolean;
 }
 
 // Quick prompts for better UX
@@ -115,13 +114,12 @@ interface SlashCommand {
     clearHistory: () => void;
     currentPostContext?: any;
     handleSend: (message: string) => void;
-    onClose: () => void;
     toggleTheme?: () => void;
     currentTheme?: string;
   }) => void;
 }
 
-export default function ChatWidget({ isOpen, onClose, currentPostContext, compact = false }: ChatWidgetProps) {
+export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetProps) {
   const { theme, toggleTheme } = useTheme();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -251,7 +249,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
           greeting = 'Still up?';
         }
 
-        // Include ASCII art in the greeting
+        // Include ASCII art, greeting, profile info in welcome message
         const asciiArt = ` __      __ .__ .__ .__  .__
 /  \\    /  \\|__||  ||  | |__|____    _____
 \\   \\/\\/   /|  ||  ||  | |  |\\__  \\  /     \\
@@ -261,6 +259,19 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
                     .ai terminal v1.0
 
 ${greeting}
+
+MINKYO JUNG (정민교)
+williamjung0130@gmail.com
+
+CURRENT
+  Founder @ Lerp (2025 - Present)
+
+PAST
+  Operator @ Disquiet (2023 - 2024)
+  15K → 100K users
+
+FOCUS
+  Exploring systems, refining ideas
 
 type / for commands`;
 
@@ -470,6 +481,7 @@ Information:
   /help         - Show this help message
   /commands     - Same as /help
   /about        - About William
+  /contact      - Contact information
   /context      - Show current page context
   /recent       - Recent posts
   /topics       - Main topics
@@ -478,7 +490,6 @@ Information:
 Actions:
   /clear        - Clear chat history
   /theme-toggle - Toggle dark/light mode
-  /close        - Close terminal
 
 Fun:
   /snake        - Play Snake game
@@ -498,6 +509,7 @@ Information:
   /help         - Show this help message
   /commands     - Same as /help
   /about        - About William
+  /contact      - Contact information
   /context      - Show current page context
   /recent       - Recent posts
   /topics       - Main topics
@@ -506,7 +518,6 @@ Information:
 Actions:
   /clear        - Clear chat history
   /theme-toggle - Toggle dark/light mode
-  /close        - Close terminal
 
 Fun:
   /snake        - Play Snake game
@@ -528,6 +539,19 @@ This terminal interface lets you explore William's writings and ask questions po
 
 Type /help to see available commands or ask any question.`;
         setMessages(prev => [...prev, { role: 'system', content: aboutText }]);
+      },
+    },
+    {
+      command: '/contact',
+      description: 'Contact information',
+      action: ({ setMessages }) => {
+        const contactText = `Contact Information:
+
+정민교 (William Jung)
+williamjung0130@gmail.com
+
+Feel free to reach out!`;
+        setMessages(prev => [...prev, { role: 'system', content: contactText }]);
       },
     },
     {
@@ -611,11 +635,6 @@ Want to know more about any project? Just ask!`;
       },
     },
     {
-      command: '/close',
-      description: 'Close terminal',
-      action: ({ onClose }) => onClose(),
-    },
-    {
       command: '/snake',
       description: 'Play Snake game',
       action: ({ setMessages }) => {
@@ -666,7 +685,7 @@ Want to know more about any project? Just ask!`;
         e.preventDefault();
         const selectedCommand = filteredCommands[selectedCommandIndex];
         if (selectedCommand) {
-          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose, toggleTheme, currentTheme: theme });
+          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, toggleTheme, currentTheme: theme });
           setInput('');
           setShowCommandPalette(false);
           setTimeout(() => inputRef.current?.focus(), 0);
@@ -696,37 +715,40 @@ Want to know more about any project? Just ask!`;
       borderColor: 'var(--border-color)'
     }}>
       {/* Header - Minimal Terminal Style */}
-      {!compact && (
-        <div className="flex items-center justify-between px-3 py-2 border-b" style={{
-          borderColor: 'var(--border-color)'
-        }}>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              className="w-2.5 h-2.5 rounded-full transition-opacity hover:opacity-60"
-              style={{ backgroundColor: 'var(--text-color)', opacity: 0.3 }}
+      <div className="flex items-center justify-between px-3 py-2 border-b" style={{
+        borderColor: 'var(--border-color)'
+      }}>
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 relative cursor-pointer" onClick={toggleTheme}>
+            <Image
+              src="/images/profile.png"
+              alt="Profile"
+              fill
+              className="object-cover border transition-opacity hover:opacity-80"
+              style={{ borderColor: 'var(--profile-border-color)' }}
+              sizes="24px"
             />
-            <span className="text-xs font-mono opacity-50" style={{ color: 'var(--text-color)' }}>
-              terminal
-            </span>
-            {weather && (
-              <span className="text-[10px] font-mono opacity-40 ml-2" style={{ color: 'var(--text-color)' }}>
-                {weather.location} {weather.temp}
-              </span>
-            )}
           </div>
-          {messages.length > 0 && (
-            <button
-              onClick={clearHistory}
-              className="p-1 rounded transition-opacity hover:opacity-60"
-              style={{ color: 'var(--text-color)', opacity: 0.5 }}
-              title="clear"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
+          <span className="text-xs font-mono opacity-70" style={{ color: 'var(--text-color)' }}>
+            정민교 (William Jung)
+          </span>
+          {weather && (
+            <span className="text-[10px] font-mono opacity-40 ml-2" style={{ color: 'var(--text-color)' }}>
+              {weather.location} {weather.temp}
+            </span>
           )}
         </div>
-      )}
+        {messages.length > 0 && (
+          <button
+            onClick={clearHistory}
+            className="p-1 rounded transition-opacity hover:opacity-60"
+            style={{ color: 'var(--text-color)', opacity: 0.5 }}
+            title="clear"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        )}
+      </div>
 
       {/* Terminal Body - Single Scroll Container */}
       <div
@@ -884,7 +906,7 @@ Want to know more about any project? Just ask!`;
                   opacity: idx === selectedCommandIndex ? 1 : 0.5
                 }}
                 onClick={() => {
-                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose, toggleTheme, currentTheme: theme });
+                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, toggleTheme, currentTheme: theme });
                   setInput('');
                   setShowCommandPalette(false);
                   setTimeout(() => inputRef.current?.focus(), 0);

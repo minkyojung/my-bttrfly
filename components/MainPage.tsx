@@ -1,10 +1,5 @@
 'use client';
 
-import { useState } from 'react';
-import { Maximize2 } from 'lucide-react';
-import { ProfilePhoto } from "@/components/ProfilePhoto";
-import { ProfileHistory } from "@/components/ProfileHistory";
-import { PinnedPosts } from "@/components/PinnedPosts";
 import ChatWidget from "@/components/ChatWidget";
 
 interface Post {
@@ -22,12 +17,9 @@ interface Post {
 
 interface MainPageProps {
   posts: Post[];
-  pinnedPosts: Post[];
 }
 
-export function MainPage({ posts, pinnedPosts }: MainPageProps) {
-  const [isTerminalExpanded, setIsTerminalExpanded] = useState(false);
-
+export function MainPage({ posts }: MainPageProps) {
   return (
     <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
       <div className="flex flex-col lg:flex-row h-screen">
@@ -123,74 +115,15 @@ export function MainPage({ posts, pinnedPosts }: MainPageProps) {
           )}
         </div>
 
-        {/* 데스크탑: 우측 50% / 모바일: 상단 - 프로필 + Terminal */}
-        <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-l order-1 lg:order-2 flex" style={{ borderColor: 'var(--border-color)' }}>
-          {isTerminalExpanded ? (
-            <div className="w-full">
-              <ChatWidget
-                isOpen={true}
-                onClose={() => setIsTerminalExpanded(false)}
-                currentPostContext={posts.length > 0 ? {
-                  title: posts[0].title,
-                  content: posts[0].content,
-                } : undefined}
-              />
-            </div>
-          ) : (
-            <div className="w-full p-6 lg:p-12 flex items-center justify-center overflow-y-auto">
-              <div className="w-full max-w-sm">
-                {/* 프로필 사진 */}
-                <ProfilePhoto />
-
-                {/* 인사말 */}
-                <h1 className="text-2xl lg:text-3xl font-black mb-2 text-center" style={{ color: 'var(--text-color)' }}>정민교</h1>
-                <p className="mb-1 text-base leading-normal text-center" style={{ color: 'var(--text-color)' }}>
-                  작동원리를 탐구하고 생각을 다듬어갑니다.
-                </p>
-                <p className="text-sm text-center mb-10 opacity-60">
-                  <a href="mailto:williamjung0130@gmail.com" className="underline hover:opacity-100" style={{ color: 'var(--text-color)' }}>
-                    williamjung0130@gmail.com
-                  </a>
-                </p>
-
-                {/* 고정된 글 */}
-                <PinnedPosts posts={pinnedPosts} />
-
-                {/* 이력 */}
-                <ProfileHistory />
-
-                {/* Compact Terminal Widget */}
-                <div className="mt-10 overflow-hidden" style={{ height: '350px' }}>
-                  {/* Terminal Header */}
-                  <div className="flex items-center justify-between px-2 py-1 mb-2">
-                    <span className="text-[10px] font-mono opacity-50" style={{ color: 'var(--text-color)' }}>
-                      terminal
-                    </span>
-                    <button
-                      onClick={() => setIsTerminalExpanded(true)}
-                      className="p-0.5 rounded transition-opacity hover:opacity-60"
-                      style={{ color: 'var(--text-color)', opacity: 0.5 }}
-                      title="expand"
-                    >
-                      <Maximize2 className="w-2.5 h-2.5" />
-                    </button>
-                  </div>
-                  {/* Compact Terminal */}
-                  <div style={{ height: 'calc(100% - 26px)' }}>
-                    <ChatWidget
-                      isOpen={true}
-                      onClose={() => {}}
-                      currentPostContext={posts.length > 0 ? {
-                        title: posts[0].title,
-                        content: posts[0].content,
-                      } : undefined}
-                      compact={true}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+        {/* 데스크탑: 우측 50% / 모바일: 상단 - Terminal */}
+        <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-l order-1 lg:order-2 flex flex-col overflow-hidden" style={{ borderColor: 'var(--border-color)' }}>
+          <ChatWidget
+            isOpen={true}
+            currentPostContext={posts.length > 0 ? {
+              title: posts[0].title,
+              content: posts[0].content,
+            } : undefined}
+          />
         </div>
       </div>
 
