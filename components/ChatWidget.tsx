@@ -221,10 +221,28 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
     scrollToBottom();
   }, [messages]);
 
-  // Auto-focus input when terminal opens
+  // Auto-focus input and show greeting when terminal opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+
+      // Show time-based greeting if no messages yet
+      if (messages.length === 0) {
+        const hour = new Date().getHours();
+        let greeting = '';
+
+        if (hour >= 5 && hour < 12) {
+          greeting = 'Good morning.';
+        } else if (hour >= 12 && hour < 17) {
+          greeting = 'Good afternoon.';
+        } else if (hour >= 17 && hour < 22) {
+          greeting = 'Good evening.';
+        } else {
+          greeting = 'Good night.';
+        }
+
+        setMessages([{ role: 'system', content: greeting }]);
+      }
     }
   }, [isOpen]);
 
@@ -360,6 +378,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
 
             if (chunk.type === 'sources') {
               sources = chunk.data;
+              console.log('[ChatWidget] Received sources:', sources);
               if (sources.length > 0) {
                 setLoadingStage(`referencing ${sources.length} documents...`);
               }
@@ -712,7 +731,11 @@ Want to know more about any project? Just ask!`;
         )}
 
         {/* Message History */}
-        {messages.map((msg, idx) => (
+        {messages.map((msg, idx) => {
+          if (msg.role === 'assistant') {
+            console.log(`[ChatWidget] Rendering assistant message ${idx}, sources:`, msg.sources);
+          }
+          return (
           <div key={idx} className="mb-3">
             {msg.role === 'user' ? (
               <div className="flex items-baseline gap-1">
@@ -789,7 +812,8 @@ Want to know more about any project? Just ask!`;
               </div>
             )}
           </div>
-        ))}
+        );
+        })}
 
         {/* Current Input Prompt - Part of scroll flow */}
         <div className="flex items-baseline gap-1" ref={messagesEndRef}>
