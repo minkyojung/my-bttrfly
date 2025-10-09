@@ -32,17 +32,30 @@ export default function ChatPage() {
       try {
         setMessages(JSON.parse(saved));
       } catch (error) {
-        console.error('대화 내역 불러오기 실패:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('대화 내역 불러오기 실패:', error);
+        }
         localStorage.removeItem('bttrfly-chat-history');
       }
     }
   }, []);
 
-  // messages 변경 시 localStorage에 자동 저장
+  // messages 변경 시 localStorage에 자동 저장 (debounced)
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('bttrfly-chat-history', JSON.stringify(messages));
-    }
+    if (messages.length === 0) return;
+
+    const timeoutId = setTimeout(() => {
+      try {
+        localStorage.setItem('bttrfly-chat-history', JSON.stringify(messages));
+      } catch (error) {
+        // Handle quota exceeded error silently
+        if (process.env.NODE_ENV === 'development') {
+          console.error('localStorage 저장 실패:', error);
+        }
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
   // 자동 스크롤
@@ -148,12 +161,16 @@ export default function ChatPage() {
               throw new Error(chunk.message);
             }
           } catch (parseError) {
-            console.error('JSON 파싱 에러:', parseError);
+            if (process.env.NODE_ENV === 'development') {
+              console.error('JSON 파싱 에러:', parseError);
+            }
           }
         }
       }
     } catch (error) {
-      console.error('Chat error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Chat error:', error);
+      }
       setMessages((prev) => {
         const updated = [...prev];
         updated[assistantMessageIndex] = {
