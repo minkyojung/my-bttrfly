@@ -8,7 +8,7 @@ import { SnakeGame } from '@/components/SnakeGame';
 import { Game2048 } from '@/components/Game2048';
 
 // Typing animation hook
-function useTypingEffect(text: string, speed: number = 20) {
+function useTypingEffect(text: string, speed: number = 20, onType?: () => void) {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const prevTextRef = useRef('');
@@ -30,6 +30,7 @@ function useTypingEffect(text: string, speed: number = 20) {
 
       if (index < text.length) {
         setDisplayedText(text.slice(0, index + 1));
+        onType?.();
         index++;
       } else {
         setIsComplete(true);
@@ -47,8 +48,8 @@ function useTypingEffect(text: string, speed: number = 20) {
 }
 
 // System message with typing effect
-function SystemMessage({ content }: { content: string }) {
-  const { displayedText, isComplete } = useTypingEffect(content, 10);
+function SystemMessage({ content, onType }: { content: string; onType?: () => void }) {
+  const { displayedText, isComplete } = useTypingEffect(content, 10, onType);
 
   return (
     <div className="mt-1 mb-2 opacity-70">
@@ -126,6 +127,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
   const [weather, setWeather] = useState<{ temp: string; condition: string; emoji: string; location: string } | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const lastAIContentLengthRef = useRef(0);
+  const lastSoundTimeRef = useRef(0);
 
   // Initialize audio context once
   useEffect(() => {
@@ -140,9 +142,14 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
     };
   }, []);
 
-  // Typing sound effect
+  // Typing sound effect with throttle
   const playTypingSound = () => {
     if (!typingSoundEnabled || !audioContextRef.current) return;
+
+    // Throttle: only play sound every 50ms
+    const now = Date.now();
+    if (now - lastSoundTimeRef.current < 50) return;
+    lastSoundTimeRef.current = now;
 
     // Create simple beep sound using Web Audio API
     try {
@@ -156,7 +163,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext, compac
       oscillator.frequency.value = 800 + Math.random() * 200; // Random pitch variation
       oscillator.type = 'sine';
 
-      gainNode.gain.setValueAtTime(0.25, audioContext.currentTime); // Quiet volume
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime); // Quiet volume
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
 
       oscillator.start(audioContext.currentTime);
@@ -715,7 +722,7 @@ Want to know more about any project? Just ask!`;
                 </div>
               </div>
             ) : msg.role === 'system' ? (
-              <SystemMessage content={msg.content} />
+              <SystemMessage content={msg.content} onType={playTypingSound} />
             ) : msg.role === 'game' ? (
               <div className="mt-1 mb-2">
                 {msg.gameType === 'snake' && (
