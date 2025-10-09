@@ -11,15 +11,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Validate environment variables
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+if (!SUPABASE_URL || !SUPABASE_KEY || !OPENAI_API_KEY) {
+  throw new Error('Missing required environment variables');
+}
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
 }
 
@@ -36,15 +41,17 @@ interface Source {
   similarity: number;
 }
 
-interface ChatResponse {
-  message: string;
-  sources: Source[];
-}
+// Constants
+const MAX_MESSAGE_LENGTH = 4000;
+const MAX_HISTORY_LENGTH = 6;
+const MATCH_THRESHOLD = 0.5; // Increased from 0.2 for better quality
+const MATCH_COUNT = 5;
 
 export async function POST(req: NextRequest) {
   try {
     const { message, history = [] }: ChatRequest = await req.json();
 
+    // Input validation
     if (!message || !message.trim()) {
       return NextResponse.json(
         { error: '메시지를 입력해주세요.' },
@@ -52,7 +59,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log('📩 질문:', message);
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `메시지는 ${MAX_MESSAGE_LENGTH}자를 초과할 수 없습니다.` },
+        { status: 400 }
+      );
+    }
 
     // 1. 질문을 임베딩으로 변환
     const embeddingResponse = await openai.embeddings.create({
@@ -66,26 +78,35 @@ export async function POST(req: NextRequest) {
       'match_documents',
       {
         query_embedding: queryEmbedding,
-        match_threshold: 0.2, // 20% 이상 유사도
-        match_count: 5,
+        match_threshold: MATCH_THRESHOLD,
+        match_count: MATCH_COUNT,
       }
     );
 
     if (searchError) {
-      console.error('검색 에러:', searchError);
+      // Log error in development only
+      if (process.env.NODE_ENV === 'development') {
+        console.error('검색 에러:', searchError);
+      }
       return NextResponse.json(
         { error: '문서 검색 중 오류가 발생했습니다.' },
         { status: 500 }
       );
     }
 
-    console.log(`🔍 ${documents?.length || 0}개의 관련 문서 발견`);
-
     // 3. 컨텍스트 구성
+    interface DocumentResult {
+      id: string;
+      title?: string;
+      content: string;
+      url?: string;
+      similarity: number;
+    }
+
     const context = documents && documents.length > 0
-      ? documents
+      ? (documents as DocumentResult[])
           .map(
-            (doc: any, i: number) => `
+            (doc, i) => `
 [출처 ${i + 1}]
 제목: ${doc.title || '제목 없음'}
 내용: ${doc.content}
@@ -109,19 +130,19 @@ export async function POST(req: NextRequest) {
 제공된 문서:
 ${context}`;
 
-    const messages: any[] = [
-      { role: 'system', content: systemPrompt },
-      ...history.slice(-6), // 최근 3턴만 유지
+    const messages: Message[] = [
+      { role: 'system' as const, content: systemPrompt },
+      ...history.slice(-MAX_HISTORY_LENGTH),
       { role: 'user', content: message },
     ];
 
     // 5. 출처 정보 구성
     const sources: Source[] = documents
-      ? documents.map((doc: any) => ({
+      ? (documents as DocumentResult[]).map((doc) => ({
           id: doc.id,
           title: doc.title || '제목 없음',
           content: doc.content.substring(0, 200) + '...',
-          url: doc.url,
+          url: doc.url || null,
           similarity: doc.similarity,
         }))
       : [];
@@ -161,11 +182,13 @@ ${context}`;
             encoder.encode(JSON.stringify({ type: 'done' }) + '\n')
           );
 
-          console.log('✅ 스트리밍 답변 생성 완료');
           controller.close();
 
         } catch (error) {
-          console.error('스트리밍 에러:', error);
+          // Log errors in development only
+          if (process.env.NODE_ENV === 'development') {
+            console.error('스트리밍 에러:', error);
+          }
           controller.enqueue(
             encoder.encode(JSON.stringify({
               type: 'error',
@@ -186,7 +209,10 @@ ${context}`;
     });
 
   } catch (error) {
-    console.error('Chat API 에러:', error);
+    // Log errors in development only
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Chat API 에러:', error);
+    }
     return NextResponse.json(
       { error: '답변 생성 중 오류가 발생했습니다.' },
       { status: 500 }
