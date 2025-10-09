@@ -3,6 +3,47 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, FileText, Trash2, X, Sparkles } from 'lucide-react';
 import MarkdownMessage from '@/app/chat/components/MarkdownMessage';
+import { useTheme } from '@/components/ThemeProvider';
+
+// Typing animation hook
+function useTypingEffect(text: string, speed: number = 20) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    setDisplayedText('');
+    setIsComplete(false);
+    let index = 0;
+
+    const interval = setInterval(() => {
+      if (index < text.length) {
+        setDisplayedText(text.slice(0, index + 1));
+        index++;
+      } else {
+        setIsComplete(true);
+        clearInterval(interval);
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [text, speed]);
+
+  return { displayedText, isComplete };
+}
+
+// System message with typing effect
+function SystemMessage({ content }: { content: string }) {
+  const { displayedText, isComplete } = useTypingEffect(content, 10);
+
+  return (
+    <div className="mt-1 mb-2 opacity-70">
+      <div className="whitespace-pre-wrap font-mono text-xs" style={{ lineHeight: '1.5' }}>
+        {displayedText}
+        {!isComplete && <span className="animate-pulse">▋</span>}
+      </div>
+    </div>
+  );
+}
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -47,10 +88,13 @@ interface SlashCommand {
     currentPostContext?: any;
     handleSend: (message: string) => void;
     onClose: () => void;
+    toggleTheme?: () => void;
+    currentTheme?: string;
   }) => void;
 }
 
 export default function ChatWidget({ isOpen, onClose, currentPostContext }: ChatWidgetProps) {
+  const { theme, toggleTheme } = useTheme();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -128,7 +172,7 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
-    setLoadingStage('문서 검색 중...');
+    setLoadingStage('thinking...');
 
     // 빈 assistant 메시지 생성
     const assistantMessageIndex = messages.length + 1;
@@ -142,8 +186,6 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
     ]);
 
     try {
-      setLoadingStage('관련 문서 분석 중...');
-
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -157,8 +199,6 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
       if (!response.ok) {
         throw new Error('답변 생성에 실패했습니다.');
       }
-
-      setLoadingStage('답변 생성 중...');
 
       // 스트림 읽기
       const reader = response.body?.getReader();
@@ -187,7 +227,9 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
 
             if (chunk.type === 'sources') {
               sources = chunk.data;
-              setLoadingStage(`${sources.length}개의 관련 문서 발견`);
+              if (sources.length > 0) {
+                setLoadingStage(`referencing ${sources.length} documents...`);
+              }
             } else if (chunk.type === 'content') {
               accumulatedContent += chunk.data;
 
@@ -250,17 +292,18 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
         const helpText = `Available Commands:
 
 Information:
-  /help       - Show this help message
-  /commands   - Same as /help
-  /about      - About William
-  /context    - Show current page context
-  /recent     - Recent posts
-  /topics     - Main topics
-  /projects   - Projects list
+  /help         - Show this help message
+  /commands     - Same as /help
+  /about        - About William
+  /context      - Show current page context
+  /recent       - Recent posts
+  /topics       - Main topics
+  /projects     - Projects list
 
 Actions:
-  /clear      - Clear chat history
-  /close      - Close terminal
+  /clear        - Clear chat history
+  /theme-toggle - Toggle dark/light mode
+  /close        - Close terminal
 
 You can also type any question to chat with William's AI.`;
         setMessages(prev => [...prev, { role: 'system', content: helpText }]);
@@ -273,17 +316,18 @@ You can also type any question to chat with William's AI.`;
         const helpText = `Available Commands:
 
 Information:
-  /help       - Show this help message
-  /commands   - Same as /help
-  /about      - About William
-  /context    - Show current page context
-  /recent     - Recent posts
-  /topics     - Main topics
-  /projects   - Projects list
+  /help         - Show this help message
+  /commands     - Same as /help
+  /about        - About William
+  /context      - Show current page context
+  /recent       - Recent posts
+  /topics       - Main topics
+  /projects     - Projects list
 
 Actions:
-  /clear      - Clear chat history
-  /close      - Close terminal
+  /clear        - Clear chat history
+  /theme-toggle - Toggle dark/light mode
+  /close        - Close terminal
 
 You can also type any question to chat with William's AI.`;
         setMessages(prev => [...prev, { role: 'system', content: helpText }]);
@@ -373,6 +417,17 @@ Want to know more about any project? Just ask!`;
       action: ({ clearHistory }) => clearHistory(),
     },
     {
+      command: '/theme-toggle',
+      description: 'Toggle dark/light mode',
+      action: ({ toggleTheme, currentTheme, setMessages }) => {
+        if (toggleTheme) {
+          toggleTheme();
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          setMessages(prev => [...prev, { role: 'system', content: `Theme switched to ${newTheme} mode.` }]);
+        }
+      },
+    },
+    {
       command: '/close',
       description: 'Close terminal',
       action: ({ onClose }) => onClose(),
@@ -414,7 +469,7 @@ Want to know more about any project? Just ask!`;
         e.preventDefault();
         const selectedCommand = filteredCommands[selectedCommandIndex];
         if (selectedCommand) {
-          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose });
+          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose, toggleTheme, currentTheme: theme });
           setInput('');
           setShowCommandPalette(false);
           setTimeout(() => inputRef.current?.focus(), 0);
@@ -481,8 +536,16 @@ Want to know more about any project? Just ask!`;
         {/* Welcome Message */}
         {messages.length === 0 && (
           <div className="mb-4 opacity-50">
-            <p>william.ai terminal</p>
-            <p className="mt-1">type / for commands</p>
+            <pre className="leading-tight" style={{ lineHeight: '1' }}>{`
+ __      __ .__ .__ .__  .__
+/  \\    /  \\|__||  ||  | |__|____    _____
+\\   \\/\\/   /|  ||  ||  | |  |\\__  \\  /     \\
+ \\        / |  ||  ||  |_|  | / __ \\|  Y Y  \\
+  \\__/\\  /  |__||__||____/__|(____ /|__|_|__/
+       \\/                         \\/
+                    .ai terminal v1.0
+            `}</pre>
+            <p className="mt-2">type / for commands</p>
           </div>
         )}
 
@@ -497,11 +560,7 @@ Want to know more about any project? Just ask!`;
                 </div>
               </div>
             ) : msg.role === 'system' ? (
-              <div className="mt-1 mb-2 opacity-70">
-                <div className="whitespace-pre-wrap font-mono text-xs" style={{ lineHeight: '1.5' }}>
-                  {msg.content}
-                </div>
-              </div>
+              <SystemMessage content={msg.content} />
             ) : (
               <div className="mt-1 mb-2">
                 {msg.content ? (
@@ -587,7 +646,7 @@ Want to know more about any project? Just ask!`;
                   opacity: idx === selectedCommandIndex ? 1 : 0.5
                 }}
                 onClick={() => {
-                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose });
+                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose, toggleTheme, currentTheme: theme });
                   setInput('');
                   setShowCommandPalette(false);
                   setTimeout(() => inputRef.current?.focus(), 0);
