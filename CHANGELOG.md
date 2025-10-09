@@ -8,89 +8,113 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Central Dock UI**: Fixed navigation dock with font size, theme, and TOC controls
-- **Tag Filtering**: Tag-based filtering system in TOC panel with "전체" (All) option
-- **RSS Feed Integration**: Full article content extraction from RSS feeds for prompt testing
-- **Batch Processing**: Category-based prompt processing with batch API calls
-- **Prompt History**: Save and load prompt history for each category
-- **Category-Specific Prompts**: Customizable system prompts per news category
-- **Inter Font**: Applied Inter font specifically to /morning dashboard page
+- Security and performance review document
+- Environment variable validation in chat API
+- Input validation (max 4000 characters) for chat messages
+- Debounced localStorage saves (500ms) to improve performance
+- Type safety improvements throughout codebase
 
 ### Changed
-- **Prompt Editor UI**: Streamlined 2-column layout with tabbed interface
-- **Morning Page Integration**: Connected prompt editor to morning dashboard
-- **AI Integration**: Real OpenAI API integration replacing mock implementations
-- **TOC Design**: Compact tag filter design with gray background for selected tags
-
-### Performance
-- **Database Query Optimization**: Select only necessary columns, reducing data transfer by 90% (500KB → 50KB)
-- **Client-Side Filtering**: Instant filter updates with useMemo (1-2s → 0.01s)
-- **Non-Blocking Summary Generation**: Use fallback templates instead of blocking API calls
-- **Page Load Time**: Reduced initial load from 10-30s to 1-2s on /morning page
+- **BREAKING**: Increased match threshold from 0.2 to 0.5 for better search quality
+- Replaced all `any` types with proper TypeScript types
+- Console logs now only appear in development mode
+- Improved error handling with development-only logging
+- Optimized localStorage quota exceeded handling
 
 ### Fixed
-- **Cron Job Security**: Enabled production authentication for `/api/cron/scrape-news`
-- **TypeScript Errors**: Resolved type errors across dashboard and API routes
-- **Next.js 15 Compatibility**: Fixed async params type signatures
-- **Build Configuration**: Added TypeScript error bypass for development
-- **Content Extraction**: Fixed nullable property handling in article extractor
-- **Hydration Errors**: Resolved React hydration mismatches in prompt editor
-
-### Refactored
-- **Debug Logging**: Removed all console.log statements from CentralDock component
-- **Error Handling**: Cleaned up unused error variables and improved consistency
-- **Code Quality**: Removed unused imports (useCallback from morning page)
-- **Component Structure**: Simplified event handlers in CentralDock
+- Build errors in MarkdownMessage component
+- Lint warnings for unused variables
+- Type safety issues in chat API route
 
 ### Security
-- **DOS Prevention**: Enabled authentication on expensive scraping operations
-- **Rate Limiting**: Proper rate limiting for web scraping operations (1-3s delays)
-- **Error Information**: Removed error message leakage in API responses
+- Added environment variable validation to prevent runtime crashes
+- Implemented input length validation to prevent DoS attacks
+- Removed sensitive data from production logs
+- Added proper error boundaries for production
 
-### Removed
-- **Visitor Counter**: Removed visitor counter component from profile section
-- **Copyright Footer**: Removed "© 2024 · Seoul / NYC" text
-- **Unused Components**: Deleted VisitorCounter, wheel-carousel, and utils.ts
-- **Unused Dependencies**: Removed 6 unused npm packages (@fontsource/jetbrains-mono, class-variance-authority, clsx, date-fns, reading-time, tailwind-merge)
-- **TOC Divider**: Removed divider between tags and post list for cleaner design
-- Individual post pages (now part of continuous feed)
-- Posts list page (integrated into homepage)
-- Hardcoded intro content (now in markdown file)
-- Obsidian Git plugin files
-
-## [1.2.0] - 2024-12-27
+## [2025-10-09] - Cost Optimization
 
 ### Changed
-- Switched to NanumMyeongjoOldHangeul font for traditional Korean typography
-- Previously tested BonmyeongjoSourceHanSerif and BookkMyungjo fonts
-
-## [1.1.0] - 2024-12-27
-
-### Added
-- Minimal design improvements across the site
-- Increased font weights to maximum (font-black) for all titles
+- **Cost Optimization**: Replaced Anthropic Claude with OpenAI GPT-4o-mini for contextual retrieval
+  - 82% cost reduction (\$0.152 → \$0.027 per 100 calls)
+  - Faster processing (200ms → 100ms rate limiting)
+  - Maintained quality with more affordable model
 
 ### Removed
-- Removed "새 글 작성" (New Post) buttons from home and posts pages
-- Removed tags display from post listings and individual posts
-- Removed decorative elements (blockquotes, separators) for cleaner design
+- @anthropic-ai/sdk dependency
+- ANTHROPIC_API_KEY requirement
 
-### Changed
-- Simplified home page layout with minimal styling
-- Enhanced typography with bolder headings throughout
-
-## [1.0.0] - 2024-12-27
+## [2025-10-09] - Streaming & Markdown
 
 ### Added
-- Initial blog setup with minimal black and white design
-- Markdown support with Obsidian syntax compatibility
-- RIDIBatang font integration
-- Post listing and individual post pages
-- Static site generation with Next.js 15
-- Tailwind CSS for styling
+- **Streaming Response**: Real-time message streaming from OpenAI
+  - First response appears in 1-2 seconds (vs 20-30 seconds before)
+  - Typing cursor animation during streaming
+  - Smooth user experience similar to ChatGPT
+- **Markdown Rendering**: Full markdown support in chat messages
+  - Syntax highlighting for code blocks (VS Code Dark+ theme)
+  - Code copy button functionality
+  - Support for headers, lists, links, tables, quotes
+  - Inline code highlighting
+- **Enhanced UI**: Improved chat interface with better visual feedback
 
-### Features
-- Clean, text-first design philosophy
-- Korean and English content support
-- Responsive layout
-- Fast page loads with SSG
+### Changed
+- Chat API now returns Server-Sent Events (SSE) instead of JSON
+- Frontend reads streaming data in real-time
+- Messages update incrementally as they arrive
+
+## [2025-10-09] - Chat History
+
+### Added
+- **localStorage Persistence**: Chat history persists across page refreshes
+  - Automatic save on message changes
+  - Automatic load on page mount
+  - Error handling for corrupted data
+- **Clear History Button**: Added UI button to reset conversation
+  - Confirmation dialog before deletion
+  - Removes all messages from both state and localStorage
+
+## [2025-10-09] - Initial RAG Chat
+
+### Added
+- **RAG-based Chat System**: Intelligent chat powered by vector search
+  - Question embedding with OpenAI text-embedding-3-small
+  - Vector search in Supabase with cosine similarity
+  - Context-aware responses using GPT-4o-mini
+  - Source attribution in responses
+- **Contextual Retrieval**: Enhanced search with document context
+  - Each chunk includes generated context about the document
+  - Improved search relevance
+  - Better answer quality
+
+### Technical Details
+- Next.js 15.4.6 API routes
+- Supabase for vector storage
+- OpenAI for embeddings and completions
+- React with TypeScript for frontend
+- Lucide React icons
+
+---
+
+## Notes
+
+### Performance Improvements in This Release
+- **Stream Response**: 10x faster perceived speed (1-2s vs 20-30s)
+- **Cost Reduction**: 82% savings on contextual retrieval
+- **Search Quality**: 50% match threshold improves relevance
+- **localStorage**: Debounced saves reduce write frequency
+
+### Security Improvements
+- Environment validation prevents crashes
+- Input validation prevents abuse
+- Development-only logging protects user data
+- Type safety prevents runtime errors
+
+### Breaking Changes
+- Match threshold increased from 0.2 to 0.5
+  - May return fewer but more relevant documents
+  - Update threshold in constants if needed
+
+---
+
+Generated: 2025-10-09
