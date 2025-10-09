@@ -786,7 +786,10 @@ Want to know more about any project? Just ask!`;
                 {msg.sources && msg.sources.length > 0 && (
                   <div className="mt-2 opacity-60 text-[10px]">
                     <p className="mb-1">refs ({msg.sources.length}):</p>
-                    {msg.sources.map((source, i) => (
+                    {msg.sources.map((source, i) => {
+                      // Remove "(part X/Y)" from title for display
+                      const cleanTitle = source.title.replace(/\s*\(part\s+\d+\/\d+\)\s*$/i, '');
+                      return (
                       <div
                         key={source.id}
                         className="pl-2 py-1 cursor-pointer hover:opacity-80 transition-opacity"
@@ -795,7 +798,7 @@ Want to know more about any project? Just ask!`;
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <div className="truncate">
-                              [{i + 1}] {source.title}
+                              [{i + 1}] {cleanTitle}
                             </div>
                             <div className="line-clamp-1 opacity-70">
                               {source.content}
@@ -806,7 +809,8 @@ Want to know more about any project? Just ask!`;
                           </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
