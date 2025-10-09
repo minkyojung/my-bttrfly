@@ -46,6 +46,7 @@ interface SlashCommand {
     clearHistory: () => void;
     currentPostContext?: any;
     handleSend: (message: string) => void;
+    onClose: () => void;
   }) => void;
 }
 
@@ -248,19 +249,59 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
       action: ({ setMessages }) => {
         const helpText = `Available Commands:
 
-/help       - Show this help message
-/clear      - Clear chat history
-/context    - Show current page context
-/about      - About William
+Information:
+  /help       - Show this help message
+  /commands   - Same as /help
+  /about      - About William
+  /context    - Show current page context
+  /recent     - Recent posts
+  /topics     - Main topics
+  /projects   - Projects list
+
+Actions:
+  /clear      - Clear chat history
+  /close      - Close terminal
 
 You can also type any question to chat with William's AI.`;
         setMessages(prev => [...prev, { role: 'system', content: helpText }]);
       },
     },
     {
-      command: '/clear',
-      description: 'Clear chat history',
-      action: ({ clearHistory }) => clearHistory(),
+      command: '/commands',
+      description: 'Show available commands',
+      action: ({ setMessages }) => {
+        const helpText = `Available Commands:
+
+Information:
+  /help       - Show this help message
+  /commands   - Same as /help
+  /about      - About William
+  /context    - Show current page context
+  /recent     - Recent posts
+  /topics     - Main topics
+  /projects   - Projects list
+
+Actions:
+  /clear      - Clear chat history
+  /close      - Close terminal
+
+You can also type any question to chat with William's AI.`;
+        setMessages(prev => [...prev, { role: 'system', content: helpText }]);
+      },
+    },
+    {
+      command: '/about',
+      description: 'About William',
+      action: ({ setMessages }) => {
+        const aboutText = `About William:
+
+William is a developer and writer interested in technology, design, and building products.
+
+This terminal interface lets you explore William's writings and ask questions powered by AI.
+
+Type /help to see available commands or ask any question.`;
+        setMessages(prev => [...prev, { role: 'system', content: aboutText }]);
+      },
     },
     {
       command: '/context',
@@ -281,18 +322,60 @@ Type a question to learn more about this post.`;
       },
     },
     {
-      command: '/about',
-      description: 'About William',
+      command: '/recent',
+      description: 'Recent posts',
       action: ({ setMessages }) => {
-        const aboutText = `About William:
+        const recentText = `Recent Posts:
 
-William is a developer and writer interested in technology, design, and building products.
+1. "Terminal UI Design" - Terminal-style chat interface
+2. "RAG Chat Integration" - AI-powered chat with context
+3. "Slash Commands" - Command palette implementation
+4. "Developer Experience" - Building better tools
 
-This terminal interface lets you explore William's writings and ask questions powered by AI.
-
-Type /help to see available commands or ask any question.`;
-        setMessages(prev => [...prev, { role: 'system', content: aboutText }]);
+Type a post title or ask questions to learn more.`;
+        setMessages(prev => [...prev, { role: 'system', content: recentText }]);
       },
+    },
+    {
+      command: '/topics',
+      description: 'Main topics',
+      action: ({ setMessages }) => {
+        const topicsText = `Main Topics:
+
+• Technology & Development
+• Design & User Experience
+• Product Building
+• AI & Machine Learning
+• Web Development
+
+Ask me anything about these topics!`;
+        setMessages(prev => [...prev, { role: 'system', content: topicsText }]);
+      },
+    },
+    {
+      command: '/projects',
+      description: 'Projects list',
+      action: ({ setMessages }) => {
+        const projectsText = `Projects:
+
+• bttrfly - Personal blog with AI-powered chat
+• Terminal UI - Minimalist terminal-style interface
+• RAG System - Retrieval-augmented generation chat
+• Slash Commands - Command palette for quick actions
+
+Want to know more about any project? Just ask!`;
+        setMessages(prev => [...prev, { role: 'system', content: projectsText }]);
+      },
+    },
+    {
+      command: '/clear',
+      description: 'Clear chat history',
+      action: ({ clearHistory }) => clearHistory(),
+    },
+    {
+      command: '/close',
+      description: 'Close terminal',
+      action: ({ onClose }) => onClose(),
     },
   ];
 
@@ -331,7 +414,7 @@ Type /help to see available commands or ask any question.`;
         e.preventDefault();
         const selectedCommand = filteredCommands[selectedCommandIndex];
         if (selectedCommand) {
-          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend });
+          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose });
           setInput('');
           setShowCommandPalette(false);
           setTimeout(() => inputRef.current?.focus(), 0);
@@ -504,7 +587,7 @@ Type /help to see available commands or ask any question.`;
                   opacity: idx === selectedCommandIndex ? 1 : 0.5
                 }}
                 onClick={() => {
-                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend });
+                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, onClose });
                   setInput('');
                   setShowCommandPalette(false);
                   setTimeout(() => inputRef.current?.focus(), 0);
