@@ -160,41 +160,32 @@ export function MainPage({ posts, pinnedPosts }: MainPageProps) {
                 <ProfileHistory />
 
                 {/* Compact Terminal Widget */}
-                <div className="mt-10 border rounded" style={{ borderColor: 'var(--border-color)' }}>
+                <div className="mt-10 overflow-hidden" style={{ height: '350px' }}>
                   {/* Terminal Header */}
-                  <div className="flex items-center justify-between px-3 py-2 border-b" style={{ borderColor: 'var(--border-color)' }}>
-                    <span className="text-xs font-mono opacity-50" style={{ color: 'var(--text-color)' }}>
+                  <div className="flex items-center justify-between px-2 py-1 mb-2">
+                    <span className="text-[10px] font-mono opacity-50" style={{ color: 'var(--text-color)' }}>
                       terminal
                     </span>
                     <button
                       onClick={() => setIsTerminalExpanded(true)}
-                      className="p-1 rounded transition-opacity hover:opacity-60"
+                      className="p-0.5 rounded transition-opacity hover:opacity-60"
                       style={{ color: 'var(--text-color)', opacity: 0.5 }}
                       title="expand"
                     >
-                      <Maximize2 className="w-3 h-3" />
+                      <Maximize2 className="w-2.5 h-2.5" />
                     </button>
                   </div>
-                  {/* Terminal Preview */}
-                  <div
-                    className="px-3 py-2 font-mono text-xs cursor-pointer hover:opacity-80 transition-opacity"
-                    style={{
-                      color: 'var(--text-color)',
-                      height: '152px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: 0.5
-                    }}
-                    onClick={() => setIsTerminalExpanded(true)}
-                  >
-                    <div className="text-center">
-                      <pre className="leading-tight mb-2" style={{ lineHeight: '1' }}>{`
-     William
-  .ai terminal v1.0
-                      `}</pre>
-                      <p className="text-[10px]">click to expand</p>
-                    </div>
+                  {/* Compact Terminal */}
+                  <div style={{ height: 'calc(100% - 26px)' }}>
+                    <ChatWidget
+                      isOpen={true}
+                      onClose={() => {}}
+                      currentPostContext={posts.length > 0 ? {
+                        title: posts[0].title,
+                        content: posts[0].content,
+                      } : undefined}
+                      compact={true}
+                    />
                   </div>
                 </div>
               </div>

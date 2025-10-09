@@ -4,18 +4,30 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, FileText, Trash2, X, Sparkles } from 'lucide-react';
 import MarkdownMessage from '@/app/chat/components/MarkdownMessage';
 import { useTheme } from '@/components/ThemeProvider';
+import { SnakeGame } from '@/components/SnakeGame';
+import { Game2048 } from '@/components/Game2048';
 
 // Typing animation hook
 function useTypingEffect(text: string, speed: number = 20) {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
+  const prevTextRef = useRef('');
 
   useEffect(() => {
+    // Only reset if text actually changed
+    if (prevTextRef.current === text && isComplete) {
+      return;
+    }
+
+    prevTextRef.current = text;
     setDisplayedText('');
     setIsComplete(false);
     let index = 0;
+    let mounted = true;
 
     const interval = setInterval(() => {
+      if (!mounted) return;
+
       if (index < text.length) {
         setDisplayedText(text.slice(0, index + 1));
         index++;
@@ -25,8 +37,11 @@ function useTypingEffect(text: string, speed: number = 20) {
       }
     }, speed);
 
-    return () => clearInterval(interval);
-  }, [text, speed]);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, [text, speed, isComplete]);
 
   return { displayedText, isComplete };
 }
@@ -46,10 +61,11 @@ function SystemMessage({ content }: { content: string }) {
 }
 
 interface Message {
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system' | 'game';
   content: string;
   sources?: Source[];
   isStreaming?: boolean;
+  gameType?: 'snake' | '2048';
 }
 
 interface Source {
@@ -67,6 +83,7 @@ interface ChatWidgetProps {
     title: string;
     content: string;
   };
+  compact?: boolean;
 }
 
 // Quick prompts for better UX
@@ -93,7 +110,7 @@ interface SlashCommand {
   }) => void;
 }
 
-export default function ChatWidget({ isOpen, onClose, currentPostContext }: ChatWidgetProps) {
+export default function ChatWidget({ isOpen, onClose, currentPostContext, compact = false }: ChatWidgetProps) {
   const { theme, toggleTheme } = useTheme();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -104,6 +121,50 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
   const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [typingSoundEnabled, setTypingSoundEnabled] = useState(true);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [weather, setWeather] = useState<{ temp: string; condition: string; emoji: string; location: string } | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const lastAIContentLengthRef = useRef(0);
+
+  // Initialize audio context once
+  useEffect(() => {
+    try {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    } catch (error) {
+      console.error('Failed to create audio context:', error);
+    }
+
+    return () => {
+      audioContextRef.current?.close();
+    };
+  }, []);
+
+  // Typing sound effect
+  const playTypingSound = () => {
+    if (!typingSoundEnabled || !audioContextRef.current) return;
+
+    // Create simple beep sound using Web Audio API
+    try {
+      const audioContext = audioContextRef.current;
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800 + Math.random() * 200; // Random pitch variation
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.25, audioContext.currentTime); // Quiet volume
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.05);
+    } catch (error) {
+      // Silently fail if audio context is not supported
+    }
+  };
 
   const clearHistory = () => {
     if (confirm('대화 내역을 모두 삭제하시겠습니까?')) {
@@ -159,6 +220,71 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
       inputRef.current.focus();
     }
   }, [isOpen]);
+
+  // Update time every second
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Play sound when AI is streaming
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant' && lastMessage.isStreaming && lastMessage.content) {
+      const currentLength = lastMessage.content.length;
+      if (currentLength > lastAIContentLengthRef.current) {
+        playTypingSound();
+        lastAIContentLengthRef.current = currentLength;
+      }
+    } else if (!lastMessage || lastMessage.role !== 'assistant' || !lastMessage.isStreaming) {
+      lastAIContentLengthRef.current = 0;
+    }
+  }, [messages]);
+
+  // Fetch weather on mount
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const response = await fetch('https://wttr.in/?format=j1');
+        const data = await response.json();
+        const current = data.current_condition[0];
+        const nearestArea = data.nearest_area[0];
+
+        // Get location code (3-letter abbreviation from city name)
+        const cityName = nearestArea.areaName[0].value;
+        const locationCode = cityName.substring(0, 3).toUpperCase();
+
+        // Map weather codes to emojis
+        const weatherEmoji: { [key: string]: string } = {
+          'Clear': '☀️',
+          'Sunny': '☀️',
+          'Partly cloudy': '⛅',
+          'Cloudy': '☁️',
+          'Overcast': '☁️',
+          'Mist': '🌫️',
+          'Fog': '🌫️',
+          'Rain': '🌧️',
+          'Light rain': '🌦️',
+          'Heavy rain': '🌧️',
+          'Snow': '❄️',
+          'Thunderstorm': '⛈️',
+        };
+
+        setWeather({
+          temp: `${current.temp_C}°C`,
+          condition: current.weatherDesc[0].value,
+          emoji: weatherEmoji[current.weatherDesc[0].value] || '🌤️',
+          location: locationCode
+        });
+      } catch (error) {
+        console.error('Failed to fetch weather:', error);
+      }
+    };
+
+    fetchWeather();
+  }, []);
 
   const handleSend = async (messageText?: string) => {
     const textToSend = messageText || input;
@@ -305,6 +431,10 @@ Actions:
   /theme-toggle - Toggle dark/light mode
   /close        - Close terminal
 
+Fun:
+  /snake        - Play Snake game
+  /2048         - Play 2048 game
+
 You can also type any question to chat with William's AI.`;
         setMessages(prev => [...prev, { role: 'system', content: helpText }]);
       },
@@ -328,6 +458,10 @@ Actions:
   /clear        - Clear chat history
   /theme-toggle - Toggle dark/light mode
   /close        - Close terminal
+
+Fun:
+  /snake        - Play Snake game
+  /2048         - Play 2048 game
 
 You can also type any question to chat with William's AI.`;
         setMessages(prev => [...prev, { role: 'system', content: helpText }]);
@@ -432,6 +566,20 @@ Want to know more about any project? Just ask!`;
       description: 'Close terminal',
       action: ({ onClose }) => onClose(),
     },
+    {
+      command: '/snake',
+      description: 'Play Snake game',
+      action: ({ setMessages }) => {
+        setMessages(prev => [...prev, { role: 'game', content: 'Snake Game', gameType: 'snake' }]);
+      },
+    },
+    {
+      command: '/2048',
+      description: 'Play 2048 game',
+      action: ({ setMessages }) => {
+        setMessages(prev => [...prev, { role: 'game', content: '2048 Game', gameType: '2048' }]);
+      },
+    },
   ];
 
   // Slash command detection and filtering
@@ -499,30 +647,37 @@ Want to know more about any project? Just ask!`;
       borderColor: 'var(--border-color)'
     }}>
       {/* Header - Minimal Terminal Style */}
-      <div className="flex items-center justify-between px-3 py-2 border-b" style={{
-        borderColor: 'var(--border-color)'
-      }}>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onClose}
-            className="w-2.5 h-2.5 rounded-full transition-opacity hover:opacity-60"
-            style={{ backgroundColor: 'var(--text-color)', opacity: 0.3 }}
-          />
-          <span className="text-xs font-mono opacity-50" style={{ color: 'var(--text-color)' }}>
-            terminal
-          </span>
+      {!compact && (
+        <div className="flex items-center justify-between px-3 py-2 border-b" style={{
+          borderColor: 'var(--border-color)'
+        }}>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              className="w-2.5 h-2.5 rounded-full transition-opacity hover:opacity-60"
+              style={{ backgroundColor: 'var(--text-color)', opacity: 0.3 }}
+            />
+            <span className="text-xs font-mono opacity-50" style={{ color: 'var(--text-color)' }}>
+              terminal
+            </span>
+            {weather && (
+              <span className="text-[10px] font-mono opacity-40 ml-2" style={{ color: 'var(--text-color)' }}>
+                {weather.location} {weather.temp}
+              </span>
+            )}
+          </div>
+          {messages.length > 0 && (
+            <button
+              onClick={clearHistory}
+              className="p-1 rounded transition-opacity hover:opacity-60"
+              style={{ color: 'var(--text-color)', opacity: 0.5 }}
+              title="clear"
+            >
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
         </div>
-        {messages.length > 0 && (
-          <button
-            onClick={clearHistory}
-            className="p-1 rounded transition-opacity hover:opacity-60"
-            style={{ color: 'var(--text-color)', opacity: 0.5 }}
-            title="clear"
-          >
-            <Trash2 className="w-3 h-3" />
-          </button>
-        )}
-      </div>
+      )}
 
       {/* Terminal Body - Single Scroll Container */}
       <div
@@ -536,7 +691,7 @@ Want to know more about any project? Just ask!`;
         {/* Welcome Message */}
         {messages.length === 0 && (
           <div className="mb-4 opacity-50">
-            <pre className="leading-tight" style={{ lineHeight: '1' }}>{`
+            <pre className="leading-tight" style={{ lineHeight: '1', color: '#d35400', fontWeight: 'bold' }}>{`
  __      __ .__ .__ .__  .__
 /  \\    /  \\|__||  ||  | |__|____    _____
 \\   \\/\\/   /|  ||  ||  | |  |\\__  \\  /     \\
@@ -561,14 +716,34 @@ Want to know more about any project? Just ask!`;
               </div>
             ) : msg.role === 'system' ? (
               <SystemMessage content={msg.content} />
+            ) : msg.role === 'game' ? (
+              <div className="mt-1 mb-2">
+                {msg.gameType === 'snake' && (
+                  <SnakeGame
+                    onGameOver={(score) => {
+                      setMessages(prev => [...prev, { role: 'system', content: `Game Over! Your score: ${score}` }]);
+                    }}
+                  />
+                )}
+                {msg.gameType === '2048' && (
+                  <Game2048
+                    onGameOver={(score) => {
+                      setMessages(prev => [...prev, { role: 'system', content: `Game Over! Your score: ${score}` }]);
+                    }}
+                  />
+                )}
+              </div>
             ) : (
               <div className="mt-1 mb-2">
                 {msg.content ? (
-                  <div className="opacity-90">
-                    <MarkdownMessage content={msg.content} />
-                    {msg.isStreaming && (
-                      <span className="inline-block w-1.5 h-3 ml-1 animate-pulse" style={{ backgroundColor: 'var(--text-color)' }} />
-                    )}
+                  <div className="flex items-baseline gap-1">
+                    <span className="opacity-30 font-mono text-xs flex-shrink-0" style={{ lineHeight: '1.5' }}>{'>'}</span>
+                    <div className="flex-1 opacity-90">
+                      <MarkdownMessage content={msg.content} />
+                      {msg.isStreaming && (
+                        <span className="inline-block w-1.5 h-3 ml-1 animate-pulse" style={{ backgroundColor: 'var(--text-color)' }} />
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 opacity-50">
@@ -611,11 +786,16 @@ Want to know more about any project? Just ask!`;
 
         {/* Current Input Prompt - Part of scroll flow */}
         <div className="flex items-baseline gap-1" ref={messagesEndRef}>
-          <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }}>$</span>
+          <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }}>
+            {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} $
+          </span>
           <textarea
             ref={inputRef}
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              playTypingSound();
+            }}
             onKeyDown={handleKeyDown}
             placeholder=""
             className="flex-1 bg-transparent resize-none focus:outline-none font-mono text-xs p-0 m-0"
