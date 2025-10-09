@@ -270,7 +270,8 @@ export default function ChatWidget({ isOpen, onClose, currentPostContext }: Chat
       setShowCommandPalette(false);
       setFilteredCommands([]);
     }
-  }, [input, SLASH_COMMANDS]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Command palette navigation
