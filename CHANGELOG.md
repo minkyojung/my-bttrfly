@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2025-10-10] - RAG System Enhancement & Training Content
+
+### Added
+- **AI Training Content**: 246 curated articles for enhanced AI training
+  - Private training content (not for public display)
+  - Articles cover technical, decision-making, and startup topics
+  - All files include metadata (category, priority, tags)
+  - Excluded irrelevant files (meeting notes, drafts)
+- **Decision-Making Principles Integration**: opinions.md loaded into system prompt
+  - William's core principles integrated for better persona alignment
+  - Extracted key headers and bullet points (up to 2000 chars)
+  - Dynamic integration at runtime
+
+### Changed
+- **RAG Retrieval Improvements** (Anthropic best practices):
+  - Increased initial document retrieval from 5 to 20
+  - Use top 20 for Cohere reranking, then select best 5
+  - Reranking now uses `content_with_context` for better relevance
+  - Match threshold decreased to 0.2 for wider search coverage
+- **Embeddings Enhancement**:
+  - Chunk size increased from 500 to 800 tokens (Anthropic recommendation)
+  - Chunk overlap increased from 50 to 80 tokens
+  - Enhanced context generation with document metadata (type, category, tags)
+  - Batch processing (5 files concurrently) for efficiency
+  - Type detection: training/article/note based on file path
+  - Store additional metadata: category, priority, visibility
+  - Set URL to null for private training content
+- **Code Quality**:
+  - Removed development debug logs for cleaner production output
+  - Fixed TypeScript errors with proper type interfaces
+  - Added CodeProps interface for MarkdownMessage
+  - Fixed webkit AudioContext typing in ChatWidget
+  - Removed unused error variables in catch blocks
+
+### Performance
+- **Batch Processing**: 5 files processed concurrently reduces embedding generation time
+- **Improved Reranking**: 20→5 selection with Cohere yields more relevant results
+- **Larger Chunks**: 800-token chunks reduce total API calls by ~40%
+
+### Security
+- Private training content properly isolated (visibility: 'private', url: null)
+- Removed all development debug logs from production code
+
 ## [2025-10-10] - GitHub Integration & Terminal UI
 
 ### Added
