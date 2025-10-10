@@ -7,6 +7,7 @@ import MarkdownMessage from '@/app/chat/components/MarkdownMessage';
 import { useTheme } from '@/components/ThemeProvider';
 import { SnakeGame } from '@/components/SnakeGame';
 import { Game2048 } from '@/components/Game2048';
+import { MatrixRain } from '@/components/MatrixRain';
 
 // Typing animation hook
 function useTypingEffect(text: string, speed: number = 20, onType?: () => void) {
@@ -77,7 +78,7 @@ interface Message {
   content: string;
   sources?: Source[];
   isStreaming?: boolean;
-  gameType?: 'snake' | '2048';
+  gameType?: 'snake' | '2048' | 'matrix';
 }
 
 interface Source {
@@ -109,13 +110,18 @@ interface SlashCommand {
   command: string;
   description: string;
   action: (props: {
-    setMessages: any;
-    setInput: any;
+    setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+    setInput: React.Dispatch<React.SetStateAction<string>>;
     clearHistory: () => void;
-    currentPostContext?: any;
+    currentPostContext?: {
+      title: string;
+      content: string;
+    };
     handleSend: (message: string) => void;
     toggleTheme?: () => void;
     currentTheme?: string;
+    setIsMatrixMode?: (value: boolean) => void;
+    isMatrixMode?: boolean;
   }) => void;
 }
 
@@ -136,6 +142,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   const audioContextRef = useRef<AudioContext | null>(null);
   const lastAIContentLengthRef = useRef(0);
   const lastSoundTimeRef = useRef(0);
+  const [isMatrixMode, setIsMatrixMode] = useState(false);
 
   // Initialize audio context once
   useEffect(() => {
@@ -273,7 +280,7 @@ ${greeting} type / for commands`;
         ]);
       }
     }
-  }, [isOpen]);
+  }, [isOpen, messages.length]);
 
   // Update time every second
   useEffect(() => {
@@ -485,10 +492,12 @@ Information:
 Actions:
   /clear        - Clear chat history
   /theme-toggle - Toggle dark/light mode
+  /github       - Show GitHub activity
 
 Fun:
   /snake        - Play Snake game
   /2048         - Play 2048 game
+  /matrix       - Enter the Matrix
 
 You can also type any question to chat with William's AI.`;
         setMessages(prev => [...prev, { role: 'system', content: helpText }]);
@@ -513,10 +522,12 @@ Information:
 Actions:
   /clear        - Clear chat history
   /theme-toggle - Toggle dark/light mode
+  /github       - Show GitHub activity
 
 Fun:
   /snake        - Play Snake game
   /2048         - Play 2048 game
+  /matrix       - Enter the Matrix
 
 You can also type any question to chat with William's AI.`;
         setMessages(prev => [...prev, { role: 'system', content: helpText }]);
@@ -630,6 +641,115 @@ Want to know more about any project? Just ask!`;
       },
     },
     {
+      command: '/github',
+      description: 'Show GitHub activity',
+      action: async ({ setMessages }) => {
+        setMessages(prev => [...prev, { role: 'system', content: 'Loading GitHub stats...' }]);
+        try {
+          const response = await fetch('/api/github');
+          const stats = await response.json();
+
+          if (stats.error) {
+            setMessages(prev => [...prev.slice(0, -1), { role: 'system', content: `Error: ${stats.details || stats.error}` }]);
+            return;
+          }
+
+          // Create ASCII bar chart for visualization
+          const createBar = (value: number, max: number, width: number = 15) => {
+            const filled = Math.round((value / max) * width);
+            return '█'.repeat(filled) + '░'.repeat(width - filled);
+          };
+
+          // Productivity metrics
+          const productivity = stats.productivity || { weeklyAvg: 0, activeDays: 0, longestStreak: 0, currentStreak: 0 };
+
+          // Top contributions - Personal repos
+          const personalContributions = stats.personalRepoStats && stats.personalRepoStats.topRepos
+            ? stats.personalRepoStats.topRepos.slice(0, 3)
+            : [];
+          const totalPersonalCommits = stats.personalRepoStats?.totalCommits || 0;
+
+          // Top contributions - Org repos
+          const orgContributions = stats.organizations && stats.organizations.length > 0 && stats.organizations[0].topRepos
+            ? stats.organizations[0].topRepos.slice(0, 3)
+            : [];
+          const totalOrgCommits = stats.organizations && stats.organizations.length > 0 && stats.organizations[0].totalCommits
+            ? stats.organizations[0].totalCommits
+            : 0;
+
+          // Code impact formatting
+          const formatNumber = (num: number) => {
+            if (num >= 1000) return `${(num / 1000).toFixed(1)}k`;
+            return num.toString();
+          };
+
+          // Calculate merge rate
+          const mergeRate = stats.collaboration.prOpened > 0
+            ? Math.round((stats.collaboration.prMerged / stats.collaboration.prOpened) * 100)
+            : 0;
+
+          // Organization stats (simplified) - show totalCommits if available
+          const orgSection = stats.organizations && stats.organizations.length > 0
+            ? `\n🏢 ORGANIZATION
+${stats.organizations.slice(0, 1).map((org) => {
+  const commitText = org.totalCommits ? `${org.totalCommits} total commits` : `${org.commits} commits (3mo)`;
+  return `  ${org.name}
+  ${commitText}  •  ${org.repos} repos  •  ${org.stars}⭐`;
+}).join('\n')}\n`
+            : '';
+
+          const githubText = `@${stats.username} — GITHUB PROFILE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 OVERVIEW
+  ${stats.totalRepos} repositories  •  ${stats.totalStars}⭐ stars
+  ${stats.totalCommitsLast3Months} commits (last 3 months)
+  ${stats.collaboration.prOpened} PRs  •  ${mergeRate}% merged
+  ${stats.collaboration.issuesCreated} issues opened
+
+🛠️  TECH STACK
+${stats.topLanguages.slice(0, 5).map((lang: { name: string; count: number; percentage: number }) =>
+  `  ${lang.name.padEnd(14)} ${createBar(lang.percentage, 100, 12)}  ${lang.percentage}%`
+).join('\n')}
+
+📈 PRODUCTIVITY METRICS (last 3 months)
+  Weekly avg      ${productivity.weeklyAvg} commits/week
+  Active days     ${productivity.activeDays} days
+  Longest streak  ${productivity.longestStreak} days
+  Current streak  ${productivity.currentStreak} days
+
+🏆 TOP CONTRIBUTIONS
+${personalContributions.length > 0 ? `
+  Personal
+${personalContributions.map((repo) => {
+  const percentage = totalPersonalCommits > 0 ? Math.round((repo.commits / totalPersonalCommits) * 100) : 0;
+  return `  ${repo.name.padEnd(20)} ${repo.commits.toString().padStart(4)} commits  ${createBar(percentage, 100, 10)}  ${percentage}%`;
+}).join('\n')}
+` : ''}${orgContributions.length > 0 ? `
+  ${stats.organizations[0].name}
+${orgContributions.map((repo) => {
+  const percentage = totalOrgCommits > 0 ? Math.round((repo.commits / totalOrgCommits) * 100) : 0;
+  return `  ${repo.name.padEnd(20)} ${repo.commits.toString().padStart(4)} commits  ${createBar(percentage, 100, 10)}  ${percentage}%`;
+}).join('\n')}` : ''}${personalContributions.length === 0 && orgContributions.length === 0 ? '  No contributions data available' : ''}
+
+💥 IMPACT SUMMARY
+  Code additions  +${formatNumber(stats.codeImpact.additions)} lines
+  Files changed   ${formatNumber(stats.codeImpact.filesChanged)} files
+  Avg PR size     +${formatNumber(stats.codeImpact.avgPRAdditions)}/-${formatNumber(stats.codeImpact.avgPRDeletions)} lines
+
+🤝 COLLABORATION
+  Pull Requests   ${stats.collaboration.prMerged}/${stats.collaboration.prOpened} merged (${mergeRate}%)
+  Issues          ${stats.collaboration.issuesClosed}/${stats.collaboration.issuesCreated} closed
+${orgSection}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+
+          setMessages(prev => [...prev.slice(0, -1), { role: 'system', content: githubText }]);
+        } catch (error) {
+          setMessages(prev => [...prev.slice(0, -1), { role: 'system', content: 'Failed to load GitHub stats.' }]);
+        }
+      },
+    },
+    {
       command: '/snake',
       description: 'Play Snake game',
       action: ({ setMessages }) => {
@@ -641,6 +761,20 @@ Want to know more about any project? Just ask!`;
       description: 'Play 2048 game',
       action: ({ setMessages }) => {
         setMessages(prev => [...prev, { role: 'game', content: '2048 Game', gameType: '2048' }]);
+      },
+    },
+    {
+      command: '/matrix',
+      description: 'Toggle Matrix effect',
+      action: ({ setIsMatrixMode, isMatrixMode, setMessages }) => {
+        if (setIsMatrixMode) {
+          const newMode = !isMatrixMode;
+          setIsMatrixMode(newMode);
+          setMessages(prev => [...prev, {
+            role: 'system',
+            content: newMode ? 'Entering the Matrix...' : 'Exited the Matrix.'
+          }]);
+        }
       },
     },
   ];
@@ -680,7 +814,7 @@ Want to know more about any project? Just ask!`;
         e.preventDefault();
         const selectedCommand = filteredCommands[selectedCommandIndex];
         if (selectedCommand) {
-          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, toggleTheme, currentTheme: theme });
+          selectedCommand.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, toggleTheme, currentTheme: theme, setIsMatrixMode, isMatrixMode });
           setInput('');
           setShowCommandPalette(false);
           setTimeout(() => inputRef.current?.focus(), 0);
@@ -707,11 +841,16 @@ Want to know more about any project? Just ask!`;
   return (
     <div className="fixed inset-0 lg:relative lg:inset-auto flex flex-col h-screen lg:h-full z-50 rounded-lg overflow-hidden" style={{
       backgroundColor: 'var(--bg-color)',
-      borderColor: 'var(--border-color)'
+      borderColor: 'var(--border-color)',
+      position: 'relative'
     }}>
+      {/* Matrix Rain Background */}
+      {isMatrixMode && <MatrixRain />}
+
       {/* Header - Minimal Terminal Style */}
-      <div className="flex items-center justify-between px-3 py-2 border-b" style={{
-        borderColor: 'var(--border-color)'
+      <div className="flex items-center justify-between px-3 py-2 border-b relative" style={{
+        borderColor: 'var(--border-color)',
+        zIndex: 1
       }}>
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 relative cursor-pointer" onClick={toggleTheme}>
@@ -747,10 +886,11 @@ Want to know more about any project? Just ask!`;
 
       {/* Terminal Body - Single Scroll Container */}
       <div
-        className="flex-1 overflow-y-auto px-3 py-2 font-mono text-xs"
+        className="flex-1 overflow-y-auto px-3 py-2 font-mono text-xs relative"
         style={{
-          backgroundColor: 'var(--bg-color)',
-          color: 'var(--text-color)'
+          backgroundColor: isMatrixMode ? 'transparent' : 'var(--bg-color)',
+          color: 'var(--text-color)',
+          zIndex: 1
         }}
         onClick={() => inputRef.current?.focus()}
       >
@@ -861,7 +1001,7 @@ Want to know more about any project? Just ask!`;
 
         {/* Current Input Prompt - Part of scroll flow */}
         <div className="flex items-baseline gap-1" ref={messagesEndRef}>
-          <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }}>
+          <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }} suppressHydrationWarning>
             {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} $
           </span>
           <textarea
@@ -901,7 +1041,7 @@ Want to know more about any project? Just ask!`;
                   opacity: idx === selectedCommandIndex ? 1 : 0.5
                 }}
                 onClick={() => {
-                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, toggleTheme, currentTheme: theme });
+                  cmd.action({ setMessages, setInput, clearHistory, currentPostContext, handleSend, toggleTheme, currentTheme: theme, setIsMatrixMode, isMatrixMode });
                   setInput('');
                   setShowCommandPalette(false);
                   setTimeout(() => inputRef.current?.focus(), 0);
