@@ -147,7 +147,8 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   // Initialize audio context once
   useEffect(() => {
     try {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
     } catch (error) {
       console.error('Failed to create audio context:', error);
     }

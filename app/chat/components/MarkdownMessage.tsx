@@ -10,13 +10,19 @@ interface MarkdownMessageProps {
   content: string;
 }
 
+interface CodeProps {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
+}
+
 export default function MarkdownMessage({ content }: MarkdownMessageProps) {
   return (
     <div className="max-w-none font-mono text-xs" style={{ lineHeight: '1.5' }}>
       <ReactMarkdown
         components={{
         // 코드 블록
-        code({ inline, className, children, ...props }: any) {
+        code({ inline, className, children, ...props }: CodeProps) {
           const match = /language-(\w+)/.exec(className || '');
           const language = match ? match[1] : '';
           const codeContent = String(children).replace(/\n$/, '');
