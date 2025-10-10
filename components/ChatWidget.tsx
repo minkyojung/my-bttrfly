@@ -249,33 +249,28 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
           greeting = 'Still up?';
         }
 
-        // Include ASCII art, greeting, profile info in welcome message
-        const asciiArt = ` __      __ .__ .__ .__  .__
+        // ASCII art logo (will be orange)
+        const asciiArtLogo = ` __      __ .__ .__ .__  .__
 /  \\    /  \\|__||  ||  | |__|____    _____
 \\   \\/\\/   /|  ||  ||  | |  |\\__  \\  /     \\
  \\        / |  ||  ||  |_|  | / __ \\|  Y Y  \\
   \\__/\\  /  |__||__||____/__|(____ /|__|_|__/
        \\/                         \\/
-                    .ai terminal v1.0
+                    .ai terminal v1.0`;
 
-${greeting}
-
-MINKYO JUNG (정민교)
-williamjung0130@gmail.com
-
-CURRENT
-  Founder @ Lerp (2025 - Present)
+        // Profile info (normal color with symbols)
+        const profileInfo = `CURRENT
+  > Lerp : editor for engaging journalism
 
 PAST
-  Operator @ Disquiet (2023 - 2024)
-  15K → 100K users
+  > DISQUIET* : Korea's largest startup community
 
-FOCUS
-  Exploring systems, refining ideas
+${greeting} type / for commands`;
 
-type / for commands`;
-
-        setMessages([{ role: 'system', content: asciiArt }]);
+        setMessages([
+          { role: 'system', content: asciiArtLogo },
+          { role: 'system', content: profileInfo }
+        ]);
       }
     }
   }, [isOpen]);
