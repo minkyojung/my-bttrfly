@@ -17,7 +17,7 @@ export function ProfileHistory() {
   const data = profileData as ProfileData;
 
   return (
-    <div className="mt-10">
+    <div className="mt-2">
       <div className="space-y-2">
         {data.experiences.map((exp, idx) => (
           <div key={idx}>
@@ -35,7 +35,6 @@ export function ProfileHistory() {
           </div>
         ))}
       </div>
-
     </div>
   );
 }
