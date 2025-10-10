@@ -10,6 +10,7 @@
     "generate-embeddings": "tsx --env-file=.env.local scripts/generate-embeddings.ts"
   },
   "dependencies": {
+    "@elevenlabs/elevenlabs-js": "^2.18.0",
     "@mozilla/readability": "^0.6.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-scroll-area": "^1.2.10",
