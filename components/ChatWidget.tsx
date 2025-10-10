@@ -179,7 +179,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       oscillator.frequency.value = 800 + Math.random() * 200; // Random pitch variation
       oscillator.type = 'sine';
 
-      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime); // Quiet volume
+      gainNode.gain.setValueAtTime(0.12, audioContext.currentTime); // Quiet volume
       gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
 
       oscillator.start(audioContext.currentTime);
