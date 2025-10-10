@@ -11,6 +11,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { CohereClient } from 'cohere-ai';
+import fs from 'fs';
+import path from 'path';
 
 // Validate environment variables
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -25,6 +27,52 @@ if (!SUPABASE_URL || !SUPABASE_KEY || !OPENAI_API_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const cohere = COHERE_API_KEY ? new CohereClient({ token: COHERE_API_KEY }) : null;
+
+// Load William's decision-making principles from opinions.md
+let williamOpinions = '';
+try {
+  const opinionsPath = path.join(process.cwd(), 'content', 'opinions.md');
+  if (fs.existsSync(opinionsPath)) {
+    const opinionsContent = fs.readFileSync(opinionsPath, 'utf-8');
+    // Extract key sections (headers and core principles)
+    williamOpinions = extractKeyOpinions(opinionsContent);
+  }
+} catch (error) {
+  console.error('Failed to load opinions.md:', error);
+}
+
+/**
+ * Extract key decision-making principles from opinions.md
+ * Focus on headers and core bullet points
+ */
+function extractKeyOpinions(content: string): string {
+  const lines = content.split('\n');
+  const keyLines: string[] = [];
+  let inFrontmatter = false;
+
+  for (const line of lines) {
+    // Skip frontmatter
+    if (line.trim() === '---') {
+      inFrontmatter = !inFrontmatter;
+      continue;
+    }
+    if (inFrontmatter) continue;
+
+    // Include headers and key bullet points
+    if (
+      line.startsWith('##') ||  // H2 headers
+      line.startsWith('###') || // H3 headers
+      (line.trim().startsWith('-') && line.length < 150) // Short bullet points
+    ) {
+      keyLines.push(line);
+    }
+
+    // Limit to ~2000 chars
+    if (keyLines.join('\n').length > 2000) break;
+  }
+
+  return keyLines.join('\n').substring(0, 2000);
+}
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
@@ -52,7 +100,7 @@ interface Source {
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_HISTORY_LENGTH = 10; // Increased from 6 for better context
 const MATCH_THRESHOLD = 0.2; // Decreased for wider search (was 0.35)
-const MATCH_COUNT = 5; // Optimal for LLM comprehension without confusion
+const MATCH_COUNT = 20; // Anthropic 권장: 20개 검색 후 rerank (was 5)
 
 export async function POST(req: NextRequest) {
   try {
@@ -90,16 +138,7 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[API] Vector search results:', documents?.length || 0, 'documents found');
-    }
-
     if (searchError) {
-      // Log error in development only
-      if (process.env.NODE_ENV === 'development') {
-        console.error('검색 에러:', searchError);
-      }
       return NextResponse.json(
         { error: '문서 검색 중 오류가 발생했습니다.' },
         { status: 500 }
@@ -121,8 +160,8 @@ export async function POST(req: NextRequest) {
       try {
         const rerankedResults = await cohere.rerank({
           query: message,
-          documents: (documents as DocumentResult[]).map(doc => doc.content),
-          topN: Math.min(5, documents.length),
+          documents: (documents as DocumentResult[]).map(doc => doc.content_with_context || doc.content),
+          topN: Math.min(5, documents.length), // Top 5 after reranking
           model: 'rerank-english-v3.0',
         });
 
@@ -130,16 +169,13 @@ export async function POST(req: NextRequest) {
         rerankedDocuments = rerankedResults.results.map(result =>
           (documents as DocumentResult[])[result.index]
         );
-
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[API] Reranking applied:', rerankedDocuments.length, 'documents reordered');
-        }
-      } catch (error) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('[API] Reranking failed, using original order:', error);
-        }
+      } catch {
         // Fall back to original documents if reranking fails
+        rerankedDocuments = (documents as DocumentResult[]).slice(0, 5);
       }
+    } else if (documents && documents.length > 5) {
+      // No reranking available, just take top 5
+      rerankedDocuments = (documents as DocumentResult[]).slice(0, 5);
     }
 
     // 4. 컨텍스트 구성
@@ -160,7 +196,13 @@ export async function POST(req: NextRequest) {
       ? `\n\n[사용자가 현재 읽고 있는 글]\n제목: ${currentPost.title}\n내용: ${currentPost.content.substring(0, 1000)}...\n---\n`
       : '';
 
-    const systemPrompt = `당신은 William Jung입니다. 당신의 글과 생각을 바탕으로 답변하세요.
+    const systemPrompt = `당신은 William Jung입니다. 당신의 글과 생각, 그리고 아래 명시된 의사결정 원칙을 바탕으로 답변하세요.
+
+# William의 핵심 의사결정 원칙
+
+${williamOpinions}
+
+---
 
 # William의 페르소나
 
@@ -288,15 +330,11 @@ ${context}`;
 
           controller.close();
 
-        } catch (error) {
-          // Log errors in development only
-          if (process.env.NODE_ENV === 'development') {
-            console.error('스트리밍 에러:', error);
-          }
+        } catch (streamError) {
           controller.enqueue(
             encoder.encode(JSON.stringify({
               type: 'error',
-              message: error instanceof Error ? error.message : '답변 생성 중 오류가 발생했습니다.'
+              message: streamError instanceof Error ? streamError.message : '답변 생성 중 오류가 발생했습니다.'
             }) + '\n')
           );
           controller.close();
@@ -312,11 +350,7 @@ ${context}`;
       },
     });
 
-  } catch (error) {
-    // Log errors in development only
-    if (process.env.NODE_ENV === 'development') {
-      console.error('Chat API 에러:', error);
-    }
+  } catch {
     return NextResponse.json(
       { error: '답변 생성 중 오류가 발생했습니다.' },
       { status: 500 }
