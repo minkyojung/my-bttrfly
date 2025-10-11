@@ -106,6 +106,40 @@ const QUICK_PROMPTS = [
   "William의 글쓰기 스타일은?",
 ];
 
+// Voice tone presets
+const VOICE_TONE_PRESETS = {
+  casual: {
+    name: '편한 반말',
+    emoji: '💬',
+    description: '친구처럼 편하게 대화 (기본)',
+    instruction: `반말로 편하게 대화하세요. "~거든", "~잖아", "~거야" 자연스럽게 사용.
+짧고 간결하게 1-2문장으로 답변. 친근한 톤 유지.`,
+  },
+  professional: {
+    name: '격식체',
+    emoji: '💼',
+    description: '존댓말로 정중하게',
+    instruction: `존댓말을 사용하세요. "~입니다", "~습니다" 형태.
+전문적이고 격식 있는 톤이지만 딱딱하지 않게.
+여전히 1-2문장으로 간결하게 답변하되, 공손한 표현 사용.`,
+  },
+  concise: {
+    name: '간결체',
+    emoji: '⚡',
+    description: '핵심만 짧게',
+    instruction: `1문장 이내로만 답변하세요. 핵심만 전달.
+불필요한 부가 설명 생략. 명확하고 직접적으로.`,
+  },
+  philosophical: {
+    name: '철학적',
+    emoji: '🤔',
+    description: '깊이 있게 생각하며',
+    instruction: `은유와 비유를 섞어서 깊이 있게 답변하세요.
+철학적 질문이나 생각할 거리를 던지며 마무리.
+2-3문장으로 여유 있게 답변 가능.`,
+  },
+} as const;
+
 // Slash commands
 interface SlashCommand {
   command: string;
@@ -151,6 +185,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [audioWaveform, setAudioWaveform] = useState<number[]>([]);
   const [recordingTime, setRecordingTime] = useState(0);
+  const [voiceTone, setVoiceTone] = useState<'casual' | 'professional' | 'concise' | 'philosophical'>('casual');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const analyserRef = useRef<AnalyserNode | null>(null);
@@ -298,6 +333,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       // Send to voice chat API
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
+      formData.append('voiceTone', voiceTone);
 
       const response = await fetch('/api/voice/chat', {
         method: 'POST',
@@ -412,7 +448,18 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
         localStorage.removeItem('bttrfly-chat-history');
       }
     }
+
+    // Load voice tone preference
+    const savedTone = localStorage.getItem('bttrfly-voice-tone');
+    if (savedTone && savedTone in VOICE_TONE_PRESETS) {
+      setVoiceTone(savedTone as keyof typeof VOICE_TONE_PRESETS);
+    }
   }, []);
+
+  // Save voice tone preference
+  useEffect(() => {
+    localStorage.setItem('bttrfly-voice-tone', voiceTone);
+  }, [voiceTone]);
 
   // messages 변경 시 localStorage에 자동 저장
   useEffect(() => {
@@ -994,6 +1041,65 @@ ${orgSection}
           content: newMode
             ? '🎤 Voice mode activated. Click microphone to start recording.'
             : '✍️  Voice mode deactivated. Type to chat.'
+        }]);
+      },
+    },
+    {
+      command: '/voice-casual',
+      description: '💬 Set casual tone (편한 반말)',
+      action: ({ setMessages }) => {
+        setVoiceTone('casual');
+        const preset = VOICE_TONE_PRESETS.casual;
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
+        }]);
+      },
+    },
+    {
+      command: '/voice-pro',
+      description: '💼 Set professional tone (격식체)',
+      action: ({ setMessages }) => {
+        setVoiceTone('professional');
+        const preset = VOICE_TONE_PRESETS.professional;
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
+        }]);
+      },
+    },
+    {
+      command: '/voice-concise',
+      description: '⚡ Set concise tone (간결체)',
+      action: ({ setMessages }) => {
+        setVoiceTone('concise');
+        const preset = VOICE_TONE_PRESETS.concise;
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
+        }]);
+      },
+    },
+    {
+      command: '/voice-philosophical',
+      description: '🤔 Set philosophical tone (철학적)',
+      action: ({ setMessages }) => {
+        setVoiceTone('philosophical');
+        const preset = VOICE_TONE_PRESETS.philosophical;
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
+        }]);
+      },
+    },
+    {
+      command: '/voice-tone',
+      description: 'Show current voice tone',
+      action: ({ setMessages }) => {
+        const preset = VOICE_TONE_PRESETS[voiceTone];
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: `Current voice tone: ${preset.emoji} ${preset.name}\n${preset.description}\n\nAvailable tones:\n${Object.entries(VOICE_TONE_PRESETS).map(([key, p]) => `  /${key === 'professional' ? 'voice-pro' : `voice-${key}`} - ${p.emoji} ${p.name}`).join('\n')}`
         }]);
       },
     },

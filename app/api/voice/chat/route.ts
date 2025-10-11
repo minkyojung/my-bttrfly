@@ -75,6 +75,20 @@ interface DocumentResult {
 const MATCH_THRESHOLD = 0.2;
 const MATCH_COUNT = 20;
 
+// Voice tone presets (must match frontend)
+const VOICE_TONE_INSTRUCTIONS = {
+  casual: `반말로 편하게 대화하세요. "~거든", "~잖아", "~거야" 자연스럽게 사용.
+짧고 간결하게 1-2문장으로 답변. 친근한 톤 유지.`,
+  professional: `존댓말을 사용하세요. "~입니다", "~습니다" 형태.
+전문적이고 격식 있는 톤이지만 딱딱하지 않게.
+여전히 1-2문장으로 간결하게 답변하되, 공손한 표현 사용.`,
+  concise: `1문장 이내로만 답변하세요. 핵심만 전달.
+불필요한 부가 설명 생략. 명확하고 직접적으로.`,
+  philosophical: `은유와 비유를 섞어서 깊이 있게 답변하세요.
+철학적 질문이나 생각할 거리를 던지며 마무리.
+2-3문장으로 여유 있게 답변 가능.`,
+};
+
 export async function POST(request: NextRequest) {
   // Initialize metrics collector
   const sessionId = generateSessionId();
@@ -83,6 +97,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const audioFile = formData.get('audio') as File;
+    const voiceTone = (formData.get('voiceTone') as string) || 'casual';
 
     if (!audioFile) {
       return NextResponse.json(
@@ -181,7 +196,13 @@ export async function POST(request: NextRequest) {
           .join('\n')
       : '관련 문서를 찾을 수 없습니다.';
 
+    // Get tone instruction
+    const toneInstruction = VOICE_TONE_INSTRUCTIONS[voiceTone as keyof typeof VOICE_TONE_INSTRUCTIONS] || VOICE_TONE_INSTRUCTIONS.casual;
+
     const systemPrompt = `당신은 William Jung입니다. 당신의 글과 생각, 그리고 아래 명시된 의사결정 원칙을 바탕으로 답변하세요.
+
+🎭 대화 톤 설정:
+${toneInstruction}
 
 🎧 William Persona v2 — Conversational Voice Prompt
 🧠 핵심 철학 (사고와 말하기의 기본 원리)
@@ -337,7 +358,7 @@ ${context}`;
       model_id: 'eleven_multilingual_v2',
       optimize_streaming_latency: 3,   // Latency optimization (0-4)
       voice_settings: {
-        stability: 0.35,
+        stability: 0.5,
         similarity_boost: 0.5,
         style: 0.35,
         use_speaker_boost: true,
