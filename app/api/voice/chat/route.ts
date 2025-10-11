@@ -25,43 +25,8 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const cohere = COHERE_API_KEY ? new CohereClient({ token: COHERE_API_KEY }) : null;
 const elevenlabs = new ElevenLabsClient({ apiKey: ELEVENLABS_API_KEY });
 
-// Load William's opinions
-let williamOpinions = '';
-try {
-  const opinionsPath = path.join(process.cwd(), 'content', 'opinions.md');
-  if (fs.existsSync(opinionsPath)) {
-    const opinionsContent = fs.readFileSync(opinionsPath, 'utf-8');
-    williamOpinions = extractKeyOpinions(opinionsContent);
-  }
-} catch (error) {
-  console.error('Failed to load opinions.md:', error);
-}
-
-function extractKeyOpinions(content: string): string {
-  const lines = content.split('\n');
-  const keyLines: string[] = [];
-  let inFrontmatter = false;
-
-  for (const line of lines) {
-    if (line.trim() === '---') {
-      inFrontmatter = !inFrontmatter;
-      continue;
-    }
-    if (inFrontmatter) continue;
-
-    if (
-      line.startsWith('##') ||
-      line.startsWith('###') ||
-      (line.trim().startsWith('-') && line.length < 150)
-    ) {
-      keyLines.push(line);
-    }
-
-    if (keyLines.join('\n').length > 2000) break;
-  }
-
-  return keyLines.join('\n').substring(0, 2000);
-}
+// Note: William's opinions are embedded in the system prompt below
+// Removed separate opinions.md loading to reduce complexity
 
 interface DocumentResult {
   id: string;
@@ -89,6 +54,15 @@ const VOICE_TONE_INSTRUCTIONS = {
 2-3문장으로 여유 있게 답변 가능.`,
 };
 
+// Max file size: 10MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+// Allowed MIME types
+const ALLOWED_AUDIO_TYPES = ['audio/webm', 'audio/wav', 'audio/mp3', 'audio/mpeg', 'audio/ogg'];
+
+// Valid tone options
+const VALID_TONES = ['casual', 'professional', 'concise', 'philosophical'] as const;
+
 export async function POST(request: NextRequest) {
   // Initialize metrics collector
   const sessionId = generateSessionId();
@@ -99,9 +73,34 @@ export async function POST(request: NextRequest) {
     const audioFile = formData.get('audio') as File;
     const voiceTone = (formData.get('voiceTone') as string) || 'casual';
 
+    // Validation: Check if audio file exists
     if (!audioFile) {
       return NextResponse.json(
         { error: 'Audio file is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validation: Check file size
+    if (audioFile.size > MAX_FILE_SIZE) {
+      return NextResponse.json(
+        { error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB` },
+        { status: 413 }
+      );
+    }
+
+    // Validation: Check MIME type
+    if (!ALLOWED_AUDIO_TYPES.includes(audioFile.type)) {
+      return NextResponse.json(
+        { error: `Invalid file type. Allowed types: ${ALLOWED_AUDIO_TYPES.join(', ')}` },
+        { status: 415 }
+      );
+    }
+
+    // Validation: Check voice tone
+    if (!VALID_TONES.includes(voiceTone as typeof VALID_TONES[number])) {
+      return NextResponse.json(
+        { error: `Invalid voice tone. Valid options: ${VALID_TONES.join(', ')}` },
         { status: 400 }
       );
     }

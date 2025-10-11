@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, FileText, Trash2, X, Sparkles } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import MarkdownMessage from '@/app/chat/components/MarkdownMessage';
 import { useTheme } from '@/components/ThemeProvider';
@@ -190,6 +190,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   const chunksRef = useRef<Blob[]>([]);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const audioUrlsRef = useRef<string[]>([]); // Track audio URLs for cleanup
 
   // Initialize audio context once
   useEffect(() => {
@@ -201,7 +202,12 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
     }
 
     return () => {
+      // Cleanup audio context
       audioContextRef.current?.close();
+
+      // Revoke all audio URLs to prevent memory leaks
+      audioUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      audioUrlsRef.current = [];
     };
   }, []);
 
@@ -330,6 +336,18 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       };
       setMessages(prev => [...prev, userMessage]);
 
+      // Validate audio blob size (max 10MB)
+      const MAX_AUDIO_SIZE = 10 * 1024 * 1024;
+      if (audioBlob.size > MAX_AUDIO_SIZE) {
+        throw new Error('Recording too large. Please keep it under 10MB.');
+      }
+
+      // Validate voice tone
+      const validTones = ['casual', 'professional', 'concise', 'philosophical'];
+      if (!validTones.includes(voiceTone)) {
+        throw new Error('Invalid voice tone');
+      }
+
       // Send to voice chat API
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.webm');
@@ -374,6 +392,9 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       }
       const responseAudioBlob = new Blob([audioArray], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(responseAudioBlob);
+
+      // Track audio URL for cleanup
+      audioUrlsRef.current.push(audioUrl);
 
       // Add assistant message with audio URL
       const assistantMessage: Message = {
@@ -665,7 +686,6 @@ ${greeting} type / for commands`;
 
             if (chunk.type === 'sources') {
               sources = chunk.data;
-              console.log('[ChatWidget] Received sources:', sources);
               if (sources.length > 0) {
                 setLoadingStage(`referencing ${sources.length} documents...`);
               }
@@ -1235,11 +1255,7 @@ ${orgSection}
         onClick={() => inputRef.current?.focus()}
       >
         {/* Message History */}
-        {messages.map((msg, idx) => {
-          if (msg.role === 'assistant') {
-            console.log(`[ChatWidget] Rendering assistant message ${idx}, sources:`, msg.sources);
-          }
-          return (
+        {messages.map((msg, idx) => (
           <div key={idx} className="mb-3">
             {msg.role === 'user' ? (
               <div className="flex items-baseline gap-1">
@@ -1356,8 +1372,7 @@ ${orgSection}
               </div>
             )}
           </div>
-        );
-        })}
+        ))}
 
         {/* Current Input Prompt - Part of scroll flow */}
         <div className="flex items-baseline gap-1" ref={messagesEndRef}>
