@@ -79,6 +79,7 @@ interface Message {
   sources?: Source[];
   isStreaming?: boolean;
   gameType?: 'snake' | '2048' | 'matrix';
+  audioUrl?: string;
 }
 
 interface Source {
@@ -149,9 +150,11 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   const [isRecording, setIsRecording] = useState(false);
   const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
   const [audioWaveform, setAudioWaveform] = useState<number[]>([]);
+  const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize audio context once
   useEffect(() => {
@@ -241,6 +244,12 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
 
       mediaRecorder.start();
       setIsRecording(true);
+      setRecordingTime(0);
+
+      // Start timer
+      recordingTimerRef.current = setInterval(() => {
+        setRecordingTime(prev => prev + 1);
+      }, 1000);
     } catch (err) {
       console.error('Error starting recording:', err);
       setMessages(prev => [...prev, {
@@ -254,13 +263,29 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+
+      // Stop timer
+      if (recordingTimerRef.current) {
+        clearInterval(recordingTimerRef.current);
+        recordingTimerRef.current = null;
+      }
+      setRecordingTime(0);
     }
   };
 
   // Handle voice message processing
   const handleVoiceMessage = async (audioBlob: Blob) => {
     setIsLoading(true);
-    setLoadingStage('transcribing...');
+
+    // Diverse loading messages
+    const loadingMessages = [
+      'transcribing...',
+      'listening...',
+      'understanding...',
+      'decoding audio...',
+      'processing speech...',
+    ];
+    setLoadingStage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
 
     try {
       // Add user message placeholder
@@ -295,7 +320,15 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
         return updated;
       });
 
-      setLoadingStage('generating response...');
+      // More diverse messages for response generation
+      const responseMessages = [
+        'thinking...',
+        'generating response...',
+        'formulating answer...',
+        'crafting reply...',
+        'composing...',
+      ];
+      setLoadingStage(responseMessages[Math.floor(Math.random() * responseMessages.length)]);
 
       // Convert base64 audio to blob and create URL
       const audioData = atob(data.audio);
@@ -306,10 +339,11 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       const responseAudioBlob = new Blob([audioArray], { type: 'audio/mpeg' });
       const audioUrl = URL.createObjectURL(responseAudioBlob);
 
-      // Add assistant message
+      // Add assistant message with audio URL
       const assistantMessage: Message = {
         role: 'assistant',
         content: data.responseText,
+        audioUrl,
       };
       setMessages(prev => [...prev, assistantMessage]);
 
@@ -1116,14 +1150,34 @@ ${orgSection}
             ) : (
               <div className="mt-1 mb-2">
                 {msg.content ? (
-                  <div className="flex items-baseline gap-1">
-                    <span className="opacity-30 font-mono text-xs flex-shrink-0" style={{ lineHeight: '1.5' }}>{'>'}</span>
-                    <div className="flex-1 opacity-90">
-                      <MarkdownMessage content={msg.content} />
-                      {msg.isStreaming && (
-                        <span className="inline-block w-1.5 h-3 ml-1 animate-pulse" style={{ backgroundColor: 'var(--text-color)' }} />
-                      )}
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="opacity-30 font-mono text-xs flex-shrink-0" style={{ lineHeight: '1.5' }}>{'>'}</span>
+                      <div className="flex-1 opacity-90">
+                        <MarkdownMessage content={msg.content} />
+                        {msg.isStreaming && (
+                          <span className="inline-block w-1.5 h-3 ml-1 animate-pulse" style={{ backgroundColor: 'var(--text-color)' }} />
+                        )}
+                      </div>
                     </div>
+                    {/* Replay button for voice messages */}
+                    {msg.audioUrl && !msg.isStreaming && (
+                      <button
+                        onClick={() => {
+                          if (currentAudio) {
+                            currentAudio.pause();
+                            currentAudio.currentTime = 0;
+                          }
+                          const audio = new Audio(msg.audioUrl);
+                          setCurrentAudio(audio);
+                          audio.play();
+                        }}
+                        className="ml-3 mt-1 font-mono text-[10px] opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
+                        style={{ color: 'var(--text-color)' }}
+                      >
+                        [▶ replay]
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 opacity-50">
@@ -1212,7 +1266,7 @@ ${orgSection}
                   padding: 0
                 }}
               >
-                {isRecording ? '[⏹ stop]' : '[🎤 rec]'}
+                {isRecording ? `[⏹ stop] ${Math.floor(recordingTime / 60)}:${String(recordingTime % 60).padStart(2, '0')}` : '[▶ rec]'}
               </button>
 
               {/* Waveform visualization */}
