@@ -354,8 +354,8 @@ ${context}`;
     metrics.checkpoint('tts_start');
     const audioStream = await elevenlabs.textToSpeech.convert(ELEVENLABS_VOICE_ID, {
       text: normalized.normalized,
-      model_id: 'eleven_multilingual_v2',
-      optimize_streaming_latency: 3,   // Latency optimization (0-4)
+      model_id: 'eleven_turbo_v2_5',
+      optimize_streaming_latency: 4,   // Latency optimization (0-4, max for fastest response)
       voice_settings: {
         stability: 0.5,
         similarity_boost: 0.5,
