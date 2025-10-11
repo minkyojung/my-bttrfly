@@ -1198,20 +1198,21 @@ ${orgSection}
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={isLoading}
                 className={`
-                  px-2 py-1 rounded font-mono text-xs transition-all border
+                  font-mono text-xs transition-all
                   ${isRecording
-                    ? 'opacity-100 animate-pulse'
-                    : 'opacity-80 hover:opacity-100'
+                    ? 'animate-pulse'
+                    : 'hover:opacity-100'
                   }
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                  ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer opacity-70'}
                 `}
                 style={{
-                  color: 'var(--text-color)',
-                  borderColor: 'var(--text-color)',
-                  backgroundColor: isRecording ? 'rgba(239, 68, 68, 0.1)' : 'rgba(128, 128, 128, 0.05)'
+                  color: isRecording ? '#ef4444' : 'var(--text-color)',
+                  background: 'none',
+                  border: 'none',
+                  padding: 0
                 }}
               >
-                {isRecording ? '⏹ stop' : '🎤 rec'}
+                {isRecording ? '[⏹ stop]' : '[🎤 rec]'}
               </button>
 
               {/* Waveform visualization */}
