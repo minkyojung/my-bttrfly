@@ -7,177 +7,79 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2025-10-10] - RAG System Enhancement & Training Content
-
 ### Added
-- **AI Training Content**: 246 curated articles for enhanced AI training
-  - Private training content (not for public display)
-  - Articles cover technical, decision-making, and startup topics
-  - All files include metadata (category, priority, tags)
-  - Excluded irrelevant files (meeting notes, drafts)
-- **Decision-Making Principles Integration**: opinions.md loaded into system prompt
-  - William's core principles integrated for better persona alignment
-  - Extracted key headers and bullet points (up to 2000 chars)
-  - Dynamic integration at runtime
+- **Voice Chat System in Terminal**
+  - Integrated voice chat mode with `/voice` slash command
+  - Real-time audio recording with visual waveform animation
+  - Speech-to-text transcription using OpenAI Whisper
+  - Text-to-speech synthesis using ElevenLabs with William's cloned voice
+  - `[▶ rec]` button with recording timer (MM:SS format)
+  - `[▶ replay]` button for replaying assistant voice responses
+
+- **Voice Tone Adjustment System**
+  - 4 customizable tone presets: casual (💬), professional (💼), concise (⚡), philosophical (🤔)
+  - Slash commands: `/voice-casual`, `/voice-pro`, `/voice-concise`, `/voice-philosophical`
+  - `/voice-tone` command to view current tone and available options
+  - Tone preference saved to localStorage for persistence
+
+- **Metrics & Analytics**
+  - Voice metrics collection system (STT, RAG, LLM, TTS performance tracking)
+  - Metrics dashboard at `/metrics`
+  - Supabase database schema for voice metrics storage
+  - Real-time performance monitoring
+
+- **Text Normalization Library**
+  - Intelligent text preprocessing for TTS
+  - Citation removal for natural speech
+  - Markdown formatting cleanup
+  - Strategic filler words for conversational tone
+  - Korean text normalization
+
+- **LiveKit Infrastructure** (experimental)
+  - LiveKit agent implementations (Python)
+  - Token generation and room management APIs
+  - Agent dispatch system
+  - LiveKit UI components integration
 
 ### Changed
-- **RAG Retrieval Improvements** (Anthropic best practices):
-  - Increased initial document retrieval from 5 to 20
-  - Use top 20 for Cohere reranking, then select best 5
-  - Reranking now uses `content_with_context` for better relevance
-  - Match threshold decreased to 0.2 for wider search coverage
-- **Embeddings Enhancement**:
-  - Chunk size increased from 500 to 800 tokens (Anthropic recommendation)
-  - Chunk overlap increased from 50 to 80 tokens
-  - Enhanced context generation with document metadata (type, category, tags)
-  - Batch processing (5 files concurrently) for efficiency
-  - Type detection: training/article/note based on file path
-  - Store additional metadata: category, priority, visibility
-  - Set URL to null for private training content
-- **Code Quality**:
-  - Removed development debug logs for cleaner production output
-  - Fixed TypeScript errors with proper type interfaces
-  - Added CodeProps interface for MarkdownMessage
-  - Fixed webkit AudioContext typing in ChatWidget
-  - Removed unused error variables in catch blocks
-
-### Performance
-- **Batch Processing**: 5 files processed concurrently reduces embedding generation time
-- **Improved Reranking**: 20→5 selection with Cohere yields more relevant results
-- **Larger Chunks**: 800-token chunks reduce total API calls by ~40%
-
-### Security
-- Private training content properly isolated (visibility: 'private', url: null)
-- Removed all development debug logs from production code
-
-## [2025-10-10] - GitHub Integration & Terminal UI
-
-### Added
-- **GitHub Profile Integration**: `/github` command displays comprehensive developer stats
-  - Real commit counts via Contributors API (not just event estimates)
-  - Productivity metrics: weekly average, active days, current/longest streaks
-  - Top contributions breakdown (personal & organization repositories)
-  - Tech stack visualization with percentage bars
-  - Impact summary: code additions, files changed, average PR size
-  - Collaboration stats: PR merge rates, issues closed
-  - 5-minute caching to reduce API calls and avoid rate limits
-- **Matrix Rain Effect**: `/matrix` command toggles animated background
-  - Blog-related keywords and tech terms in falling characters
-  - Transparent canvas overlay with fade trails
-  - Integrates with terminal theme
-- **Terminal Profile**: Updated welcome message
-  - Current project: Lerp (editor for engaging journalism)
-  - Past work: DISQUIET (Korea's largest startup community)
-  - Removed excessive ASCII art for cleaner interface
-
-### Changed
-- Parallelized GitHub API calls for 10x faster data fetching
-  - Sequential loops replaced with Promise.all()
-  - Personal and organization repos fetched concurrently
-- Improved TypeScript type safety
-  - Replaced all `any` types with proper interfaces
-  - Added GitHubStats, GitHubOrganization, GitHubItem interfaces
-- Removed debug console logs from production
-- Simplified terminal greeting and command structure
+- Updated help menu to include voice tone commands
+- Improved loading messages with diverse variations (transcribing, listening, understanding, etc.)
+- Enhanced voice processing feedback with stage-based status updates
 
 ### Fixed
-- Hydration warnings with suppressHydrationWarning on time display
-- Type safety issues in GitHub API route
-- Unused variable warnings (checkDate, error handlers)
+- **Security Improvements**
+  - Added file size validation (max 10MB) for audio uploads
+  - Added MIME type validation for audio files (webm, wav, mp3, mpeg, ogg)
+  - Added voice tone parameter validation
+  - Prevented memory leaks by tracking and revoking audio blob URLs
+  - Client-side validation before API calls
+
+- **Code Quality**
+  - Removed debug console.log statements
+  - Removed unused imports (Send, Loader2, FileText, X, Sparkles)
+  - Fixed TypeScript 'any' type issues in LiveKit routes
+  - Proper error handling with typed error objects
+  - Cleaned up unused williamOpinions variable
 
 ### Performance
-- **API Optimization**: Parallel fetch reduces GitHub data load time by ~90%
-- **Caching**: In-memory cache prevents redundant API calls for 5 minutes
-- **Rate Limiting**: Stays well within GitHub's 5000 req/hour limit
+- Proper cleanup of audio URLs in component unmount
+- Efficient audio context management
+- Optimized waveform animation with requestAnimationFrame
 
-### Security
-- Removed sensitive token logging from production
-- Added proper error handling for failed API requests
-- Environment variables properly validated
+### Dependencies
+- Added `@livekit/components-react` (latest)
+- Added `livekit-client` (latest)
+- Updated `livekit-server-sdk` to ^2.14.0
+- Added Python packages for LiveKit agent (openai, elevenlabs, silero, supabase, cohere)
 
-## [2025-10-09] - Cost Optimization
+## Previous Commits
 
-### Changed
-- **Cost Optimization**: Replaced Anthropic Claude with OpenAI GPT-4o-mini for contextual retrieval
-  - 82% cost reduction (\$0.152 → \$0.027 per 100 calls)
-  - Faster processing (200ms → 100ms rate limiting)
-  - Maintained quality with more affordable model
-
-### Removed
-- @anthropic-ai/sdk dependency
-- ANTHROPIC_API_KEY requirement
-
-## [2025-10-09] - Streaming & Markdown
-
-### Added
-- **Streaming Response**: Real-time message streaming from OpenAI
-  - First response appears in 1-2 seconds (vs 20-30 seconds before)
-  - Typing cursor animation during streaming
-  - Smooth user experience similar to ChatGPT
-- **Markdown Rendering**: Full markdown support in chat messages
-  - Syntax highlighting for code blocks (VS Code Dark+ theme)
-  - Code copy button functionality
-  - Support for headers, lists, links, tables, quotes
-  - Inline code highlighting
-- **Enhanced UI**: Improved chat interface with better visual feedback
-
-### Changed
-- Chat API now returns Server-Sent Events (SSE) instead of JSON
-- Frontend reads streaming data in real-time
-- Messages update incrementally as they arrive
-
-## [2025-10-09] - Chat History
-
-### Added
-- **localStorage Persistence**: Chat history persists across page refreshes
-  - Automatic save on message changes
-  - Automatic load on page mount
-  - Error handling for corrupted data
-- **Clear History Button**: Added UI button to reset conversation
-  - Confirmation dialog before deletion
-  - Removes all messages from both state and localStorage
-
-## [2025-10-09] - Initial RAG Chat
-
-### Added
-- **RAG-based Chat System**: Intelligent chat powered by vector search
-  - Question embedding with OpenAI text-embedding-3-small
-  - Vector search in Supabase with cosine similarity
-  - Context-aware responses using GPT-4o-mini
-  - Source attribution in responses
-- **Contextual Retrieval**: Enhanced search with document context
-  - Each chunk includes generated context about the document
-  - Improved search relevance
-  - Better answer quality
-
-### Technical Details
-- Next.js 15.4.6 API routes
-- Supabase for vector storage
-- OpenAI for embeddings and completions
-- React with TypeScript for frontend
-- Lucide React icons
+### [2025-01-11] Voice Chat Foundation
+- Initial voice chat integration with Whisper + GPT-4o-mini + ElevenLabs
+- RAG system integration for context-aware responses
+- Retrieval augmented generation with Supabase vector database
+- Cohere reranking for improved document relevance
 
 ---
 
-## Notes
-
-### Performance Improvements in This Release
-- **Stream Response**: 10x faster perceived speed (1-2s vs 20-30s)
-- **Cost Reduction**: 82% savings on contextual retrieval
-- **Search Quality**: 50% match threshold improves relevance
-- **localStorage**: Debounced saves reduce write frequency
-
-### Security Improvements
-- Environment validation prevents crashes
-- Input validation prevents abuse
-- Development-only logging protects user data
-- Type safety prevents runtime errors
-
-### Breaking Changes
-- Match threshold increased from 0.2 to 0.5
-  - May return fewer but more relevant documents
-  - Update threshold in constants if needed
-
----
-
-Generated: 2025-10-09
+Generated with [Claude Code](https://claude.com/claude-code)
