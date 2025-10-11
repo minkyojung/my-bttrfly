@@ -318,15 +318,25 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   const handleVoiceMessage = async (audioBlob: Blob) => {
     setIsLoading(true);
 
-    // Diverse loading messages
-    const loadingMessages = [
-      'transcribing...',
-      'listening...',
-      'understanding...',
-      'decoding audio...',
-      'processing speech...',
+    // Dynamic loading stages with progression
+    const loadingStages = [
+      { message: 'listening to your voice...', duration: 800 },
+      { message: 'transcribing audio...', duration: 1200 },
+      { message: 'understanding context...', duration: 1000 },
+      { message: 'searching knowledge base...', duration: 1500 },
+      { message: 'generating response...', duration: 2000 },
+      { message: 'synthesizing voice...', duration: 1800 },
+      { message: 'almost there...', duration: 1000 },
     ];
-    setLoadingStage(loadingMessages[Math.floor(Math.random() * loadingMessages.length)]);
+
+    let currentStageIndex = 0;
+    setLoadingStage(loadingStages[0].message);
+
+    // Cycle through stages dynamically
+    const stageInterval = setInterval(() => {
+      currentStageIndex = (currentStageIndex + 1) % loadingStages.length;
+      setLoadingStage(loadingStages[currentStageIndex].message);
+    }, 1500); // Update every 1.5 seconds
 
     try {
       // Add user message placeholder
@@ -444,6 +454,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
         },
       ]);
     } finally {
+      clearInterval(stageInterval);
       setIsLoading(false);
       setLoadingStage('');
     }
@@ -1317,7 +1328,7 @@ ${orgSection}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 opacity-50">
-                    <span className="animate-pulse">▋</span>
+                    <span className="inline-block animate-spin text-sm">⟳</span>
                     <span className="text-[10px]">{loadingStage || 'processing...'}</span>
                   </div>
                 )}
@@ -1428,9 +1439,10 @@ ${orgSection}
 
               {/* Loading indicator for voice */}
               {isLoading && (
-                <span className="text-[10px] opacity-50 animate-pulse">
-                  {loadingStage}
-                </span>
+                <div className="flex items-center gap-2 text-[10px] opacity-50">
+                  <span className="inline-block animate-spin">⟳</span>
+                  <span>{loadingStage}</span>
+                </div>
               )}
             </div>
           ) : (
