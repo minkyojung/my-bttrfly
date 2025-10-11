@@ -746,6 +746,13 @@ Actions:
   /github       - Show GitHub activity
   /voice        - Toggle voice chat mode
 
+Voice Tones:
+  /voice-casual       - 💬 Casual tone (편한 반말)
+  /voice-pro          - 💼 Professional (격식체)
+  /voice-concise      - ⚡ Concise (간결체)
+  /voice-philosophical - 🤔 Philosophical (철학적)
+  /voice-tone         - Show current tone
+
 Fun:
   /snake        - Play Snake game
   /2048         - Play 2048 game
@@ -776,6 +783,13 @@ Actions:
   /theme-toggle - Toggle dark/light mode
   /github       - Show GitHub activity
   /voice        - Toggle voice chat mode
+
+Voice Tones:
+  /voice-casual       - 💬 Casual tone (편한 반말)
+  /voice-pro          - 💼 Professional (격식체)
+  /voice-concise      - ⚡ Concise (간결체)
+  /voice-philosophical - 🤔 Philosophical (철학적)
+  /voice-tone         - Show current tone
 
 Fun:
   /snake        - Play Snake game
