@@ -769,13 +769,6 @@ Actions:
   /github       - Show GitHub activity
   /voice        - Toggle voice chat mode
 
-Voice Tones:
-  /voice-casual       - 💬 Casual tone (편한 반말)
-  /voice-pro          - 💼 Professional (격식체)
-  /voice-concise      - ⚡ Concise (간결체)
-  /voice-philosophical - 🤔 Philosophical (철학적)
-  /voice-tone         - Show current tone
-
 Fun:
   /snake        - Play Snake game
   /2048         - Play 2048 game
@@ -806,13 +799,6 @@ Actions:
   /theme-toggle - Toggle dark/light mode
   /github       - Show GitHub activity
   /voice        - Toggle voice chat mode
-
-Voice Tones:
-  /voice-casual       - 💬 Casual tone (편한 반말)
-  /voice-pro          - 💼 Professional (격식체)
-  /voice-concise      - ⚡ Concise (간결체)
-  /voice-philosophical - 🤔 Philosophical (철학적)
-  /voice-tone         - Show current tone
 
 Fun:
   /snake        - Play Snake game
@@ -1078,65 +1064,6 @@ ${orgSection}
           content: newMode
             ? '🎤 Voice mode activated. Click microphone to start recording.'
             : '✍️  Voice mode deactivated. Type to chat.'
-        }]);
-      },
-    },
-    {
-      command: '/voice-casual',
-      description: '💬 Set casual tone (편한 반말)',
-      action: ({ setMessages }) => {
-        setVoiceTone('casual');
-        const preset = VOICE_TONE_PRESETS.casual;
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
-        }]);
-      },
-    },
-    {
-      command: '/voice-pro',
-      description: '💼 Set professional tone (격식체)',
-      action: ({ setMessages }) => {
-        setVoiceTone('professional');
-        const preset = VOICE_TONE_PRESETS.professional;
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
-        }]);
-      },
-    },
-    {
-      command: '/voice-concise',
-      description: '⚡ Set concise tone (간결체)',
-      action: ({ setMessages }) => {
-        setVoiceTone('concise');
-        const preset = VOICE_TONE_PRESETS.concise;
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
-        }]);
-      },
-    },
-    {
-      command: '/voice-philosophical',
-      description: '🤔 Set philosophical tone (철학적)',
-      action: ({ setMessages }) => {
-        setVoiceTone('philosophical');
-        const preset = VOICE_TONE_PRESETS.philosophical;
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: `${preset.emoji} Voice tone: ${preset.name}\n${preset.description}`
-        }]);
-      },
-    },
-    {
-      command: '/voice-tone',
-      description: 'Show current voice tone',
-      action: ({ setMessages }) => {
-        const preset = VOICE_TONE_PRESETS[voiceTone];
-        setMessages(prev => [...prev, {
-          role: 'system',
-          content: `Current voice tone: ${preset.emoji} ${preset.name}\n${preset.description}\n\nAvailable tones:\n${Object.entries(VOICE_TONE_PRESETS).map(([key, p]) => `  /${key === 'professional' ? 'voice-pro' : `voice-${key}`} - ${p.emoji} ${p.name}`).join('\n')}`
         }]);
       },
     },
