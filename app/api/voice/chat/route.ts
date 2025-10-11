@@ -316,7 +316,7 @@ ${context}`;
         { role: 'user', content: userMessage },
       ],
       temperature: 0.8,
-      max_tokens: 200,
+      max_tokens: 150,
       presence_penalty: 0.3,
       frequency_penalty: 0.3,
       stream: true, // Stream for faster perceived response
