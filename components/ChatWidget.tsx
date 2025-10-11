@@ -342,7 +342,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       // Add user message placeholder with audio visualization
       const userMessage: Message = {
         role: 'user',
-        content: '▌processing audio...',
+        content: 'processing audio...',
       };
       setMessages(prev => [...prev, userMessage]);
 
@@ -1274,13 +1274,7 @@ ${orgSection}
                 <div className="flex-1 whitespace-pre-wrap font-mono text-xs" style={{ lineHeight: '1.5' }}>
                   {msg.content.includes('processing audio') ? (
                     <div className="flex items-center gap-2">
-                      <div className="flex items-end gap-0.5" style={{ height: '12px' }}>
-                        <span className="audio-bar"></span>
-                        <span className="audio-bar"></span>
-                        <span className="audio-bar"></span>
-                        <span className="audio-bar"></span>
-                        <span className="audio-bar"></span>
-                      </div>
+                      <span className="animate-pulse">◉</span>
                       <span>processing audio...</span>
                     </div>
                   ) : (
@@ -1341,7 +1335,7 @@ ${orgSection}
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 opacity-50">
-                    <span className="inline-block animate-spin-variable text-sm">+</span>
+                    <span className="inline-block animate-spin-variable text-sm">*</span>
                     <span className="text-[10px]">{loadingStage || 'processing...'}</span>
                   </div>
                 )}
@@ -1453,7 +1447,7 @@ ${orgSection}
               {/* Loading indicator for voice */}
               {isLoading && (
                 <div className="flex items-center gap-2 text-[10px] opacity-50">
-                  <span className="inline-block animate-spin-variable">+</span>
+                  <span className="inline-block animate-spin-variable">*</span>
                   <span>{loadingStage}</span>
                 </div>
               )}
