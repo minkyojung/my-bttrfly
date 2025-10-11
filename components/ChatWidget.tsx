@@ -1198,14 +1198,18 @@ ${orgSection}
                 onClick={isRecording ? stopRecording : startRecording}
                 disabled={isLoading}
                 className={`
-                  px-2 py-1 rounded font-mono text-xs transition-all
+                  px-2 py-1 rounded font-mono text-xs transition-all border
                   ${isRecording
                     ? 'opacity-100 animate-pulse'
-                    : 'opacity-70 hover:opacity-100'
+                    : 'opacity-80 hover:opacity-100'
                   }
                   ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                 `}
-                style={{ color: 'var(--text-color)' }}
+                style={{
+                  color: 'var(--text-color)',
+                  borderColor: 'var(--text-color)',
+                  backgroundColor: isRecording ? 'rgba(239, 68, 68, 0.1)' : 'rgba(128, 128, 128, 0.05)'
+                }}
               >
                 {isRecording ? '⏹ stop' : '🎤 rec'}
               </button>
