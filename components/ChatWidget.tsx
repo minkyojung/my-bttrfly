@@ -1203,10 +1203,10 @@ ${orgSection}
                     ? 'animate-pulse'
                     : 'hover:opacity-100'
                   }
-                  ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer opacity-70'}
+                  ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer opacity-80'}
                 `}
                 style={{
-                  color: isRecording ? '#ef4444' : 'var(--text-color)',
+                  color: isRecording ? '#ef4444' : '#10b981',
                   background: 'none',
                   border: 'none',
                   padding: 0
