@@ -35,8 +35,8 @@ interface DocumentResult {
   similarity: number;
 }
 
-const MATCH_THRESHOLD = 0.2;
-const MATCH_COUNT = 20;
+const MATCH_THRESHOLD = 0.35;
+const MATCH_COUNT = 15;
 
 // Voice tone presets (must match frontend)
 const VOICE_TONE_INSTRUCTIONS = {
@@ -163,18 +163,18 @@ export async function POST(request: NextRequest) {
           documents: (documents as DocumentResult[]).map(
             doc => doc.content_with_context || doc.content
           ),
-          topN: Math.min(5, documents.length),
-          model: 'rerank-english-v3.0',
+          topN: Math.min(3, documents.length),
+          model: 'rerank-multilingual-v3.0',
         });
 
         rerankedDocuments = rerankedResults.results.map(result =>
           (documents as DocumentResult[])[result.index]
         );
       } catch {
-        rerankedDocuments = (documents as DocumentResult[]).slice(0, 5);
+        rerankedDocuments = (documents as DocumentResult[]).slice(0, 3);
       }
-    } else if (documents && documents.length > 5) {
-      rerankedDocuments = (documents as DocumentResult[]).slice(0, 5);
+    } else if (documents && documents.length > 3) {
+      rerankedDocuments = (documents as DocumentResult[]).slice(0, 3);
     }
     metrics.checkpoint('rerank_end');
     metrics.setMetric('quality.documentsUsed', rerankedDocuments?.length || 0);
@@ -356,8 +356,8 @@ ${context}`;
       optimize_streaming_latency: 4,   // Latency optimization (0-4, max for fastest response)
       voice_settings: {
         stability: 0.5,
-        similarity_boost: 0.5,
-        style: 0.35,
+        similarity_boost: 0.8,
+        style: 0,
         use_speaker_boost: true,
       },
     });
