@@ -144,6 +144,15 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   const lastSoundTimeRef = useRef(0);
   const [isMatrixMode, setIsMatrixMode] = useState(false);
 
+  // Voice mode states
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
+  const [audioWaveform, setAudioWaveform] = useState<number[]>([]);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+
   // Initialize audio context once
   useEffect(() => {
     try {
@@ -186,6 +195,166 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       oscillator.stop(audioContext.currentTime + 0.05);
     } catch (error) {
       // Silently fail if audio context is not supported
+    }
+  };
+
+  // Voice recording functions
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+
+      // Setup audio analyzer for waveform
+      if (audioContextRef.current) {
+        const source = audioContextRef.current.createMediaStreamSource(stream);
+        const analyser = audioContextRef.current.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        analyserRef.current = analyser;
+
+        // Start waveform animation
+        const updateWaveform = () => {
+          if (!analyserRef.current || !isRecording) return;
+          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+          analyserRef.current.getByteFrequencyData(dataArray);
+          setAudioWaveform(Array.from(dataArray.slice(0, 20)));
+          requestAnimationFrame(updateWaveform);
+        };
+        updateWaveform();
+      }
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        handleVoiceMessage(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+        setAudioWaveform([]);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Error starting recording:', err);
+      setMessages(prev => [...prev, {
+        role: 'system',
+        content: '❌ Microphone access denied. Please allow microphone permissions.'
+      }]);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
+
+  // Handle voice message processing
+  const handleVoiceMessage = async (audioBlob: Blob) => {
+    setIsLoading(true);
+    setLoadingStage('transcribing...');
+
+    try {
+      // Add user message placeholder
+      const userMessage: Message = {
+        role: 'user',
+        content: '🎤 processing audio...',
+      };
+      setMessages(prev => [...prev, userMessage]);
+
+      // Send to voice chat API
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.webm');
+
+      const response = await fetch('/api/voice/chat', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Voice chat failed');
+      }
+
+      const data = await response.json();
+
+      // Update user message with transcription
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: 'user',
+          content: data.transcription,
+        };
+        return updated;
+      });
+
+      setLoadingStage('generating response...');
+
+      // Convert base64 audio to blob and create URL
+      const audioData = atob(data.audio);
+      const audioArray = new Uint8Array(audioData.length);
+      for (let i = 0; i < audioData.length; i++) {
+        audioArray[i] = audioData.charCodeAt(i);
+      }
+      const responseAudioBlob = new Blob([audioArray], { type: 'audio/mpeg' });
+      const audioUrl = URL.createObjectURL(responseAudioBlob);
+
+      // Add assistant message
+      const assistantMessage: Message = {
+        role: 'assistant',
+        content: data.responseText,
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+
+      // Play audio with waveform visualization
+      const audio = new Audio(audioUrl);
+      setCurrentAudio(audio);
+
+      // Setup audio visualization during playback
+      if (audioContextRef.current) {
+        const source = audioContextRef.current.createMediaElementSource(audio);
+        const analyser = audioContextRef.current.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+        analyser.connect(audioContextRef.current.destination);
+        analyserRef.current = analyser;
+
+        // Animate waveform during playback
+        const updatePlaybackWaveform = () => {
+          if (!analyserRef.current || audio.paused) {
+            setAudioWaveform([]);
+            return;
+          }
+          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+          analyserRef.current.getByteFrequencyData(dataArray);
+          setAudioWaveform(Array.from(dataArray.slice(0, 20)));
+          requestAnimationFrame(updatePlaybackWaveform);
+        };
+
+        audio.onplay = () => updatePlaybackWaveform();
+        audio.onended = () => setAudioWaveform([]);
+      }
+
+      audio.play();
+    } catch (error) {
+      console.error('Voice chat error:', error);
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'system',
+          content: '❌ Voice processing failed. Please try again.',
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+      setLoadingStage('');
     }
   };
 
@@ -494,6 +663,7 @@ Actions:
   /clear        - Clear chat history
   /theme-toggle - Toggle dark/light mode
   /github       - Show GitHub activity
+  /voice        - Toggle voice chat mode
 
 Fun:
   /snake        - Play Snake game
@@ -524,6 +694,7 @@ Actions:
   /clear        - Clear chat history
   /theme-toggle - Toggle dark/light mode
   /github       - Show GitHub activity
+  /voice        - Toggle voice chat mode
 
 Fun:
   /snake        - Play Snake game
@@ -778,6 +949,20 @@ ${orgSection}
         }
       },
     },
+    {
+      command: '/voice',
+      description: 'Toggle voice chat mode',
+      action: ({ setMessages }) => {
+        const newMode = !isVoiceMode;
+        setIsVoiceMode(newMode);
+        setMessages(prev => [...prev, {
+          role: 'system',
+          content: newMode
+            ? '🎤 Voice mode activated. Click microphone to start recording.'
+            : '✍️  Voice mode deactivated. Type to chat.'
+        }]);
+      },
+    },
   ];
 
   // Slash command detection and filtering
@@ -1005,29 +1190,80 @@ ${orgSection}
           <span className="opacity-50 flex-shrink-0 font-mono text-xs" style={{ lineHeight: '1.5' }} suppressHydrationWarning>
             {currentTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })} $
           </span>
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-              playTypingSound();
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder=""
-            className="flex-1 bg-transparent resize-none focus:outline-none font-mono text-xs p-0 m-0"
-            style={{
-              color: 'var(--text-color)',
-              lineHeight: '1.5',
-              verticalAlign: 'baseline'
-            }}
-            disabled={isLoading}
-            rows={1}
-            onInput={(e) => {
-              const target = e.target as HTMLTextAreaElement;
-              target.style.height = 'auto';
-              target.style.height = target.scrollHeight + 'px';
-            }}
-          />
+
+          {isVoiceMode ? (
+            <div className="flex-1 flex items-center gap-2">
+              {/* Microphone button */}
+              <button
+                onClick={isRecording ? stopRecording : startRecording}
+                disabled={isLoading}
+                className={`
+                  px-2 py-1 rounded font-mono text-xs transition-all
+                  ${isRecording
+                    ? 'opacity-100 animate-pulse'
+                    : 'opacity-70 hover:opacity-100'
+                  }
+                  ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                `}
+                style={{ color: 'var(--text-color)' }}
+              >
+                {isRecording ? '⏹ stop' : '🎤 rec'}
+              </button>
+
+              {/* Waveform visualization */}
+              {(audioWaveform.length > 0 || isRecording) && (
+                <div className="flex items-center gap-px h-4">
+                  {audioWaveform.length > 0 ? (
+                    audioWaveform.map((value, i) => (
+                      <div
+                        key={i}
+                        className="w-0.5 rounded-full transition-all"
+                        style={{
+                          height: `${Math.max(2, (value / 255) * 16)}px`,
+                          backgroundColor: 'var(--text-color)',
+                          opacity: 0.6
+                        }}
+                      />
+                    ))
+                  ) : (
+                    // Placeholder dots when recording but no data yet
+                    <span className="text-xs opacity-50 animate-pulse">...</span>
+                  )}
+                </div>
+              )}
+
+              {/* Loading indicator for voice */}
+              {isLoading && (
+                <span className="text-[10px] opacity-50 animate-pulse">
+                  {loadingStage}
+                </span>
+              )}
+            </div>
+          ) : (
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => {
+                setInput(e.target.value);
+                playTypingSound();
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder=""
+              className="flex-1 bg-transparent resize-none focus:outline-none font-mono text-xs p-0 m-0"
+              style={{
+                color: 'var(--text-color)',
+                lineHeight: '1.5',
+                verticalAlign: 'baseline'
+              }}
+              disabled={isLoading}
+              rows={1}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement;
+                target.style.height = 'auto';
+                target.style.height = target.scrollHeight + 'px';
+              }}
+            />
+          )}
         </div>
 
         {/* Command Palette - Below input */}
