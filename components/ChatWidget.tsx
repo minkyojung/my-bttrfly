@@ -98,14 +98,6 @@ interface ChatWidgetProps {
   };
 }
 
-// Quick prompts for better UX
-const QUICK_PROMPTS = [
-  "William의 주요 관심사는 무엇인가요?",
-  "최근 작성한 글에서 다룬 주제는?",
-  "어떤 프로젝트를 진행했나요?",
-  "William의 글쓰기 스타일은?",
-];
-
 // Voice tone presets
 const VOICE_TONE_PRESETS = {
   casual: {

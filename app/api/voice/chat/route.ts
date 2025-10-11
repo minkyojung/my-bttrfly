@@ -3,8 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { CohereClient } from 'cohere-ai';
 import { ElevenLabsClient } from '@elevenlabs/elevenlabs-js';
-import fs from 'fs';
-import path from 'path';
 import { normalizeForTTS } from '@/lib/text-normalization';
 import { VoiceMetricsCollector, generateSessionId, countSentences, calculateAvgSimilarity } from '@/lib/metrics';
 
