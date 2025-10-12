@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-01-15)
+- **Improved RAG Accuracy**
+  - Increased similarity threshold from 0.2 to 0.35 for more relevant document retrieval
+  - Switched to `rerank-multilingual-v3.0` model (critical fix for Korean queries)
+  - Reduced document count from 20 to 15 for better quality
+  - Decreased top reranked documents from 5 to 3 for focused context
+
 ### Added
 - **Voice Chat System in Terminal**
   - Integrated voice chat mode with `/voice` slash command
@@ -54,6 +61,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Agent dispatch system
   - LiveKit UI components integration
 
+### Changed (2025-01-15)
+- **Simplified Voice Commands**
+  - Removed individual voice tone slash commands (`/voice-casual`, `/voice-pro`, `/voice-concise`, `/voice-philosophical`, `/voice-tone`)
+  - Kept only `/voice` toggle command for simplicity
+  - Removed voice tone section from help menu
+
 ### Changed
 - Updated help menu to include voice tone commands
 - Improved loading messages with diverse variations (transcribing, listening, understanding, etc.)
@@ -69,6 +82,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Decreased max_tokens from 200 to 150
   - Faster generation without compromising quality
   - System prompt already enforces concise 1-2 sentence responses
+
+### Fixed (2025-01-15)
+- **Security & Code Quality Improvements**
+  - Removed all debug console logging (console.error, console.warn, console.log)
+  - Removed sensitive error message exposure from API responses
+  - Removed test function with console statements from text-normalization.ts
+  - Fixed unused variable warnings (setTypingSoundEnabled, error variables, displayIndex)
+  - Improved error handling to gracefully degrade instead of logging
+  - Reduced production log pollution
+  - Enhanced client-side security by not exposing internal errors
 
 ### Fixed
 - **Security Improvements**
