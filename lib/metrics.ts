@@ -132,8 +132,7 @@ export class VoiceMetricsCollector {
     this.metrics.cost = this.estimateCost();
 
     // Save to database (fire and forget - don't block response)
-    this.saveToDatabase().catch(error => {
-      console.error('Failed to save metrics:', error);
+    this.saveToDatabase().catch(() => {
       // Don't throw - metrics failure shouldn't break the voice chat
     });
 
@@ -177,7 +176,6 @@ export class VoiceMetricsCollector {
    */
   private async saveToDatabase(): Promise<void> {
     if (!SUPABASE_URL || !SUPABASE_KEY) {
-      console.warn('Supabase credentials not configured, skipping metrics save');
       return;
     }
 

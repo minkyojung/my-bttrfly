@@ -395,15 +395,13 @@ ${context}`;
       },
     });
   } catch (error) {
-    console.error('Voice chat error:', error);
-
     // Record error in metrics
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     metrics.recordError('llm', errorMessage);
     await metrics.finalize();
 
     return NextResponse.json(
-      { error: 'Voice chat failed', message: errorMessage },
+      { error: 'Voice chat failed' },
       { status: 500 }
     );
   }
