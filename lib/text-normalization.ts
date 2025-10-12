@@ -277,7 +277,7 @@ export function normalizeKoreanText(text: string): string {
 /**
  * Split long sentences (future enhancement)
  */
-export function splitLongSentences(text: string, maxLength: number): { text: string; count: number } {
+export function splitLongSentences(text: string, _maxLength: number): { text: string; count: number } {
   // TODO: Implement smart sentence splitting
   // For now, just return as-is
   return { text, count: 0 };
@@ -304,41 +304,3 @@ function cleanupWhitespace(text: string): string {
   return result;
 }
 
-/**
- * Test function (for development)
- */
-export function testNormalization(): void {
-  const testCases = [
-    {
-      input: '[출처 1] 이것은 **중요한** 내용입니다. AI에 대한 생각.',
-      description: 'Citation + 마크다운 제거',
-    },
-    {
-      input: '그거는 진짜 어려운 문제거든. 나도 고민했어.',
-      description: 'Filler 추가',
-    },
-    {
-      input: '3개 사과를 샀어요.',
-      description: '한국어 숫자 단위',
-    },
-    {
-      input: 'AI는 미래다.근데 지금도 중요해.왜냐하면 모든 게 바뀌거든.',
-      description: '구두점 정리',
-    },
-    {
-      input: '[출처 1] **AI는** `중요해`. [출처 2] 정말로.',
-      description: '복합 패턴',
-    },
-  ];
-
-  console.log('\n=== Text Normalization Test ===\n');
-
-  testCases.forEach((testCase, i) => {
-    const result = normalizeForTTS(testCase.input);
-    console.log(`Test ${i + 1}: ${testCase.description}`);
-    console.log(`Input:  "${testCase.input}"`);
-    console.log(`Output: "${result.normalized}"`);
-    console.log(`Changes:`, result.changes);
-    console.log('');
-  });
-}
