@@ -163,7 +163,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
   const [filteredCommands, setFilteredCommands] = useState<SlashCommand[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [typingSoundEnabled, setTypingSoundEnabled] = useState(true);
+  const [typingSoundEnabled] = useState(true);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [weather, setWeather] = useState<{ temp: string; condition: string; emoji: string; location: string } | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -189,8 +189,8 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
     try {
       const AudioContextClass = window.AudioContext || (window as Window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       audioContextRef.current = new AudioContextClass();
-    } catch (error) {
-      console.error('Failed to create audio context:', error);
+    } catch {
+      // Audio context creation failed - will gracefully degrade
     }
 
     return () => {
@@ -229,7 +229,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.05);
-    } catch (error) {
+    } catch {
       // Silently fail if audio context is not supported
     }
   };
@@ -283,8 +283,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
       }, 1000);
-    } catch (err) {
-      console.error('Error starting recording:', err);
+    } catch {
       setMessages(prev => [...prev, {
         role: 'system',
         content: '❌ Microphone access denied. Please allow microphone permissions.'
@@ -436,8 +435,7 @@ export default function ChatWidget({ isOpen, currentPostContext }: ChatWidgetPro
       }
 
       audio.play();
-    } catch (error) {
-      console.error('Voice chat error:', error);
+    } catch {
       setMessages(prev => [
         ...prev,
         {
@@ -614,8 +612,8 @@ ${greeting} type / for commands`;
           emoji: weatherEmoji[current.weatherDesc[0].value] || '🌤️',
           location: locationCode
         });
-      } catch (error) {
-        console.error('Failed to fetch weather:', error);
+      } catch {
+        // Weather fetch failed - will gracefully degrade
       }
     };
 
@@ -1020,7 +1018,7 @@ ${orgSection}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
 
           setMessages(prev => [...prev.slice(0, -1), { role: 'system', content: githubText }]);
-        } catch (error) {
+        } catch {
           setMessages(prev => [...prev.slice(0, -1), { role: 'system', content: 'Failed to load GitHub stats.' }]);
         }
       },
@@ -1276,7 +1274,7 @@ ${orgSection}
                   return (
                   <div className="mt-2 opacity-60 text-[10px]">
                     <p className="mb-1">refs ({citedSources.length}):</p>
-                    {citedSources.map((source, displayIndex) => {
+                    {citedSources.map((source) => {
                       // Remove "(part X/Y)" from title for display
                       const cleanTitle = source.title.replace(/\s*\(part\s+\d+\/\d+\)\s*$/i, '');
                       // Get original source number (1-indexed)
