@@ -1,0 +1,73 @@
+{
+  "conversationId": "9901d64a-2daf-46fb-bdc5-aae884efb4e9",
+  "messageId": "msg-1762095843488",
+  "mode": "auto",
+  "todos": [
+    {
+      "id": "todo-msg-1762095843488-0",
+      "content": "Read type definitions and config files",
+      "activeForm": "Reading type definitions and config files",
+      "status": "pending",
+      "priority": "high",
+      "complexity": "trivial",
+      "estimatedDuration": 180,
+      "order": 0,
+      "depth": 0
+    },
+    {
+      "id": "todo-msg-1762095843488-1",
+      "content": "Analyze error handling patterns across chatbot components",
+      "activeForm": "Analyzing error handling patterns",
+      "status": "pending",
+      "priority": "high",
+      "complexity": "simple",
+      "estimatedDuration": 300,
+      "order": 1,
+      "depth": 0
+    },
+    {
+      "id": "todo-msg-1762095843488-2",
+      "content": "Review RAG system configuration and optimization opportunities",
+      "activeForm": "Reviewing RAG system configuration",
+      "status": "pending",
+      "priority": "high",
+      "complexity": "medium",
+      "estimatedDuration": 600,
+      "order": 2,
+      "depth": 0
+    },
+    {
+      "id": "todo-msg-1762095843488-3",
+      "content": "Evaluate UX/UI improvements for ChatWidget component",
+      "activeForm": "Evaluating UX/UI improvements",
+      "status": "pending",
+      "priority": "medium",
+      "complexity": "simple",
+      "estimatedDuration": 420,
+      "order": 3,
+      "depth": 0
+    },
+    {
+      "id": "todo-msg-1762095843488-4",
+      "content": "Check code quality and maintainability issues",
+      "activeForm": "Checking code quality issues",
+      "status": "pending",
+      "priority": "medium",
+      "complexity": "simple",
+      "estimatedDuration": 300,
+      "order": 4,
+      "depth": 0
+    },
+    {
+      "id": "todo-msg-1762095843488-5",
+      "content": "Compile comprehensive improvement recommendations",
+      "activeForm": "Compiling improvement recommendations",
+      "status": "pending",
+      "priority": "high",
+      "complexity": "medium",
+      "estimatedDuration": 600,
+      "order": 5,
+      "depth": 0
+    }
+  ]
+}
