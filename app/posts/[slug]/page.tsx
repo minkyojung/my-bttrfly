@@ -2,8 +2,6 @@ import { notFound } from 'next/navigation';
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ShareButton } from '@/components/ShareButton';
-import { ReadingControls } from '@/components/ReadingControls';
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -67,11 +65,10 @@ export default async function Post({
             <h1 className="text-3xl font-black mb-4" style={{ color: 'var(--text-color)' }}>
               {post.title}
             </h1>
-            <div className="flex items-center justify-between text-sm" style={{ color: 'var(--text-color)' }}>
+            <div className="flex items-center text-sm" style={{ color: 'var(--text-color)' }}>
               <p className="opacity-80">
                 {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')} · {post.readingTime}
               </p>
-              <ShareButton />
             </div>
           </header>
 
@@ -113,9 +110,6 @@ export default async function Post({
           />
         </article>
       </div>
-      
-      {/* 읽기 컨트롤 */}
-      <ReadingControls />
     </main>
   );
 }

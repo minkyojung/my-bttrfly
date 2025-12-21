@@ -1,7 +1,5 @@
 'use client';
 
-import ChatWidget from "@/components/ChatWidget";
-
 interface Post {
   slug: string;
   title: string;
@@ -22,9 +20,8 @@ interface MainPageProps {
 export function MainPage({ posts }: MainPageProps) {
   return (
     <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-      <div className="flex flex-col lg:flex-row h-screen">
-        {/* 데스크탑: 좌측 50% / 모바일: 하단 - 모든 포스트 수직 나열 */}
-        <div className="w-full lg:w-1/2 pl-6 lg:pl-12 pr-6 lg:pr-8 py-6 lg:py-12 overflow-y-auto order-2 lg:order-1 scrollbar-hide">
+      <div className="max-w-4xl mx-auto px-6 lg:px-12 py-6 lg:py-12">
+        <div className="overflow-y-auto scrollbar-hide">
           {posts.length > 0 ? (
             posts.map((post, index) => (
               <article key={post.slug} className={index > 0 ? 'mt-24' : ''}>
@@ -114,19 +111,7 @@ export function MainPage({ posts }: MainPageProps) {
             </div>
           )}
         </div>
-
-        {/* 데스크탑: 우측 50% / 모바일: 상단 - Terminal */}
-        <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-l order-1 lg:order-2 flex flex-col overflow-hidden" style={{ borderColor: 'var(--border-color)' }}>
-          <ChatWidget
-            isOpen={true}
-            currentPostContext={posts.length > 0 ? {
-              title: posts[0].title,
-              content: posts[0].content,
-            } : undefined}
-          />
-        </div>
       </div>
-
     </main>
   );
 }
