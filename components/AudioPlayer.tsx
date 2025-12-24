@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 
 interface AudioPlayerProps {
   src: string;
@@ -11,8 +12,11 @@ interface AudioPlayerProps {
 export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(180); // 임시로 3분 설정
+  const [isDragging, setIsDragging] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -37,13 +41,53 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
     }
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const time = parseFloat(e.target.value);
-    if (audioRef.current) {
-      audioRef.current.currentTime = time;
-      setCurrentTime(time);
+  const updateProgress = (clientX: number) => {
+    if (!progressRef.current) return;
+
+    const rect = progressRef.current.getBoundingClientRect();
+    const clickX = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(1, clickX / rect.width));
+    const time = percentage * duration;
+
+    // 임시로 오디오 없이 currentTime만 업데이트
+    setCurrentTime(time);
+
+    // if (audioRef.current) {
+    //   audioRef.current.currentTime = time;
+    //   setCurrentTime(time);
+    // }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    updateProgress(e.clientX);
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging) {
+      updateProgress(e.clientX);
     }
   };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  // Add global event listeners for drag
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    } else {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -53,14 +97,21 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
 
   return (
     <div style={{
-      width: '300px',
+      width: '275px',
       display: 'flex',
-      alignItems: 'center',
+      flexDirection: 'column',
       gap: '12px',
-      padding: '12px 16px',
-      border: '1px solid #3a3a3a',
-      borderRadius: '6px',
-      backgroundColor: '#0E0E0E'
+      padding: '12px',
+      position: 'relative',
+      borderRadius: '20px',
+      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)',
+      backdropFilter: 'blur(20px) saturate(180%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      boxShadow: `
+        0 8px 32px 0 rgba(0, 0, 0, 0.37),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1)
+      `,
+      border: '1px solid rgba(255, 255, 255, 0.04)'
     }}>
       <audio
         ref={audioRef}
@@ -70,123 +121,124 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
         onEnded={() => setIsPlaying(false)}
       />
 
-      {/* Play/Pause Button */}
-      <button
-        onClick={togglePlay}
-        style={{
-          width: '28px',
-          height: '28px',
-          borderRadius: '4px',
-          backgroundColor: '#2a2a2a',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-          transition: 'background-color 0.2s'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#3a3a3a'}
-        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#2a2a2a'}
-      >
-        {isPlaying ? (
-          // Pause icon
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <rect x="6" y="4" width="4" height="16" fill="#ffffff" />
-            <rect x="14" y="4" width="4" height="16" fill="#ffffff" />
-          </svg>
-        ) : (
-          // Play icon
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path d="M8 5v14l11-7z" fill="#ffffff" />
-          </svg>
-        )}
-      </button>
-
-      {/* Track Info */}
+      {/* Top Group: Track Info + Play Button */}
       <div style={{
         display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-        flexShrink: 0,
-        minWidth: '100px'
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: '100%',
+        gap: '12px'
       }}>
-        {title && (
-          <p style={{
-            color: '#ffffff',
-            fontFamily: 'Pretendard',
-            fontWeight: 600,
-            fontSize: '14px',
-            letterSpacing: '-0.03em',
-            lineHeight: '1.2'
-          }}>
-            {title}
-          </p>
-        )}
-        {artist && (
-          <p style={{
-            color: '#7B7B7B',
-            fontFamily: 'Pretendard',
-            fontWeight: 500,
-            fontSize: '12px',
-            letterSpacing: '-0.03em',
-            lineHeight: '1.2'
-          }}>
-            {artist}
-          </p>
-        )}
+        {/* Track Info */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {artist && (
+            <p style={{
+              color: '#7B7B7B',
+              fontFamily: 'Pretendard',
+              fontWeight: 500,
+              fontSize: '12px',
+              letterSpacing: '-0.03em',
+              lineHeight: '1.3',
+              marginBottom: '2px'
+            }}>
+              {artist}
+            </p>
+          )}
+          {title && (
+            <p style={{
+              color: '#ffffff',
+              fontFamily: 'Pretendard',
+              fontWeight: 600,
+              fontSize: '14px',
+              letterSpacing: '-0.03em',
+              lineHeight: '1.3',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
+              {title}
+            </p>
+          )}
+        </div>
+
+        {/* Play/Pause Button */}
+        <button
+          onClick={togglePlay}
+          style={{
+            width: '32px',
+            height: '32px',
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+            border: 'none',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'opacity 0.2s',
+            flexShrink: 0
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.6'}
+          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+        >
+          {isPlaying ? (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <rect x="6" y="4" width="4" height="16" fill="#ffffff" />
+              <rect x="14" y="4" width="4" height="16" fill="#ffffff" />
+            </svg>
+          ) : (
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style={{ marginLeft: '2px' }}>
+              <path d="M8 5v14l11-7z" fill="#ffffff" />
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Progress Bar */}
-      <div style={{ flex: 1, position: 'relative' }}>
-        <input
-          type="range"
-          min="0"
-          max={duration || 0}
-          value={currentTime}
-          onChange={handleSeek}
+      <motion.div
+        ref={progressRef}
+        onMouseDown={handleMouseDown}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+        animate={{
+          scaleY: isHovering || isDragging ? 1.2 : 1
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 25
+        }}
+        style={{
+          width: '100%',
+          position: 'relative',
+          height: '6px',
+          backgroundColor: 'rgba(255, 255, 255, 0.15)',
+          borderRadius: '10px',
+          cursor: 'pointer',
+          overflow: 'hidden'
+        }}
+      >
+        {/* Progress Fill */}
+        <motion.div
+          animate={{
+            width: `${(currentTime / duration) * 100}%`
+          }}
+          transition={{
+            type: 'spring',
+            stiffness: isDragging ? 500 : 300,
+            damping: isDragging ? 40 : 30
+          }}
           style={{
-            width: '100%',
-            height: '2px',
-            outline: 'none',
-            cursor: 'pointer',
-            appearance: 'none',
-            backgroundColor: '#3a3a3a',
-            borderRadius: '1px'
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            height: '100%',
+            backgroundColor: '#ffffff',
+            borderRadius: '10px'
           }}
         />
-        <style jsx>{`
-          input[type='range']::-webkit-slider-thumb {
-            appearance: none;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ffffff;
-            cursor: pointer;
-          }
-          input[type='range']::-moz-range-thumb {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ffffff;
-            cursor: pointer;
-            border: none;
-          }
-        `}</style>
-      </div>
-
-      {/* Time Display */}
-      <span style={{
-        color: '#7B7B7B',
-        fontFamily: 'Pretendard',
-        fontSize: '12px',
-        fontWeight: 500,
-        flexShrink: 0,
-        minWidth: '60px',
-        textAlign: 'right'
-      }}>
-        {formatTime(currentTime)} / {formatTime(duration)}
-      </span>
+      </motion.div>
     </div>
   );
 }
