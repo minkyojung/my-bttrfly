@@ -10,11 +10,14 @@
     "generate-embeddings": "tsx --env-file=.env.local scripts/generate-embeddings.ts"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.4.2",
     "@types/three": "^0.182.0",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
     "next": "^15.2.1",
     "react": "^19.2.3",
+    "react-audio-player": "^0.17.0",
     "react-dom": "^19.2.3",
     "remark": "^15.0.1",
     "remark-html": "^16.0.1",
