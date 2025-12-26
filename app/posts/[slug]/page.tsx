@@ -50,8 +50,57 @@ export default async function Post({
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-      <div className="max-w-3xl mx-auto px-6 py-12">
+    <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .prose img {
+          position: relative;
+          cursor: help;
+        }
+
+        .prose img::after {
+          content: attr(alt);
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%) translateY(-8px);
+          background: rgba(0, 0, 0, 0.9);
+          color: #ffffff;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 500;
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 100;
+          font-family: 'Pretendard', sans-serif;
+        }
+
+        .prose img:hover::after {
+          opacity: 1;
+        }
+
+        .prose img::before {
+          content: '';
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%) translateY(-2px);
+          border: 6px solid transparent;
+          border-top-color: rgba(0, 0, 0, 0.9);
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 100;
+        }
+
+        .prose img:hover::before {
+          opacity: 1;
+        }
+      `}} />
+      <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+        <div className="max-w-3xl mx-auto px-6 py-12">
         {/* 홈으로 돌아가기 링크 */}
         <Link
           href="/"
@@ -149,6 +198,7 @@ export default async function Post({
           />
         </div>
       )}
-    </main>
+      </main>
+    </>
   );
 }
