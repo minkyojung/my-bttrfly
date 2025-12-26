@@ -48,6 +48,9 @@ export function GitHubContributions() {
         .react-activity-calendar text {
           fill: rgba(255,255,255,0.25) !important;
         }
+        .react-activity-calendar rect {
+          stroke-width: 0.5px !important;
+        }
         .github-tooltip {
           background-color: #1a1a1a !important;
           color: #fff !important;
