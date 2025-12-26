@@ -1,0 +1,36 @@
+.container {
+  width: 100%;
+  max-width: 600px;
+  padding: 1.5rem 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  overflow-x: auto;
+
+  /* 스크롤바 숨기기 */
+  -ms-overflow-style: none;  /* IE, Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.container::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
+.loading {
+  height: 8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.2);
+  font-size: 0.875rem;
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .container {
+    padding: 1rem 0;
+  }
+
+  .loading {
+    height: 6rem;
+    font-size: 0.8125rem;
+  }
+}

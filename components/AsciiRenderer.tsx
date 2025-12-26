@@ -8,30 +8,25 @@ interface AsciiRendererProps {
 
 export default function AsciiRenderer({ className }: AsciiRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
+  const animationIdRef = useRef<number | null>(null);
+  const rendererRef = useRef<import('three').WebGLRenderer | null>(null);
+  const asciiContainerRef = useRef<HTMLDivElement | null>(null);
+  const isCleanedUpRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Prevent double initialization in Strict Mode
-    if (initializedRef.current) {
-      console.log('[AsciiRenderer] Already initialized, skipping');
-      return;
-    }
-
     if (!containerRef.current) {
       return;
     }
 
-    initializedRef.current = true;
     const container = containerRef.current;
-
-    let animationId: number | null = null;
-    let renderer: import('three').WebGLRenderer | null = null;
-    let asciiContainer: HTMLDivElement | null = null;
+    isCleanedUpRef.current = false;
+    let resizeHandler: (() => void) | null = null;
 
     import('three')
       .then((THREE) => {
-        if (!containerRef.current) return;
+        // Check if cleanup was called before promise resolved
+        if (isCleanedUpRef.current || !containerRef.current) return;
 
         const width = container.clientWidth || window.innerWidth;
         const height = container.clientHeight || window.innerHeight;
@@ -45,13 +40,13 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
         camera.position.z = 500;
 
         // Renderer setup
-        renderer = new THREE.WebGLRenderer({
+        rendererRef.current = new THREE.WebGLRenderer({
           antialias: false,
           preserveDrawingBuffer: true,
         });
-        renderer.setSize(width, height);
-        renderer.domElement.style.display = 'none';
-        container.appendChild(renderer.domElement);
+        rendererRef.current.setSize(width, height);
+        rendererRef.current.domElement.style.display = 'none';
+        container.appendChild(rendererRef.current.domElement);
 
         // Lighting
         const ambientLight = new THREE.AmbientLight(0x333333);
@@ -105,8 +100,8 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
         const charSet = ' .,:;i1tfLCG08@';
         const resolution = 0.12;
 
-        asciiContainer = document.createElement('div');
-        asciiContainer.style.cssText = `
+        asciiContainerRef.current = document.createElement('div');
+        asciiContainerRef.current.style.cssText = `
           font-family: monospace;
           white-space: pre;
           background: #0a0a0a;
@@ -130,17 +125,17 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
           line-height: 8px;
           letter-spacing: 2px;
         `;
-        asciiContainer.appendChild(pre);
-        container.appendChild(asciiContainer);
+        asciiContainerRef.current.appendChild(pre);
+        container.appendChild(asciiContainerRef.current);
 
         // Render function
         const renderAscii = () => {
-          if (!renderer) return;
+          if (!rendererRef.current) return;
 
-          renderer.render(scene, camera);
+          rendererRef.current.render(scene, camera);
 
-          const gl = renderer.getContext();
-          const canvas = renderer.domElement;
+          const gl = rendererRef.current.getContext();
+          const canvas = rendererRef.current.domElement;
 
           const asciiWidth = Math.floor(canvas.width * resolution);
           const asciiHeight = Math.floor(canvas.height * resolution);
@@ -180,7 +175,7 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
 
         // Animation loop
         const animate = () => {
-          animationId = requestAnimationFrame(animate);
+          animationIdRef.current = requestAnimationFrame(animate);
 
           const time = Date.now() * 0.001;
 
@@ -205,42 +200,49 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
         animate();
 
         // Handle resize
-        const handleResize = () => {
-          if (!container || !renderer) return;
+        resizeHandler = () => {
+          if (!containerRef.current || !rendererRef.current) return;
 
-          const newWidth = container.clientWidth || window.innerWidth;
-          const newHeight = container.clientHeight || window.innerHeight;
+          const newWidth = containerRef.current.clientWidth || window.innerWidth;
+          const newHeight = containerRef.current.clientHeight || window.innerHeight;
 
           camera.aspect = newWidth / newHeight;
           camera.updateProjectionMatrix();
-          renderer.setSize(newWidth, newHeight);
+          rendererRef.current.setSize(newWidth, newHeight);
         };
 
-        window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', resizeHandler);
       })
       .catch((err) => {
         console.error('Three.js load error:', err);
         setError(err.message);
-        initializedRef.current = false;
       });
 
-    // Cleanup - Note: This runs on unmount, not on Strict Mode re-run
+    // Cleanup
     return () => {
-      initializedRef.current = false;
+      isCleanedUpRef.current = true;
 
-      if (animationId) {
-        cancelAnimationFrame(animationId);
+      // Remove resize event listener
+      if (resizeHandler) {
+        window.removeEventListener('resize', resizeHandler);
       }
 
-      if (renderer) {
-        renderer.dispose();
-        if (renderer.domElement.parentNode) {
-          renderer.domElement.parentNode.removeChild(renderer.domElement);
+      if (animationIdRef.current !== null) {
+        cancelAnimationFrame(animationIdRef.current);
+        animationIdRef.current = null;
+      }
+
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+        if (rendererRef.current.domElement?.parentNode) {
+          rendererRef.current.domElement.parentNode.removeChild(rendererRef.current.domElement);
         }
+        rendererRef.current = null;
       }
 
-      if (asciiContainer && asciiContainer.parentNode) {
-        asciiContainer.parentNode.removeChild(asciiContainer);
+      if (asciiContainerRef.current?.parentNode) {
+        asciiContainerRef.current.parentNode.removeChild(asciiContainerRef.current);
+        asciiContainerRef.current = null;
       }
     };
   }, []);

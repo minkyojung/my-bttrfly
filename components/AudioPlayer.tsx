@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 
 interface AudioPlayerProps {
@@ -12,7 +12,7 @@ interface AudioPlayerProps {
 export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(180); // 임시로 3분 설정
+  const [duration, setDuration] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -42,20 +42,17 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
   };
 
   const updateProgress = (clientX: number) => {
-    if (!progressRef.current) return;
+    if (!progressRef.current || !audioRef.current) return;
 
     const rect = progressRef.current.getBoundingClientRect();
     const clickX = clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, clickX / rect.width));
     const time = percentage * duration;
 
-    // 임시로 오디오 없이 currentTime만 업데이트
-    setCurrentTime(time);
-
-    // if (audioRef.current) {
-    //   audioRef.current.currentTime = time;
-    //   setCurrentTime(time);
-    // }
+    if (!isNaN(time) && isFinite(time)) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -63,15 +60,15 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
     updateProgress(e.clientX);
   };
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (isDragging) {
       updateProgress(e.clientX);
     }
-  };
+  }, [isDragging, duration]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   // Add global event listeners for drag
   useEffect(() => {
@@ -87,7 +84,7 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

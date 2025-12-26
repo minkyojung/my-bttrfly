@@ -1,25 +1,65 @@
 'use client';
 
-import { useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { useRef, useMemo } from 'react';
+import { Canvas, useFrame, useThree, createPortal } from '@react-three/fiber';
+import { useFBO, OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import { BackgroundScene } from './BackgroundScene';
+import {
+  vertexShader,
+  fragmentShader,
+  createLiquidGlassUniforms
+} from './LiquidGlassShader';
 
-function RotatingBox() {
+function Scene() {
+  const { gl, camera, scene } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
 
-  useFrame((state, delta) => {
+  // Create render target for background
+  const backgroundFBO = useFBO(1024, 1024);
+
+  // Create shader material
+  const shaderMaterial = useMemo(() => {
+    return new THREE.ShaderMaterial({
+      uniforms: createLiquidGlassUniforms(backgroundFBO.texture),
+      vertexShader,
+      fragmentShader,
+      transparent: true,
+    });
+  }, [backgroundFBO.texture]);
+
+  useFrame(({ clock }) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x += delta * 0.5;
-      meshRef.current.rotation.y += delta * 0.3;
+      // Hide glass plane temporarily
+      meshRef.current.visible = false;
+
+      // 1. Render scene (without glass) to texture
+      gl.setRenderTarget(backgroundFBO);
+      gl.render(scene, camera);
+      gl.setRenderTarget(null);
+
+      // Show glass plane again
+      meshRef.current.visible = true;
+    }
+
+    // 2. Update shader uniforms
+    if (shaderMaterial.uniforms) {
+      shaderMaterial.uniforms.uTime.value = clock.getElapsedTime();
+      shaderMaterial.uniforms.uBackground.value = backgroundFBO.texture;
     }
   });
 
   return (
-    <mesh ref={meshRef}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial color="#667eea" />
-    </mesh>
+    <>
+      {/* Background scene */}
+      <BackgroundScene />
+
+      {/* Liquid Glass plane with custom shader (in front) */}
+      <mesh ref={meshRef} position={[0, 0, 3]}>
+        <planeGeometry args={[3, 3, 32, 32]} />
+        <primitive object={shaderMaterial} attach="material" />
+      </mesh>
+    </>
   );
 }
 
@@ -32,10 +72,8 @@ export function LiquidGlassTest() {
       borderRadius: '8px',
       overflow: 'hidden'
     }}>
-      <Canvas camera={{ position: [0, 0, 3] }}>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} />
-        <RotatingBox />
+      <Canvas camera={{ position: [0, 0, 5] }}>
+        <Scene />
         <OrbitControls />
       </Canvas>
     </div>

@@ -1,7 +1,6 @@
 'use client';
 
-import { AudioPlayer } from './AudioPlayer';
-import { LiquidGlassTest } from './LiquidGlassTest';
+import { ProfileSection } from './ProfileSection/ProfileSection';
 
 interface Post {
   slug: string;
@@ -18,54 +17,45 @@ interface Post {
 
 interface MainPageProps {
   posts: Post[];
+  pinnedPosts?: Post[];
 }
 
-export function MainPage({ posts }: MainPageProps) {
-
+export function MainPage({ posts, pinnedPosts }: MainPageProps) {
   return (
     <main style={{
+      backgroundColor: 'var(--bg-color)',
       height: '100vh',
-      overflowY: 'scroll',
+      overflowY: 'auto',
       scrollSnapType: 'y mandatory',
-      scrollBehavior: 'smooth',
-      backgroundColor: 'var(--bg-color)'
+      scrollBehavior: 'smooth'
     }}>
-        {/* Three.js Test Section */}
-        <div style={{
-          minHeight: '100vh',
-          scrollSnapAlign: 'center',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '0 24px',
-          gap: '24px'
-        }}>
-          <h2 style={{ color: '#ffffff', fontFamily: 'Pretendard', fontWeight: 700 }}>
-            Three.js Test
-          </h2>
-          <LiquidGlassTest />
-          <AudioPlayer
-            src="/audio/sample.mp3"
-            title="Sample Track"
-            artist="Artist Name"
-          />
-        </div>
+      {/* 프로필 섹션 - 첫 번째 화면 */}
+      <section style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        scrollSnapAlign: 'center'
+      }}>
+        <ProfileSection />
+      </section>
 
-        {posts.length > 0 ? (
-          posts.map((post) => (
-            <article
-              key={post.slug}
-              style={{
-                minHeight: '100vh',
-                scrollSnapAlign: 'center',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 24px'
-              }}
-            >
+      {/* 각 포스트 - 각각 한 화면씩 */}
+      {posts.length > 0 ? (
+        posts.map((post) => (
+          <section
+            key={post.slug}
+            style={{
+              height: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              scrollSnapAlign: 'center'
+            }}
+          >
+            <article style={{
+              width: '630px'
+            }}>
               <a
                 href={`/posts/${post.slug}`}
                 className="block hover:opacity-80 transition-opacity"
@@ -102,7 +92,7 @@ export function MainPage({ posts }: MainPageProps) {
                   </p>
                 </div>
 
-                {/* 이미지 영역 (나중에 이미지 추가) */}
+                {/* 이미지 영역 */}
                 <div
                   className="mb-4"
                   style={{
@@ -127,15 +117,24 @@ export function MainPage({ posts }: MainPageProps) {
                 </p>
               </a>
             </article>
-          ))
-        ) : (
-          <div className="text-center py-12">
+          </section>
+        ))
+      ) : (
+        <section style={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          scrollSnapAlign: 'center'
+        }}>
+          <div className="text-center">
             <p className="text-sm" style={{ color: 'var(--text-color)' }}>
               Obsidian에서 <code className="px-1" style={{ backgroundColor: 'var(--bg-color)', border: '1px solid var(--profile-border-color)', color: 'var(--text-color)' }}>content/posts</code> 폴더에
               마크다운 파일을 작성해주세요.
             </p>
           </div>
-        )}
+        </section>
+      )}
     </main>
   );
 }

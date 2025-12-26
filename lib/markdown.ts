@@ -18,6 +18,9 @@ export interface Post {
   readingTime: string;
   pinned?: boolean;
   pinnedOrder?: number;
+  audio?: string;
+  audioTitle?: string;
+  audioArtist?: string;
 }
 
 // 읽는 시간 계산 (한글 기준 분당 400자)
@@ -92,7 +95,10 @@ export async function getAllPosts(): Promise<Post[]> {
         htmlContent,
         readingTime,
         pinned: data.pinned || false,
-        pinnedOrder: data.pinnedOrder || 999
+        pinnedOrder: data.pinnedOrder || 999,
+        audio: data.audio,
+        audioTitle: data.audioTitle,
+        audioArtist: data.audioArtist
       };
     })
   );
@@ -142,7 +148,10 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       htmlContent,
       readingTime,
       pinned: data.pinned || false,
-      pinnedOrder: data.pinnedOrder || 999
+      pinnedOrder: data.pinnedOrder || 999,
+      audio: data.audio,
+      audioTitle: data.audioTitle,
+      audioArtist: data.audioArtist
     };
   } catch {
     // Production: error logging removed

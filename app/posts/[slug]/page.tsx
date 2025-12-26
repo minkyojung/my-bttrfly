@@ -133,20 +133,22 @@ export default async function Post({
         </article>
       </div>
 
-      {/* Fixed Audio Player Widget */}
-      <div style={{
-        position: 'fixed',
-        bottom: '48px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 1000
-      }}>
-        <AudioPlayer
-          src="/audio/sample.mp3"
-          title="Sample Track"
-          artist="Artist Name"
-        />
-      </div>
+      {/* Fixed Audio Player Widget - Only show if post has audio */}
+      {post.audio && (
+        <div style={{
+          position: 'fixed',
+          bottom: '48px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1000
+        }}>
+          <AudioPlayer
+            src={post.audio}
+            title={post.audioTitle || post.title}
+            artist={post.audioArtist || 'William Jung'}
+          />
+        </div>
+      )}
     </main>
   );
 }
