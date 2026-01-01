@@ -1,0 +1,22 @@
+{
+  "dingo": {
+    "archived": true,
+    "archivedAt": "2025-11-04T03:07:53.308Z"
+  },
+  "weasel": {
+    "archived": true,
+    "archivedAt": "2025-11-05T05:14:45.336Z"
+  },
+  "swan": {
+    "archived": true,
+    "archivedAt": "2025-11-06T09:14:38.261Z"
+  },
+  "crab": {
+    "archived": false,
+    "archivedAt": null
+  },
+  "pigeon": {
+    "archived": false,
+    "archivedAt": null
+  }
+}
