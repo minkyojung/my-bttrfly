@@ -1,6 +1,6 @@
 'use client';
 
-import ChatWidget from "@/components/ChatWidget";
+import { ProfileSection } from './ProfileSection/ProfileSection';
 
 interface Post {
   slug: string;
@@ -17,116 +17,124 @@ interface Post {
 
 interface MainPageProps {
   posts: Post[];
+  pinnedPosts?: Post[];
 }
 
-export function MainPage({ posts }: MainPageProps) {
+export function MainPage({ posts, pinnedPosts }: MainPageProps) {
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-      <div className="flex flex-col lg:flex-row h-screen">
-        {/* 데스크탑: 좌측 50% / 모바일: 하단 - 모든 포스트 수직 나열 */}
-        <div className="w-full lg:w-1/2 pl-6 lg:pl-12 pr-6 lg:pr-8 py-6 lg:py-12 overflow-y-auto order-2 lg:order-1 scrollbar-hide">
-          {posts.length > 0 ? (
-            posts.map((post, index) => (
-              <article key={post.slug} className={index > 0 ? 'mt-24' : ''}>
-                <h1 className="text-3xl font-black mb-4" style={{ color: 'var(--text-color)' }}>
-                  {post.title}
-                </h1>
-                <div className="flex items-center gap-3 text-sm mb-8" style={{ color: 'var(--text-color)' }}>
-                  <p className="opacity-80">
+    <main style={{
+      backgroundColor: 'var(--bg-color)',
+      height: '100vh',
+      overflowY: 'auto',
+      scrollSnapType: 'y mandatory',
+      scrollBehavior: 'smooth'
+    }}>
+      {/* 프로필 섹션 - 첫 번째 화면 */}
+      <section style={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        scrollSnapAlign: 'center'
+      }}>
+        <ProfileSection />
+      </section>
+
+      {/* 각 포스트 - 각각 한 화면씩 */}
+      {posts.length > 0 ? (
+        posts.map((post) => (
+          <section
+            key={post.slug}
+            style={{
+              height: '100vh',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              scrollSnapAlign: 'center'
+            }}
+          >
+            <article style={{
+              width: '630px'
+            }}>
+              <a
+                href={`/posts/${post.slug}`}
+                className="block hover:opacity-80 transition-opacity"
+              >
+                {/* 제목과 날짜 */}
+                <div className="mb-6" style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-end',
+                  width: '600px'
+                }}>
+                  <h2 style={{
+                    color: '#ffffff',
+                    fontFamily: 'Pretendard',
+                    fontWeight: 700,
+                    fontSize: '42px',
+                    lineHeight: '1.2',
+                    letterSpacing: '-0.05em'
+                  }}>
+                    {post.title}
+                  </h2>
+
+                  <p style={{
+                    color: '#7B7B7B',
+                    fontFamily: 'Pretendard',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    lineHeight: '1.4',
+                    letterSpacing: '-0.05em',
+                    whiteSpace: 'nowrap',
+                    marginLeft: '16px'
+                  }}>
                     {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')} · {post.readingTime}
                   </p>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => {
-                        const url = `${window.location.origin}/posts/${post.slug}`;
-                        navigator.clipboard.writeText(url);
-                      }}
-                      className="p-1 hover:opacity-60 transition-opacity"
-                      style={{ color: 'var(--text-color)' }}
-                      title="링크 복사"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-                      </svg>
-                    </button>
-                    <a
-                      href={`/posts/${post.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1 hover:opacity-60 transition-opacity inline-block"
-                      style={{ color: 'var(--text-color)' }}
-                      title="새 탭에서 열기"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                        <polyline points="15 3 21 3 21 9" />
-                        <line x1="10" y1="14" x2="21" y2="3" />
-                      </svg>
-                    </a>
-                  </div>
                 </div>
 
+                {/* 이미지 영역 */}
                 <div
-                  className="prose prose-serif max-w-none
-                    prose-headings:font-black
-                    prose-h1:text-2xl prose-h1:mb-4 prose-h1:mt-8
-                    prose-h2:text-xl prose-h2:mb-3 prose-h2:mt-6
-                    prose-p:mb-2
-                    prose-blockquote:border-l-2
-                    prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
-                    prose-strong:font-bold
-                    prose-em:italic
-                    prose-ul:mb-2 prose-ul:list-none
-                    prose-li:mb-1
-                    prose-img:w-full prose-img:rounded prose-img:my-4
-                    prose-code:px-1 prose-code:rounded prose-code:text-sm
-                    prose-pre:rounded prose-pre:p-4 prose-pre:mb-4
-                    prose-a:underline hover:prose-a:opacity-60"
+                  className="mb-4"
                   style={{
-                    lineHeight: '1.9',
-                    '--tw-prose-headings': 'var(--text-color)',
-                    '--tw-prose-body': 'var(--text-color)',
-                    '--tw-prose-bold': 'var(--text-color)',
-                    '--tw-prose-quotes': 'var(--text-color)',
-                    '--tw-prose-quote-borders': 'var(--profile-border-color)',
-                    '--tw-prose-links': 'var(--text-color)',
-                    '--tw-prose-code': 'var(--text-color)',
-                    '--tw-prose-pre-code': 'var(--text-color)',
-                    '--tw-prose-pre-bg': 'var(--bg-color)',
-                    '--tw-prose-borders': 'var(--border-color)',
-                    '--tw-prose-counters': 'var(--text-color)',
-                    '--tw-prose-bullets': 'var(--text-color)',
-                    '--tw-prose-hr': 'var(--border-color)',
-                    '--tw-prose-th-borders': 'var(--border-color)',
-                    '--tw-prose-td-borders': 'var(--border-color)'
-                  } as React.CSSProperties}
-                  dangerouslySetInnerHTML={{ __html: post.htmlContent || '' }}
+                    width: '600px',
+                    height: '280px',
+                    backgroundColor: '#1a1a1a',
+                    borderRadius: '8px'
+                  }}
                 />
-              </article>
-            ))
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-sm" style={{ color: 'var(--text-color)' }}>
-                Obsidian에서 <code className="px-1" style={{ backgroundColor: 'var(--bg-color)', border: '1px solid var(--profile-border-color)', color: 'var(--text-color)' }}>content/posts</code> 폴더에
-                마크다운 파일을 작성해주세요.
-              </p>
-            </div>
-          )}
-        </div>
 
-        {/* 데스크탑: 우측 50% / 모바일: 상단 - Terminal */}
-        <div className="w-full lg:w-1/2 border-b lg:border-b-0 lg:border-l order-1 lg:order-2 flex flex-col overflow-hidden" style={{ borderColor: 'var(--border-color)' }}>
-          <ChatWidget
-            isOpen={true}
-            currentPostContext={posts.length > 0 ? {
-              title: posts[0].title,
-              content: posts[0].content,
-            } : undefined}
-          />
-        </div>
-      </div>
-
+                {/* 부제목 */}
+                <p style={{
+                  color: '#7B7B7B',
+                  fontFamily: 'Pretendard',
+                  fontWeight: 600,
+                  fontSize: '16px',
+                  lineHeight: '1.4',
+                  letterSpacing: '-0.05em',
+                  maxWidth: '600px'
+                }}>
+                  {post.preview}
+                </p>
+              </a>
+            </article>
+          </section>
+        ))
+      ) : (
+        <section style={{
+          height: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          scrollSnapAlign: 'center'
+        }}>
+          <div className="text-center">
+            <p className="text-sm" style={{ color: 'var(--text-color)' }}>
+              Obsidian에서 <code className="px-1" style={{ backgroundColor: 'var(--bg-color)', border: '1px solid var(--profile-border-color)', color: 'var(--text-color)' }}>content/posts</code> 폴더에
+              마크다운 파일을 작성해주세요.
+            </p>
+          </div>
+        </section>
+      )}
     </main>
   );
 }

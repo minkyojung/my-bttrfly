@@ -3,45 +3,53 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: 'KoPub Batang';
-    src: url('/fonts/KoPub Batang_Pro Light.otf') format('opentype');
+    font-family: 'Pretendard';
+    src: url('/fonts/Pretendard-Regular.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'KoPub Batang';
-    src: url('/fonts/KoPub Batang_Pro Medium.otf') format('opentype');
-    font-weight: 700;
+    font-family: 'Pretendard';
+    src: url('/fonts/Pretendard-Medium.woff2') format('woff2');
+    font-weight: 500;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'KoPub Batang';
-    src: url('/fonts/KoPub Batang_Pro Bold.otf') format('opentype');
-    font-weight: 900;
+    font-family: 'Pretendard';
+    src: url('/fonts/Pretendard-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    src: url('/fonts/Pretendard-Bold.woff2') format('woff2');
+    font-weight: 700;
     font-style: normal;
     font-display: swap;
 }
 
 @layer base {
   :root {
-    --bg-color: #ffffff;
-    --text-color: #000000;
-    --border-color: #d1d5db;
-    --profile-border-color: #000000;
-    --bg-color-rgb: 255, 255, 255;
-  }
-  
-  [data-theme="dark"], 
-  .dark {
-    --bg-color: #1F1F1F;
+    --bg-color: #0E0E0E;
     --text-color: #ffffff;
-    --border-color: #404040;
+    --border-color: #2a2a2a;
     --profile-border-color: #ffffff;
-    --bg-color-rgb: 31, 31, 31;
+    --bg-color-rgb: 14, 14, 14;
+  }
+
+  [data-theme="dark"],
+  .dark {
+    --bg-color: #0E0E0E;
+    --text-color: #ffffff;
+    --border-color: #2a2a2a;
+    --profile-border-color: #ffffff;
+    --bg-color-rgb: 14, 14, 14;
   }
 
   html {
@@ -58,10 +66,11 @@
   body {
     color: var(--text-color);
     background-color: var(--bg-color);
-    font-family: 'KoPub Batang', 'Noto Serif KR', 'Batang', 'Georgia', serif;
-    line-height: 1.6;
-    font-size: 1rem;
-    letter-spacing: 0.02em;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.03em;
   }
 
   ::selection {
