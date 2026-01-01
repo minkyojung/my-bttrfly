@@ -1,0 +1,19 @@
+.container {
+  width: 100%;
+  max-width: 600px;
+}
+
+.canvas {
+  width: 100%;
+  max-width: 600px;
+  height: 200px;
+  display: block;
+  background-color: transparent;
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+  .canvas {
+    height: 150px;
+  }
+}

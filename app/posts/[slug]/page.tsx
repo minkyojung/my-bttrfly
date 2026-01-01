@@ -2,8 +2,7 @@ import { notFound } from 'next/navigation';
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { ShareButton } from '@/components/ShareButton';
-import { ReadingControls } from '@/components/ReadingControls';
+import { AudioPlayer } from '@/components/AudioPlayer';
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -51,37 +50,105 @@ export default async function Post({
   }
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-      <div className="max-w-3xl mx-auto px-6 py-12">
+    <>
+      <style dangerouslySetInnerHTML={{ __html: `
+        .prose img {
+          position: relative;
+          cursor: help;
+        }
+
+        .prose img::after {
+          content: attr(alt);
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%) translateY(-8px);
+          background: rgba(0, 0, 0, 0.9);
+          color: #ffffff;
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 500;
+          white-space: nowrap;
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 100;
+          font-family: 'Pretendard', sans-serif;
+        }
+
+        .prose img:hover::after {
+          opacity: 1;
+        }
+
+        .prose img::before {
+          content: '';
+          position: absolute;
+          bottom: 100%;
+          left: 50%;
+          transform: translateX(-50%) translateY(-2px);
+          border: 6px solid transparent;
+          border-top-color: rgba(0, 0, 0, 0.9);
+          pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+          z-index: 100;
+        }
+
+        .prose img:hover::before {
+          opacity: 1;
+        }
+      `}} />
+      <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+        <div className="max-w-3xl mx-auto px-6 py-12">
         {/* 홈으로 돌아가기 링크 */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="inline-flex items-center mb-8 text-sm hover:opacity-60 transition-opacity"
           style={{ color: 'var(--text-color)' }}
         >
-          ← 홈으로 돌아가기
+          ←
         </Link>
 
-        <article>
-          <header className="mb-12">
-            <h1 className="text-3xl font-black mb-4" style={{ color: 'var(--text-color)' }}>
-              {post.title}
-            </h1>
-            <div className="flex items-center justify-between text-sm" style={{ color: 'var(--text-color)' }}>
-              <p className="opacity-80">
+        <article className="flex flex-col items-center">
+          <header className="mb-12" style={{ width: '550px' }}>
+            <div className="flex items-center justify-center text-sm mb-4" style={{ color: '#7B7B7B', marginTop: '24px' }}>
+              <p>
                 {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')} · {post.readingTime}
               </p>
-              <ShareButton />
             </div>
+
+            <h1 className="text-center" style={{
+              color: '#E5E5E5',
+              fontFamily: 'Pretendard',
+              fontWeight: 700,
+              fontSize: '60px',
+              lineHeight: '1.2',
+              letterSpacing: '-0.05em',
+              marginBottom: '48px'
+            }}>
+              {post.title}
+            </h1>
+
+            <p className="mb-8" style={{
+              color: '#7B7B7B',
+              fontFamily: 'Pretendard',
+              fontWeight: 500,
+              fontSize: '16px',
+              lineHeight: '24px',
+              letterSpacing: '-0.02em'
+            }}>
+              {post.preview}
+            </p>
           </header>
 
-          <div 
+          <div
             className="prose prose-serif max-w-none
-              prose-headings:font-black 
+              prose-headings:font-black
               prose-h1:text-2xl prose-h1:mb-4 prose-h1:mt-8
               prose-h2:text-xl prose-h2:mb-3 prose-h2:mt-6
               prose-p:mb-2
-              prose-blockquote:border-l-2 
+              prose-blockquote:border-l-2
               prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
               prose-strong:font-bold
               prose-em:italic
@@ -92,9 +159,10 @@ export default async function Post({
               prose-pre:rounded prose-pre:p-4 prose-pre:mb-4
               prose-a:underline hover:prose-a:opacity-60"
             style={{
-              lineHeight: '1.9',
-              '--tw-prose-headings': 'var(--text-color)',
-              '--tw-prose-body': 'var(--text-color)',
+              width: '550px',
+              lineHeight: '1.7',
+              '--tw-prose-headings': '#7B7B7B',
+              '--tw-prose-body': '#7B7B7B',
               '--tw-prose-bold': 'var(--text-color)',
               '--tw-prose-quotes': 'var(--text-color)',
               '--tw-prose-quote-borders': 'var(--profile-border-color)',
@@ -113,9 +181,24 @@ export default async function Post({
           />
         </article>
       </div>
-      
-      {/* 읽기 컨트롤 */}
-      <ReadingControls />
-    </main>
+
+      {/* Fixed Audio Player Widget - Only show if post has audio */}
+      {post.audio && (
+        <div style={{
+          position: 'fixed',
+          bottom: '48px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1000
+        }}>
+          <AudioPlayer
+            src={post.audio}
+            title={post.audioTitle || post.title}
+            artist={post.audioArtist || 'William Jung'}
+          />
+        </div>
+      )}
+      </main>
+    </>
   );
 }
