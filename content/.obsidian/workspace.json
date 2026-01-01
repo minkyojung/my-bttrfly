@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "posts/2024-01-29-light-and-shadow.md",
+                "file": "posts/2025-wrapped.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2024-01-29-light-and-shadow"
+              "title": "2025-wrapped"
             }
           }
         ]
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "411641ff708ceed1",
@@ -94,7 +95,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "posts/2024-01-28-seoul-to-newyork.md",
+                "file": "posts/2025-wrapped.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +105,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for 2024-01-28-seoul-to-newyork"
+              "title": "Backlinks for 2025-wrapped"
             }
           },
           {
@@ -113,12 +114,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "posts/2024-01-28-seoul-to-newyork.md",
+                "file": "posts/2025-wrapped.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from 2024-01-28-seoul-to-newyork"
+              "title": "Outgoing links from 2025-wrapped"
             }
           },
           {
@@ -142,17 +143,27 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "posts/2024-01-29-light-and-shadow.md",
+                "file": "posts/2025-wrapped.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 2024-01-29-light-and-shadow"
+              "title": "Outline of 2025-wrapped"
+            }
+          },
+          {
+            "id": "5cec31da18420d55",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
             }
           }
         ],
-        "currentTab": 3
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -166,15 +177,20 @@
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "command-palette:Open command palette": false,
+      "obsidian-git:Open Git source control": false
     }
   },
-  "active": "48c46a2d094b86e4",
+  "active": "898bd0fa2c363e7e",
   "lastOpenFiles": [
     "posts/2024-09-27-rnr.md",
-    "posts/2024-07-17-10-principles.md",
-    "posts/2024-01-30-coffee-ritual.md",
+    "posts/2024-03-24-beginner.md",
     "intro.md",
+    "opinions.md",
+    "posts/2025-wrapped.md",
+    "posts/2024-07-17-10-principles.md",
+    "posts/2024-03-24.md",
+    "posts/2024-01-30-coffee-ritual.md",
     "posts/2024-01-28-seoul-to-newyork.md",
     "posts/2024-01-29-light-and-shadow.md"
   ]
