@@ -181,8 +181,22 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "898bd0fa2c363e7e",
+  "active": "5cec31da18420d55",
   "lastOpenFiles": [
+    "templates/publish-checklist.md",
+    "templates/draft.md",
+    "templates/daily-note.md",
+    "templates/blog-post.md",
+    "templates/blog-post-with-filename.md",
+    "templates",
+    "VISUAL_WORKFLOW_GUIDE.md",
+    "SETUP_GUIDE.md",
+    "README.md",
+    "QUICK_REFERENCE.md",
+    "OBSIDIAN_BLOG_WORKFLOW.md",
+    "KOREAN_BLOGGING_TIPS.md",
+    "Dashboard.md",
+    "ADVANCED_DATAVIEW_EXAMPLES.md",
     "posts/2024-09-27-rnr.md",
     "posts/2024-03-24-beginner.md",
     "intro.md",
