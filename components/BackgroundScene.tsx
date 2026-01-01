@@ -1,11 +1,35 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 export function BackgroundScene() {
   const meshRef = useRef<THREE.Mesh>(null);
+
+  // Create gradient texture once and memoize it (fixes SSR and memory leak)
+  const gradientTexture = useMemo(() => {
+    // Only create texture on client side
+    if (typeof window === 'undefined') return null;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) return null;
+
+    // Create gradient
+    const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+    gradient.addColorStop(0, '#667eea');
+    gradient.addColorStop(0.5, '#764ba2');
+    gradient.addColorStop(1, '#f093fb');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 512, 512);
+
+    return new THREE.CanvasTexture(canvas);
+  }, []);
 
   useFrame(({ clock }) => {
     if (meshRef.current) {
@@ -20,10 +44,12 @@ export function BackgroundScene() {
       <mesh position={[0, 0, -5]}>
         <planeGeometry args={[20, 20]} />
         <meshBasicMaterial>
-          <primitive
-            attach="map"
-            object={createGradientTexture()}
-          />
+          {gradientTexture && (
+            <primitive
+              attach="map"
+              object={gradientTexture}
+            />
+          )}
         </meshBasicMaterial>
       </mesh>
 
@@ -49,24 +75,4 @@ export function BackgroundScene() {
       <pointLight position={[-10, -10, 5]} intensity={0.5} color="#764ba2" />
     </>
   );
-}
-
-// Create a colorful gradient texture
-function createGradientTexture() {
-  const canvas = document.createElement('canvas');
-  canvas.width = 512;
-  canvas.height = 512;
-  const ctx = canvas.getContext('2d')!;
-
-  // Create gradient
-  const gradient = ctx.createLinearGradient(0, 0, 512, 512);
-  gradient.addColorStop(0, '#667eea');
-  gradient.addColorStop(0.5, '#764ba2');
-  gradient.addColorStop(1, '#f093fb');
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, 512, 512);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  return texture;
 }

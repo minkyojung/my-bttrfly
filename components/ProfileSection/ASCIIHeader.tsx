@@ -34,7 +34,8 @@ export function ASCIIHeader() {
     const grayChars = ['+', '-', '=', 'X', '*', ':', '.', ' '];
     const accentChar = '^';
 
-    let animationFrame: number;
+    // Proper initialization for cleanup (fixes animation leak)
+    let animationFrame: number | null = null;
     let time = 0;
 
     const charWidth = 8;
@@ -108,8 +109,9 @@ export function ASCIIHeader() {
     animate();
 
     return () => {
-      if (animationFrame) {
+      if (animationFrame !== null) {
         cancelAnimationFrame(animationFrame);
+        animationFrame = null;
       }
     };
   }, [dimensions]);

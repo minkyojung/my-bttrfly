@@ -212,9 +212,11 @@ export default function GhostAscii({
 
     animate();
 
+    // Cleanup function - properly cancel animation frame (fixes missing cleanup)
     return () => {
-      if (animationRef.current) {
+      if (animationRef.current !== null) {
         cancelAnimationFrame(animationRef.current);
+        animationRef.current = null;
       }
     };
   }, [currentStyle]);

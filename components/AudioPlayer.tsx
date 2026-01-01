@@ -41,19 +41,20 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
     }
   };
 
-  const updateProgress = (clientX: number) => {
+  const updateProgress = useCallback((clientX: number) => {
     if (!progressRef.current || !audioRef.current) return;
 
     const rect = progressRef.current.getBoundingClientRect();
     const clickX = clientX - rect.left;
     const percentage = Math.max(0, Math.min(1, clickX / rect.width));
-    const time = percentage * duration;
 
-    if (!isNaN(time) && isFinite(time)) {
+    // Validate duration first before calculating time
+    if (!isNaN(duration) && isFinite(duration) && duration > 0) {
+      const time = percentage * duration;
       audioRef.current.currentTime = time;
       setCurrentTime(time);
     }
-  };
+  }, [duration]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsDragging(true);
@@ -64,7 +65,7 @@ export function AudioPlayer({ src, title, artist }: AudioPlayerProps) {
     if (isDragging) {
       updateProgress(e.clientX);
     }
-  }, [isDragging, duration]);
+  }, [isDragging, updateProgress]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);

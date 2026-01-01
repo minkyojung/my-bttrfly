@@ -12,6 +12,8 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
   const rendererRef = useRef<import('three').WebGLRenderer | null>(null);
   const asciiContainerRef = useRef<HTMLDivElement | null>(null);
   const isCleanedUpRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const pixelBufferRef = useRef<Uint8Array | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,8 +27,8 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
 
     import('three')
       .then((THREE) => {
-        // Check if cleanup was called before promise resolved
-        if (isCleanedUpRef.current || !containerRef.current) return;
+        // Check if cleanup was called before promise resolved (fixes race condition)
+        if (isCleanedUpRef.current || !containerRef.current || !isMountedRef.current) return;
 
         const width = container.clientWidth || window.innerWidth;
         const height = container.clientHeight || window.innerHeight;
@@ -142,8 +144,13 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
 
           if (asciiWidth <= 0 || asciiHeight <= 0) return;
 
-          // Read pixels from WebGL
-          const pixels = new Uint8Array(canvas.width * canvas.height * 4);
+          // Allocate pixel buffer once and reuse (fixes memory leak)
+          const bufferSize = canvas.width * canvas.height * 4;
+          if (!pixelBufferRef.current || pixelBufferRef.current.length !== bufferSize) {
+            pixelBufferRef.current = new Uint8Array(bufferSize);
+          }
+          const pixels = pixelBufferRef.current;
+
           gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
           const stepX = Math.max(1, Math.floor(canvas.width / asciiWidth));
@@ -215,11 +222,15 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
       })
       .catch((err) => {
         console.error('Three.js load error:', err);
-        setError(err.message);
+        // Only set error if component is still mounted (fixes race condition)
+        if (isMountedRef.current) {
+          setError(err.message);
+        }
       });
 
     // Cleanup
     return () => {
+      isMountedRef.current = false;
       isCleanedUpRef.current = true;
 
       // Remove resize event listener
@@ -244,6 +255,9 @@ export default function AsciiRenderer({ className }: AsciiRendererProps) {
         asciiContainerRef.current.parentNode.removeChild(asciiContainerRef.current);
         asciiContainerRef.current = null;
       }
+
+      // Clear pixel buffer
+      pixelBufferRef.current = null;
     };
   }, []);
 
