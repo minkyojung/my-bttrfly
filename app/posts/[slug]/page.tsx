@@ -3,6 +3,7 @@ import { getAllPosts, getPostBySlug } from "@/lib/markdown";
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { PostASCII } from '@/components/PostASCII';
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -98,6 +99,38 @@ export default async function Post({
         .prose img:hover::before {
           opacity: 1;
         }
+
+        .prose mark {
+          background-color: rgba(255, 213, 79, 0.3);
+          color: #E5E5E5;
+          padding: 0.1em 0.3em;
+          border-radius: 3px;
+        }
+
+        .prose table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1.5rem 0;
+        }
+
+        .prose th {
+          background-color: #2A2A2A;
+          color: #E5E5E5;
+          font-weight: 600;
+          padding: 0.75rem 1rem;
+          text-align: left;
+          border-bottom: 1px solid #4A4A4A;
+        }
+
+        .prose td {
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid #3A3A3A;
+          color: #939393;
+        }
+
+        .prose tr:hover td {
+          background-color: rgba(255, 255, 255, 0.02);
+        }
       `}} />
       <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         <div className="max-w-3xl mx-auto px-6 py-12">
@@ -130,52 +163,63 @@ export default async function Post({
               {post.title}
             </h1>
 
-            <p className="mb-8" style={{
-              color: '#7B7B7B',
-              fontFamily: 'Pretendard',
-              fontWeight: 500,
-              fontSize: '16px',
-              lineHeight: '24px',
-              letterSpacing: '-0.02em'
-            }}>
-              {post.preview}
-            </p>
+            {/* ASCII Art - scaled up version */}
+            {!post.thumbnail && (
+              <div style={{
+                width: '700px',
+                height: '326px',
+                marginBottom: '0px',
+                marginLeft: '-75px'
+              }}>
+                <PostASCII text={post.ascii} width={700} height={326} />
+              </div>
+            )}
+
           </header>
 
           <div
             className="prose prose-serif max-w-none
               prose-headings:font-black
-              prose-h1:text-2xl prose-h1:mb-4 prose-h1:mt-8
-              prose-h2:text-xl prose-h2:mb-3 prose-h2:mt-6
+              prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
+              prose-h2:text-2xl prose-h2:mb-4 prose-h2:mt-8
+              prose-h3:text-xl prose-h3:mb-3 prose-h3:mt-6
+              prose-h4:text-lg prose-h4:mb-2 prose-h4:mt-5
+              prose-h5:text-base prose-h5:mb-2 prose-h5:mt-4
+              prose-h6:text-sm prose-h6:mb-1 prose-h6:mt-3
               prose-p:mb-2
               prose-blockquote:border-l-2
               prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
               prose-strong:font-bold
               prose-em:italic
-              prose-ul:mb-2 prose-ul:list-none
+              prose-ul:mb-2 prose-ul:list-disc prose-ul:pl-5
+              prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-5
               prose-li:mb-1
+              prose-hr:my-8
               prose-img:w-full prose-img:rounded prose-img:my-4
               prose-code:px-1 prose-code:rounded prose-code:text-sm
               prose-pre:rounded prose-pre:p-4 prose-pre:mb-4
               prose-a:underline hover:prose-a:opacity-60"
             style={{
-              width: '550px',
+              width: '600px',
               lineHeight: '1.7',
-              '--tw-prose-headings': '#7B7B7B',
-              '--tw-prose-body': '#7B7B7B',
-              '--tw-prose-bold': 'var(--text-color)',
-              '--tw-prose-quotes': 'var(--text-color)',
+              fontWeight: 500,
+              textAlign: 'justify',
+              '--tw-prose-headings': '#E5E5E5',
+              '--tw-prose-body': '#939393',
+              '--tw-prose-bold': '#939393',
+              '--tw-prose-quotes': '#939393',
               '--tw-prose-quote-borders': 'var(--profile-border-color)',
-              '--tw-prose-links': 'var(--text-color)',
-              '--tw-prose-code': 'var(--text-color)',
-              '--tw-prose-pre-code': 'var(--text-color)',
+              '--tw-prose-links': '#939393',
+              '--tw-prose-code': '#939393',
+              '--tw-prose-pre-code': '#939393',
               '--tw-prose-pre-bg': 'var(--bg-color)',
               '--tw-prose-borders': 'var(--border-color)',
-              '--tw-prose-counters': 'var(--text-color)',
-              '--tw-prose-bullets': 'var(--text-color)',
-              '--tw-prose-hr': 'var(--border-color)',
-              '--tw-prose-th-borders': 'var(--border-color)',
-              '--tw-prose-td-borders': 'var(--border-color)'
+              '--tw-prose-counters': '#E5E5E5',
+              '--tw-prose-bullets': '#E5E5E5',
+              '--tw-prose-hr': '#5A5A5A',
+              '--tw-prose-th-borders': '#4A4A4A',
+              '--tw-prose-td-borders': '#3A3A3A',
+              '--tw-prose-captions': '#6A6A6A'
             } as React.CSSProperties}
             dangerouslySetInnerHTML={{ __html: post.htmlContent || '' }}
           />

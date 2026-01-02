@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
+import breaks from 'remark-breaks';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const pagesDirectory = path.join(process.cwd(), 'content/pages');
@@ -21,6 +22,8 @@ export interface Post {
   audio?: string;
   audioTitle?: string;
   audioArtist?: string;
+  thumbnail?: string;
+  ascii?: string;
 }
 
 // 읽는 시간 계산 (한글 기준 분당 400자)
@@ -28,7 +31,7 @@ function calculateReadingTime(content: string): string {
   const plainText = content.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
   const chars = plainText.length;
   const minutes = Math.max(1, Math.ceil(chars / 400));
-  return `${minutes}분 읽기`;
+  return `${minutes} min read`;
 }
 
 // 옵시디언 문법을 표준 마크다운으로 변환
@@ -73,6 +76,7 @@ export async function getAllPosts(): Promise<Post[]> {
       
       // 마크다운을 HTML로 변환
       const processedHTML = await remark()
+        .use(breaks)
         .use(html, { sanitize: true })
         .process(processedContent);
       
@@ -98,11 +102,13 @@ export async function getAllPosts(): Promise<Post[]> {
         pinnedOrder: data.pinnedOrder || 999,
         audio: data.audio,
         audioTitle: data.audioTitle,
-        audioArtist: data.audioArtist
+        audioArtist: data.audioArtist,
+        thumbnail: data.thumbnail,
+        ascii: data.ascii
       };
     })
   );
-  
+
   // 날짜 기준 내림차순 정렬
   return posts.sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -151,7 +157,9 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       pinnedOrder: data.pinnedOrder || 999,
       audio: data.audio,
       audioTitle: data.audioTitle,
-      audioArtist: data.audioArtist
+      audioArtist: data.audioArtist,
+      thumbnail: data.thumbnail,
+      ascii: data.ascii
     };
   } catch {
     // Production: error logging removed
@@ -211,9 +219,10 @@ export async function getIntro(): Promise<{ content: string, htmlContent: string
     const processedContent = convertObsidianSyntax(content);
     
     const processedHTML = await remark()
+      .use(breaks)
       .use(html, { sanitize: true })
       .process(processedContent);
-    
+
     return {
       content: processedContent,
       htmlContent: processedHTML.toString()
@@ -238,9 +247,10 @@ export async function getPage(pageName: string): Promise<{ content: string, html
     const processedContent = convertObsidianSyntax(content);
     
     const processedHTML = await remark()
+      .use(breaks)
       .use(html, { sanitize: true })
       .process(processedContent);
-    
+
     return {
       content: processedContent,
       htmlContent: processedHTML.toString()

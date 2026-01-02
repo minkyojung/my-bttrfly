@@ -1,6 +1,7 @@
 'use client';
 
 import { ProfileSection } from './ProfileSection/ProfileSection';
+import { PostASCII } from './PostASCII';
 
 interface Post {
   slug: string;
@@ -13,6 +14,8 @@ interface Post {
   readingTime: string;
   pinned?: boolean;
   pinnedOrder?: number;
+  thumbnail?: string;
+  ascii?: string;
 }
 
 interface MainPageProps {
@@ -92,16 +95,29 @@ export function MainPage({ posts, pinnedPosts }: MainPageProps) {
                   </p>
                 </div>
 
-                {/* 이미지 영역 */}
+                {/* 이미지/ASCII 영역 */}
                 <div
                   className="mb-4"
                   style={{
                     width: '600px',
                     height: '280px',
-                    backgroundColor: '#1a1a1a',
-                    borderRadius: '8px'
+                    overflow: 'hidden'
                   }}
-                />
+                >
+                  {post.thumbnail ? (
+                    <img
+                      src={post.thumbnail}
+                      alt={post.title}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover'
+                      }}
+                    />
+                  ) : (
+                    <PostASCII text={post.ascii} width={600} height={280} />
+                  )}
+                </div>
 
                 {/* 부제목 */}
                 <p style={{
