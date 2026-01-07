@@ -147,7 +147,7 @@ export default async function Post({
           <header className="mb-12" style={{ width: '550px' }}>
             <div className="flex items-center justify-center text-sm mb-4" style={{ color: '#7B7B7B', marginTop: '24px' }}>
               <p>
-                {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')} · {post.readingTime}
+                {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')}
               </p>
             </div>
 

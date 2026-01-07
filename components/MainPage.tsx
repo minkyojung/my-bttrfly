@@ -91,7 +91,7 @@ export function MainPage({ posts, pinnedPosts }: MainPageProps) {
                     whiteSpace: 'nowrap',
                     marginLeft: '16px'
                   }}>
-                    {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')} · {post.readingTime}
+                    {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')}
                   </p>
                 </div>
 
