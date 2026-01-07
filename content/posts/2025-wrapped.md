@@ -2,7 +2,7 @@
 title: 2025 Wrapped
 date: 2025-12-31
 tags:
-audio: Prince Ralis is Saved - Twilight Princess (For Sleep_Relaxing) [Rain] - Yuzulink.mp3
+audio: /audio/Prince Ralis is Saved - Twilight Princess (For Sleep_Relaxing) [Rain] - Yuzulink.mp3
 audioTitle: Prince Ralis is Saved
 audioArtist: Toru Minegishi(峰岸透)
 pinned:
