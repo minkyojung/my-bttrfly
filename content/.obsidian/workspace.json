@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "411641ff708ceed1",
@@ -181,8 +180,12 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "5cec31da18420d55",
+  "active": "770f04c66ced4d67",
   "lastOpenFiles": [
+    "templates/2024-03-24-beginner.md",
+    "templates/2024-07-17-10-principles.md",
+    "posts/2025-wrapped.md",
+    "Untitled.md",
     "templates/publish-checklist.md",
     "templates/draft.md",
     "templates/daily-note.md",
@@ -197,12 +200,9 @@
     "KOREAN_BLOGGING_TIPS.md",
     "Dashboard.md",
     "ADVANCED_DATAVIEW_EXAMPLES.md",
-    "posts/2024-09-27-rnr.md",
-    "posts/2024-03-24-beginner.md",
+    "templates/2024-09-27-rnr.md",
     "intro.md",
     "opinions.md",
-    "posts/2025-wrapped.md",
-    "posts/2024-07-17-10-principles.md",
     "posts/2024-03-24.md",
     "posts/2024-01-30-coffee-ritual.md",
     "posts/2024-01-28-seoul-to-newyork.md",
