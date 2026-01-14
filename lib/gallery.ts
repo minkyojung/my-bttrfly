@@ -20,7 +20,7 @@ export async function getGalleryPhotos(): Promise<Photo[]> {
   }
 
   const files = fs.readdirSync(galleryDirectory)
-    .filter(file => /\.(jpg|jpeg|png|webp|gif)$/i.test(file))
+    .filter(file => /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(file))
     .sort(); // 파일명 순 정렬
 
   return files.map(filename => ({
