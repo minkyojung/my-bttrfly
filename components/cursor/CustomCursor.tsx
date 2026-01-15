@@ -5,7 +5,13 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useCursor } from './CursorContext';
 
 // L자 모서리 컴포넌트
-function CornerBracket({ position }: { position: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' }) {
+function CornerBracket({
+  position,
+  color = 'white'
+}: {
+  position: 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight';
+  color?: string;
+}) {
   const styles: Record<string, React.CSSProperties> = {
     topLeft: { top: 0, left: 0 },
     topRight: { top: 0, right: 0, transform: 'rotate(90deg)' },
@@ -21,12 +27,13 @@ function CornerBracket({ position }: { position: 'topLeft' | 'topRight' | 'botto
       fill="none"
       style={{
         position: 'absolute',
+        transition: 'stroke 0.2s ease',
         ...styles[position]
       }}
     >
       <path
         d="M1 11V1H11"
-        stroke="white"
+        stroke={color}
         strokeWidth="2"
         strokeLinecap="square"
         fill="none"
@@ -35,6 +42,9 @@ function CornerBracket({ position }: { position: 'topLeft' | 'topRight' | 'botto
   );
 }
 
+// 카메라 포커스 초록색
+const FOCUS_GREEN = '#00FF00';
+
 const SPRING_CONFIG = {
   stiffness: 300,
   damping: 25,
@@ -42,6 +52,7 @@ const SPRING_CONFIG = {
 };
 
 const DEFAULT_SIZE = 40; // 기본 상태에서 모서리 사각형 크기
+const FRAME_PADDING = 8; // 호버 시 타겟보다 얼마나 더 크게 (바깥쪽으로)
 
 export function CustomCursor() {
   const { targetRect, isHovering } = useCursor();
@@ -59,6 +70,12 @@ export function CustomCursor() {
   const boxY = useMotionValue(0);
   const boxWidth = useMotionValue(DEFAULT_SIZE);
   const boxHeight = useMotionValue(DEFAULT_SIZE);
+
+  // 호버 시 미세 흔들림 offset
+  const hoverOffsetX = useMotionValue(0);
+  const hoverOffsetY = useMotionValue(0);
+  const springHoverOffsetX = useSpring(hoverOffsetX, { stiffness: 150, damping: 15 });
+  const springHoverOffsetY = useSpring(hoverOffsetY, { stiffness: 150, damping: 15 });
 
   // 스프링 적용
   const springBoxX = useSpring(boxX, SPRING_CONFIG);
@@ -102,11 +119,11 @@ export function CustomCursor() {
   // 호버 상태에 따른 박스 위치/크기 업데이트
   useEffect(() => {
     if (isHovering && targetRect) {
-      // 호버: 타겟 요소의 위치와 크기로
-      boxX.set(targetRect.left);
-      boxY.set(targetRect.top);
-      boxWidth.set(targetRect.width);
-      boxHeight.set(targetRect.height);
+      // 호버: 타겟 요소보다 약간 크게 (프레임 느낌)
+      boxX.set(targetRect.left - FRAME_PADDING);
+      boxY.set(targetRect.top - FRAME_PADDING);
+      boxWidth.set(targetRect.width + FRAME_PADDING * 2);
+      boxHeight.set(targetRect.height + FRAME_PADDING * 2);
       rotation.set(0); // 회전 멈춤
     } else {
       // 기본: 마우스 중심으로 작은 사각형
@@ -129,12 +146,39 @@ export function CustomCursor() {
         boxY.set(y - DEFAULT_SIZE / 2);
       });
 
+      // 기본 상태에서는 offset 초기화
+      hoverOffsetX.set(0);
+      hoverOffsetY.set(0);
+
       return () => {
         unsubX();
         unsubY();
       };
     }
-  }, [isHovering, mouseX, mouseY, boxX, boxY]);
+  }, [isHovering, mouseX, mouseY, boxX, boxY, hoverOffsetX, hoverOffsetY]);
+
+  // 호버 상태에서 마우스 움직임에 따른 미세 흔들림
+  useEffect(() => {
+    if (isHovering && targetRect) {
+      const centerX = targetRect.left + targetRect.width / 2;
+      const centerY = targetRect.top + targetRect.height / 2;
+      const HOVER_SENSITIVITY = 0.03; // 흔들림 민감도 (3%)
+
+      const unsubX = mouseX.on('change', (mx) => {
+        const offsetX = (mx - centerX) * HOVER_SENSITIVITY;
+        hoverOffsetX.set(offsetX);
+      });
+      const unsubY = mouseY.on('change', (my) => {
+        const offsetY = (my - centerY) * HOVER_SENSITIVITY;
+        hoverOffsetY.set(offsetY);
+      });
+
+      return () => {
+        unsubX();
+        unsubY();
+      };
+    }
+  }, [isHovering, targetRect, mouseX, mouseY, hoverOffsetX, hoverOffsetY]);
 
   return (
     <div
@@ -160,7 +204,7 @@ export function CustomCursor() {
         }}
       />
 
-      {/* 모서리 그룹 - 위치/크기 동적 변환 */}
+      {/* 모서리 그룹 - 위치/크기 동적 변환 + 호버 시 미세 흔들림 */}
       <motion.div
         style={{
           position: 'absolute',
@@ -168,13 +212,15 @@ export function CustomCursor() {
           y: springBoxY,
           width: springBoxWidth,
           height: springBoxHeight,
-          rotate: springRotation
+          rotate: springRotation,
+          translateX: springHoverOffsetX,
+          translateY: springHoverOffsetY
         }}
       >
-        <CornerBracket position="topLeft" />
-        <CornerBracket position="topRight" />
-        <CornerBracket position="bottomLeft" />
-        <CornerBracket position="bottomRight" />
+        <CornerBracket position="topLeft" color={isHovering ? FOCUS_GREEN : 'white'} />
+        <CornerBracket position="topRight" color={isHovering ? FOCUS_GREEN : 'white'} />
+        <CornerBracket position="bottomLeft" color={isHovering ? FOCUS_GREEN : 'white'} />
+        <CornerBracket position="bottomRight" color={isHovering ? FOCUS_GREEN : 'white'} />
       </motion.div>
     </div>
   );
