@@ -3,10 +3,18 @@
 import { useState } from 'react';
 import { useCursor } from './cursor';
 
+interface PhotoMetadata {
+  date?: string;
+  location?: string;
+  camera?: string;
+  description?: string;
+}
+
 interface Photo {
   src: string;
   alt: string;
   filename: string;
+  metadata?: PhotoMetadata;
 }
 
 interface GalleryBoardProps {
@@ -14,16 +22,18 @@ interface GalleryBoardProps {
 }
 
 export function GalleryBoard({ photos }: GalleryBoardProps) {
-  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [hoveredPhoto, setHoveredPhoto] = useState<string | null>(null);
   const { setTarget } = useCursor();
 
-  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>, filename: string) => {
     const rect = e.currentTarget.getBoundingClientRect();
     setTarget(rect);
+    setHoveredPhoto(filename);
   };
 
   const handleMouseLeave = () => {
     setTarget(null);
+    setHoveredPhoto(null);
   };
 
   return (
@@ -41,8 +51,7 @@ export function GalleryBoard({ photos }: GalleryBoardProps) {
         {photos.map((photo) => (
           <div
             key={photo.filename}
-            onClick={() => setSelectedPhoto(photo)}
-            onMouseEnter={handleMouseEnter}
+            onMouseEnter={(e) => handleMouseEnter(e, photo.filename)}
             onMouseLeave={handleMouseLeave}
             style={{
               breakInside: 'avoid',
@@ -51,7 +60,8 @@ export function GalleryBoard({ photos }: GalleryBoardProps) {
               borderRadius: '12px',
               overflow: 'hidden',
               backgroundColor: 'rgba(255,255,255,0.05)',
-              transition: 'transform 0.2s, box-shadow 0.2s'
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              position: 'relative'
             }}
             className="gallery-item"
           >
@@ -65,75 +75,54 @@ export function GalleryBoard({ photos }: GalleryBoardProps) {
               }}
               loading="lazy"
             />
+
+            {/* Metadata Overlay */}
+            {hoveredPhoto === photo.filename && photo.metadata && (
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+                  padding: '24px 16px 16px',
+                  color: '#ffffff',
+                  fontFamily: 'Pretendard',
+                  pointerEvents: 'none'
+                }}
+              >
+                {photo.metadata.description && (
+                  <p style={{
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    marginBottom: '8px',
+                    lineHeight: 1.4
+                  }}>
+                    {photo.metadata.description}
+                  </p>
+                )}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '12px',
+                  fontSize: '12px',
+                  opacity: 0.8
+                }}>
+                  {photo.metadata.date && (
+                    <span>{photo.metadata.date}</span>
+                  )}
+                  {photo.metadata.location && (
+                    <span>{photo.metadata.location}</span>
+                  )}
+                  {photo.metadata.camera && (
+                    <span>{photo.metadata.camera}</span>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>
-
-      {/* Lightbox Modal */}
-      {selectedPhoto && (
-        <div
-          onClick={() => setSelectedPhoto(null)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            cursor: 'zoom-out',
-            padding: '40px'
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              maxWidth: '90vw',
-              maxHeight: '90vh',
-              position: 'relative'
-            }}
-          >
-            <img
-              src={selectedPhoto.src}
-              alt={selectedPhoto.alt}
-              style={{
-                maxWidth: '100%',
-                maxHeight: '85vh',
-                objectFit: 'contain',
-                borderRadius: '8px'
-              }}
-            />
-            <p style={{
-              color: '#ffffff',
-              fontFamily: 'Pretendard',
-              fontWeight: 500,
-              fontSize: '14px',
-              textAlign: 'center',
-              marginTop: '16px'
-            }}>
-              {selectedPhoto.alt}
-            </p>
-          </div>
-
-          {/* Close button */}
-          <button
-            onClick={() => setSelectedPhoto(null)}
-            style={{
-              position: 'absolute',
-              top: '20px',
-              right: '20px',
-              background: 'none',
-              border: 'none',
-              color: '#ffffff',
-              fontSize: '24px',
-              cursor: 'pointer',
-              padding: '8px'
-            }}
-          >
-            ✕
-          </button>
-        </div>
-      )}
 
       {/* Responsive styles */}
       <style jsx global>{`

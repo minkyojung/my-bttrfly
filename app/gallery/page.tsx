@@ -45,14 +45,22 @@ export default async function GalleryPage() {
         }}>
           Gallery
         </h1>
-        <span style={{
-          color: '#7B7B7B',
-          fontFamily: 'Pretendard',
-          fontWeight: 500,
-          fontSize: '14px'
-        }}>
-          {photos.length} photos
-        </span>
+        <Link
+          href="/gallery/upload"
+          style={{
+            color: '#7B7B7B',
+            fontFamily: 'Pretendard',
+            fontWeight: 500,
+            fontSize: '14px',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'color 0.2s'
+          }}
+        >
+          <span>+</span> Upload
+        </Link>
       </header>
 
       {/* 갤러리 보드 */}
