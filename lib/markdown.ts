@@ -4,9 +4,18 @@ import matter from 'gray-matter';
 import { remark } from 'remark';
 import html from 'remark-html';
 import breaks from 'remark-breaks';
+import {
+  getAllPostsFromGhost,
+  getPostBySlugFromGhost,
+  getPinnedPostsFromGhost,
+  getAllTagsFromGhost,
+  searchPostsFromGhost,
+} from './ghost';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const pagesDirectory = path.join(process.cwd(), 'content/pages');
+
+const useGhost = !!(process.env.GHOST_URL && process.env.GHOST_CONTENT_API_KEY);
 
 export interface HeadingAscii {
   heading: string;
@@ -138,6 +147,14 @@ function convertObsidianSyntax(content: string): string {
 
 // 모든 포스트 가져오기
 export async function getAllPosts(): Promise<Post[]> {
+  if (useGhost) {
+    try {
+      return await getAllPostsFromGhost();
+    } catch {
+      // Ghost 실패 시 파일시스템 폴백
+    }
+  }
+
   // 폴더가 없으면 빈 배열 반환
   if (!fs.existsSync(postsDirectory)) {
     return [];
@@ -201,6 +218,14 @@ export async function getAllPosts(): Promise<Post[]> {
 
 // 특정 포스트 가져오기
 export async function getPostBySlug(slug: string): Promise<Post | null> {
+  if (useGhost) {
+    try {
+      return await getPostBySlugFromGhost(slug);
+    } catch {
+      // Ghost 실패 시 파일시스템 폴백
+    }
+  }
+
   try {
     const fullPath = path.join(postsDirectory, `${slug}.md`);
     
@@ -261,6 +286,14 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
 // Pinned 포스트 가져오기
 export async function getPinnedPosts(): Promise<Post[]> {
+  if (useGhost) {
+    try {
+      return await getPinnedPostsFromGhost();
+    } catch {
+      // Ghost 실패 시 파일시스템 폴백
+    }
+  }
+
   const allPosts = await getAllPosts();
   return allPosts
     .filter(post => post.pinned)
@@ -270,6 +303,14 @@ export async function getPinnedPosts(): Promise<Post[]> {
 
 // 모든 태그 가져오기
 export async function getAllTags(): Promise<string[]> {
+  if (useGhost) {
+    try {
+      return await getAllTagsFromGhost();
+    } catch {
+      // Ghost 실패 시 파일시스템 폴백
+    }
+  }
+
   const allPosts = await getAllPosts();
   const allTags = allPosts.flatMap(post => post.tags);
   const uniqueTags = [...new Set(allTags)];
@@ -286,6 +327,14 @@ export async function getPostsByTag(tag: string): Promise<Post[]> {
 
 // 포스트 검색
 export async function searchPosts(query: string): Promise<Post[]> {
+  if (useGhost) {
+    try {
+      return await searchPostsFromGhost(query);
+    } catch {
+      // Ghost 실패 시 파일시스템 폴백
+    }
+  }
+
   const allPosts = await getAllPosts();
   const lowerQuery = query.toLowerCase();
   
