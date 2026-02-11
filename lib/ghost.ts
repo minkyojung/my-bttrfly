@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import type { Post, HeadingAscii, SectionAscii } from './markdown';
 
 const GHOST_URL = process.env.GHOST_URL || 'http://localhost:2368';
@@ -46,8 +48,18 @@ interface PostMeta {
   pinnedOrder?: number;
 }
 
-// slug → 커스텀 메타데이터 매핑 (Step 4에서 외부 파일로 분리 예정)
-const postMetaMap: Record<string, PostMeta> = {};
+// slug → 커스텀 메타데이터 매핑 (data/post-meta.json)
+function loadPostMeta(): Record<string, PostMeta> {
+  try {
+    const filePath = path.join(process.cwd(), 'data/post-meta.json');
+    const raw = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return {};
+  }
+}
+
+let postMetaMap: Record<string, PostMeta> = loadPostMeta();
 
 async function ghostFetch<T>(endpoint: string, params: Record<string, string> = {}): Promise<T> {
   const url = new URL(`/ghost/api/content/${endpoint}`, GHOST_URL);
