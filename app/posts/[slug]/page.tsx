@@ -131,6 +131,49 @@ export default async function Post({
         .prose tr:hover td {
           background-color: rgba(255, 255, 255, 0.02);
         }
+
+        /* Heading with ASCII styles */
+        .prose .heading-with-ascii {
+          display: flex;
+          align-items: stretch;
+          gap: 24px;
+          margin-top: 2rem;
+          margin-bottom: 1rem;
+        }
+
+        .prose .heading-with-ascii h1,
+        .prose .heading-with-ascii h2,
+        .prose .heading-with-ascii h3,
+        .prose .heading-with-ascii h4,
+        .prose .heading-with-ascii h5,
+        .prose .heading-with-ascii h6 {
+          margin: 0;
+          flex: 1;
+          display: flex;
+          align-items: center;
+        }
+
+        .prose .heading-ascii {
+          margin: 0;
+          padding: 0;
+          background: transparent;
+          color: #5A5A5A;
+          font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+          font-size: 10px;
+          line-height: 1.2;
+          white-space: pre;
+          display: flex;
+          align-items: center;
+          flex-shrink: 0;
+        }
+
+        .prose .heading-ascii-left {
+          order: -1;
+        }
+
+        .prose .heading-ascii-right {
+          order: 1;
+        }
       `}} />
       <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         <div className="max-w-3xl mx-auto px-6 py-12">
@@ -178,6 +221,7 @@ export default async function Post({
           </header>
 
           <div
+            dangerouslySetInnerHTML={{ __html: post.htmlContent || '' }}
             className="prose prose-serif max-w-none
               prose-headings:font-black
               prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
@@ -221,8 +265,10 @@ export default async function Post({
               '--tw-prose-td-borders': '#3A3A3A',
               '--tw-prose-captions': '#6A6A6A'
             } as React.CSSProperties}
-            dangerouslySetInnerHTML={{ __html: post.htmlContent || '' }}
           />
+
+          {/* Bottom padding for audio player */}
+          <div style={{ height: '160px' }} />
         </article>
       </div>
 

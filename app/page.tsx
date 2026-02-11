@@ -1,11 +1,13 @@
 import { getAllPosts, getPinnedPosts } from "@/lib/markdown";
+import { getGalleryPhotos } from "@/lib/gallery";
 import { MainPage } from "@/components/MainPage";
 
 export default async function Home() {
-  const [posts, pinnedPosts] = await Promise.all([
+  const [posts, pinnedPosts, photos] = await Promise.all([
     getAllPosts(),
-    getPinnedPosts()
+    getPinnedPosts(),
+    getGalleryPhotos()
   ]);
 
-  return <MainPage posts={posts} pinnedPosts={pinnedPosts} />;
+  return <MainPage posts={posts} pinnedPosts={pinnedPosts} photos={photos} />;
 }

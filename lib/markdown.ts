@@ -8,6 +8,20 @@ import breaks from 'remark-breaks';
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const pagesDirectory = path.join(process.cwd(), 'content/pages');
 
+export interface HeadingAscii {
+  heading: string;
+  ascii: string;
+  position?: 'left' | 'right';
+}
+
+export interface SectionAscii {
+  afterHeading: string;
+  type: 'fire' | 'static' | 'custom' | 'pipeline' | 'blackhole' | 'poty';
+  ascii?: string;
+  width?: number;
+  height?: number;
+}
+
 export interface Post {
   slug: string;
   title: string;
@@ -24,6 +38,9 @@ export interface Post {
   audioArtist?: string;
   thumbnail?: string;
   ascii?: string;
+  customAscii?: string;
+  headingAscii?: HeadingAscii[];
+  sectionAscii?: SectionAscii[];
 }
 
 // 읽는 시간 계산 (한글 기준 분당 400자)
@@ -32,6 +49,73 @@ function calculateReadingTime(content: string): string {
   const chars = plainText.length;
   const minutes = Math.max(1, Math.ceil(chars / 400));
   return `${minutes} min read`;
+}
+
+// heading에 ASCII 아트 삽입
+function insertHeadingAscii(htmlContent: string, headingAsciiList?: HeadingAscii[]): string {
+  if (!headingAsciiList || headingAsciiList.length === 0) {
+    return htmlContent;
+  }
+
+  let result = htmlContent;
+
+  for (const item of headingAsciiList) {
+    const { heading, ascii, position = 'right' } = item;
+
+    // h1~h6 태그에서 해당 heading 텍스트 찾기
+    const headingRegex = new RegExp(
+      `(<h([1-6])[^>]*>)(${escapeRegex(heading)})(</h\\2>)`,
+      'gi'
+    );
+
+    result = result.replace(headingRegex, (match, openTag, level, text, closeTag) => {
+      const escapedAscii = ascii
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      const asciiHtml = `<pre class="heading-ascii heading-ascii-${position}" data-heading-level="${level}">${escapedAscii}</pre>`;
+
+      if (position === 'left') {
+        return `<div class="heading-with-ascii">${asciiHtml}${openTag}${text}${closeTag}</div>`;
+      } else {
+        return `<div class="heading-with-ascii">${openTag}${text}${closeTag}${asciiHtml}</div>`;
+      }
+    });
+  }
+
+  return result;
+}
+
+// 정규식 특수문자 이스케이프
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// heading 뒤에 sectionAscii placeholder 삽입
+function insertSectionAscii(htmlContent: string, sectionAsciiList?: SectionAscii[]): string {
+  if (!sectionAsciiList || sectionAsciiList.length === 0) {
+    return htmlContent;
+  }
+
+  let result = htmlContent;
+
+  for (const item of sectionAsciiList) {
+    const { afterHeading, type, width = 600, height = 200 } = item;
+
+    // h1~h6 태그에서 해당 heading 텍스트 찾기
+    const headingRegex = new RegExp(
+      `(<h([1-6])[^>]*>${escapeRegex(afterHeading)}</h\\2>)`,
+      'gi'
+    );
+
+    result = result.replace(headingRegex, (match, fullTag) => {
+      const placeholderHtml = `<div class="section-ascii-placeholder" data-type="${type}" data-width="${width}" data-height="${height}"></div>`;
+      return `${fullTag}${placeholderHtml}`;
+    });
+  }
+
+  return result;
 }
 
 // 옵시디언 문법을 표준 마크다운으로 변환
@@ -134,16 +218,21 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
     const processedHTML = await remark()
       .use(html, { sanitize: true })
       .process(processedContent);
-    
-    const htmlContent = processedHTML.toString();
-    
+
+    // headingAscii 파싱
+    const headingAscii: HeadingAscii[] | undefined = data.headingAscii;
+    const sectionAscii: SectionAscii[] | undefined = data.sectionAscii;
+
+    // heading에 ASCII 삽입
+    const htmlContent = insertHeadingAscii(processedHTML.toString(), headingAscii);
+
     // 미리보기 텍스트
     const plainText = processedContent.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
     const preview = plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
-    
+
     // 읽는 시간 계산
     const readingTime = calculateReadingTime(processedContent);
-    
+
     return {
       slug,
       title: data.title || slug.replace(/-/g, ' '),
@@ -159,7 +248,10 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       audioTitle: data.audioTitle,
       audioArtist: data.audioArtist,
       thumbnail: data.thumbnail,
-      ascii: data.ascii
+      ascii: data.ascii,
+      customAscii: data.customAscii,
+      headingAscii,
+      sectionAscii
     };
   } catch {
     // Production: error logging removed

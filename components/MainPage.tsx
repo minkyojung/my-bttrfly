@@ -18,12 +18,19 @@ interface Post {
   ascii?: string;
 }
 
+interface Photo {
+  src: string;
+  alt: string;
+  filename: string;
+}
+
 interface MainPageProps {
   posts: Post[];
   pinnedPosts?: Post[];
+  photos?: Photo[];
 }
 
-export function MainPage({ posts, pinnedPosts }: MainPageProps) {
+export function MainPage({ posts, pinnedPosts, photos = [] }: MainPageProps) {
   return (
     <main style={{
       backgroundColor: 'var(--bg-color)',
@@ -32,13 +39,13 @@ export function MainPage({ posts, pinnedPosts }: MainPageProps) {
       scrollSnapType: 'y mandatory',
       scrollBehavior: 'smooth'
     }}>
-      {/* 프로필 섹션 - 첫 번째 화면 */}
+      {/* 첫 번째 화면: 프로필 */}
       <section style={{
         height: '100vh',
+        scrollSnapAlign: 'center',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
-        scrollSnapAlign: 'center'
+        justifyContent: 'center'
       }}>
         <ProfileSection />
       </section>
