@@ -7,6 +7,15 @@ audioTitle: Prince Ralis is Saved
 audioArtist: Toru Minegishi(峰岸透)
 pinned:
 ascii: "2025"
+sectionAscii:
+  - afterHeading: "Obsessions on 2025"
+    type: blackhole
+    width: 600
+    height: 150
+  - afterHeading: "How to learn fast"
+    type: pipeline
+    width: 600
+    height: 150
 ---
 ## Intro
 오늘도 늘 미루고 싶은 숙제처럼 연말회고를 적습니다. 여러분의 2025년은 어땠나요? 인류는 전례없는 수준의 지능을 가지게 되었고, 하루가 다르게 그 기술은 무서운 속대로 발전하고 있습니다. 이 성장세를 유지한다면, 우리에게남은 가장 해결이 어려운 문제는 자원의 분배일까 싶습니다.
