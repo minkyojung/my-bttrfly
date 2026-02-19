@@ -176,7 +176,7 @@ export default async function Post({
         }
       `}} />
       <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-        <div className="max-w-3xl mx-auto px-6 py-12">
+        <div className="max-w-3xl mx-auto px-6 py-12" style={{ paddingTop: '64px' }}>
         {/* 홈으로 돌아가기 링크 */}
         <Link
           href="/"
