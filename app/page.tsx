@@ -1,9 +1,12 @@
-import { getGalleryPhotos } from '@/lib/gallery';
-import { GalleryBoard } from '@/components/GalleryBoard';
+// import { getGalleryPhotos } from '@/lib/gallery';
+import { getAllPosts } from '@/lib/markdown';
+// import { GalleryBoard } from '@/components/GalleryBoard';
 import { CardDeck } from '@/components/CardDeck';
 
 export default async function Home() {
-  const photos = await getGalleryPhotos();
+  const posts = await getAllPosts();
+
+  const postsWithImages = posts.filter(p => p.images && p.images.length > 0);
 
   return (
     <main style={{
@@ -11,27 +14,24 @@ export default async function Home() {
       minHeight: '100vh',
       padding: '56px 20px 40px',
     }}>
-      {/* Card Deck 실험 영역 */}
-      <section style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '80px 0',
-      }}>
-        <CardDeck />
-      </section>
-
-      {photos.length > 0 ? (
-        <GalleryBoard photos={photos} />
-      ) : (
-        <div style={{
-          textAlign: 'center',
-          color: '#7B7B7B',
-          fontFamily: 'Pretendard',
-          marginTop: '100px',
+      {postsWithImages.length > 0 && (
+        <section style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '48px',
+          padding: '80px 0',
         }}>
-          <p>No photos yet.</p>
-        </div>
+          {postsWithImages.map(post => (
+            <CardDeck
+              key={post.slug}
+              images={post.images!}
+              title={post.title}
+              slug={post.slug}
+            />
+          ))}
+        </section>
       )}
     </main>
   );

@@ -77,6 +77,16 @@ async function ghostFetch<T>(endpoint: string, params: Record<string, string> = 
   return res.json();
 }
 
+function extractImagesFromHtml(htmlStr: string): string[] {
+  const regex = /<img[^>]+src="([^"]+)"/g;
+  const images: string[] = [];
+  let match;
+  while ((match = regex.exec(htmlStr)) !== null) {
+    images.push(match[1]);
+  }
+  return images;
+}
+
 function calculateReadingTime(html: string): string {
   const plainText = html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ');
   const chars = plainText.length;
@@ -108,6 +118,7 @@ function ghostPostToPost(gp: GhostPost): Post {
     audio: meta.audio,
     audioTitle: meta.audioTitle,
     audioArtist: meta.audioArtist,
+    images: extractImagesFromHtml(htmlContent),
   };
 }
 

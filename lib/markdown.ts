@@ -50,6 +50,18 @@ export interface Post {
   customAscii?: string;
   headingAscii?: HeadingAscii[];
   sectionAscii?: SectionAscii[];
+  images?: string[];
+}
+
+// HTML에서 이미지 URL 추출
+function extractImagesFromHtml(htmlStr: string): string[] {
+  const regex = /<img[^>]+src="([^"]+)"/g;
+  const images: string[] = [];
+  let match;
+  while ((match = regex.exec(htmlStr)) !== null) {
+    images.push(match[1]);
+  }
+  return images;
 }
 
 // 읽는 시간 계산 (한글 기준 분당 400자)
@@ -205,7 +217,8 @@ export async function getAllPosts(): Promise<Post[]> {
         audioTitle: data.audioTitle,
         audioArtist: data.audioArtist,
         thumbnail: data.thumbnail,
-        ascii: data.ascii
+        ascii: data.ascii,
+        images: extractImagesFromHtml(htmlContent),
       };
     })
   );
@@ -276,7 +289,8 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
       ascii: data.ascii,
       customAscii: data.customAscii,
       headingAscii,
-      sectionAscii
+      sectionAscii,
+      images: extractImagesFromHtml(htmlContent),
     };
   } catch {
     // Production: error logging removed

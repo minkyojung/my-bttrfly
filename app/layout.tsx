@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
-import { CursorWrapper } from "@/components/CursorWrapper";
+// import { CursorWrapper } from "@/components/CursorWrapper";
 
 export const metadata: Metadata = {
   title: "Minkyo Jung",
@@ -16,10 +16,10 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased">
-        <CursorWrapper>
+        {/* <CursorWrapper> */}
           <NavBar />
           {children}
-        </CursorWrapper>
+        {/* </CursorWrapper> */}
       </body>
     </html>
   );
