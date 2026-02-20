@@ -172,6 +172,47 @@ export default async function Post({
         .prose .heading-ascii-right {
           order: 1;
         }
+
+        /* Ghost image width variants */
+        .prose .kg-image-card,
+        .prose .kg-gallery-card {
+          margin: 24px auto;
+        }
+
+        .prose .kg-image-card img {
+          margin-left: auto;
+          margin-right: auto;
+          border-radius: 8px;
+        }
+
+        .prose .kg-width-wide {
+          width: calc(100% + 120px);
+          max-width: none;
+          margin-left: -60px;
+          margin-right: -60px;
+        }
+
+        .prose .kg-width-wide img {
+          border-radius: 10px;
+        }
+
+        .prose .kg-width-full {
+          width: 100vw;
+          max-width: none;
+          margin-left: calc(-50vw + 50%);
+          margin-right: calc(-50vw + 50%);
+          padding: 0 10px;
+          box-sizing: border-box;
+        }
+
+        .prose .kg-width-wide img,
+        .prose .kg-width-full img {
+          width: 100%;
+        }
+
+        .prose .kg-width-full img {
+          border-radius: 12px;
+        }
       `}} />
       <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
         {post.thumbnail && (
