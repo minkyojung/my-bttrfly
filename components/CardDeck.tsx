@@ -10,6 +10,7 @@ interface CardDeckProps {
   thumbnail?: string;
   isActive?: boolean;
   showTitle?: boolean;
+  onHoverChange?: (hovered: boolean) => void;
 }
 
 const MAX_CARDS = 7;
@@ -91,7 +92,7 @@ const fallbackColors = [
   '#525252', '#5c5c5c', '#686868',
 ];
 
-export function CardDeck({ images, title, slug, thumbnail, isActive = true, showTitle = true }: CardDeckProps) {
+export function CardDeck({ images, title, slug, thumbnail, isActive = true, showTitle = true, onHoverChange }: CardDeckProps) {
   const [isHovered, setIsHovered] = useState(false);
 
   // thumbnail을 맨 위에, 나머지 본문 이미지는 뒤에
@@ -105,11 +106,13 @@ export function CardDeck({ images, title, slug, thumbnail, isActive = true, show
     if (!isActive) return;
     scatterRef.current = generateScatter(cardCount);
     setIsHovered(true);
-  }, [cardCount, isActive]);
+    onHoverChange?.(true);
+  }, [cardCount, isActive, onHoverChange]);
 
   const handleLeave = useCallback(() => {
     setIsHovered(false);
-  }, []);
+    onHoverChange?.(false);
+  }, [onHoverChange]);
 
   return (
     <div

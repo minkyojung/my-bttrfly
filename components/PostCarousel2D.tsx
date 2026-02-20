@@ -52,12 +52,19 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
 
   const scrollOffsetRef = useRef(0);
   const hoveredRef = useRef(false);
+  const draggingRef = useRef(false);
+  const dragStartYRef = useRef(0);
+  const dragOffsetStartRef = useRef(0);
+  const dragVelocityRef = useRef(0);
+  const dragLastYRef = useRef(0);
+  const dragLastTimeRef = useRef(0);
   const rafRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const snapTargetRef = useRef<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [centerIndex, setCenterIndex] = useState(0);
+  const [hoveredPostIndex, setHoveredPostIndex] = useState<number | null>(null);
 
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
@@ -77,7 +84,16 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
 
       const clampedDt = Math.min(dt, 0.1);
 
-      if (snapTargetRef.current !== null) {
+      if (draggingRef.current) {
+        // 드래그 중에는 자동 스크롤 멈춤 — offset은 pointerMove에서 직접 업데이트
+      } else if (Math.abs(dragVelocityRef.current) > 5) {
+        // 드래그 후 관성 스크롤
+        scrollOffsetRef.current += dragVelocityRef.current * clampedDt;
+        dragVelocityRef.current *= 0.95; // 감속
+        if (Math.abs(dragVelocityRef.current) <= 5) {
+          dragVelocityRef.current = 0;
+        }
+      } else if (snapTargetRef.current !== null) {
         const target = snapTargetRef.current;
         const diff = target - scrollOffsetRef.current;
         if (Math.abs(diff) < 0.5) {
@@ -192,9 +208,38 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
           width: '50%',
           height: '100%',
           overflow: 'hidden',
+          cursor: 'grab',
         }}
         onMouseEnter={slowDown}
         onMouseLeave={speedUp}
+        onPointerDown={(e) => {
+          draggingRef.current = true;
+          dragVelocityRef.current = 0;
+          dragStartYRef.current = e.clientY;
+          dragOffsetStartRef.current = scrollOffsetRef.current;
+          dragLastYRef.current = e.clientY;
+          dragLastTimeRef.current = performance.now();
+          (e.currentTarget as HTMLElement).style.cursor = 'grabbing';
+          e.currentTarget.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          if (!draggingRef.current) return;
+          const dy = e.clientY - dragStartYRef.current;
+          scrollOffsetRef.current = dragOffsetStartRef.current + dy;
+
+          // velocity 계산 (최근 움직임 기반)
+          const now = performance.now();
+          const timeDelta = (now - dragLastTimeRef.current) / 1000;
+          if (timeDelta > 0) {
+            dragVelocityRef.current = (e.clientY - dragLastYRef.current) / timeDelta;
+          }
+          dragLastYRef.current = e.clientY;
+          dragLastTimeRef.current = now;
+        }}
+        onPointerUp={(e) => {
+          draggingRef.current = false;
+          (e.currentTarget as HTMLElement).style.cursor = 'grab';
+        }}
       >
         {Array.from({ length: slotCount }, (_, slot) => {
           const post = posts[slot % total];
@@ -214,7 +259,11 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
                 willChange: 'transform',
                 cursor: 'pointer',
               }}
-              onClick={() => {
+              onClick={(e) => {
+                // 드래그 후 클릭 방지 — 시작 위치에서 많이 이동했으면 무시
+                const dragDist = Math.abs(e.clientY - dragStartYRef.current);
+                if (dragDist > 5) return;
+
                 const postIdx = slot % total;
                 if (postIdx === centerIndex) {
                   router.push(`/posts/${post.slug}`);
@@ -228,8 +277,11 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
                 title={post.title}
                 slug={post.slug}
                 thumbnail={post.thumbnail}
-                isActive={(slot % total) === centerIndex}
+                isActive={true}
                 showTitle={false}
+                onHoverChange={(hovered) => {
+                  setHoveredPostIndex(hovered ? (slot % total) : null);
+                }}
               />
             </div>
           );
@@ -249,56 +301,62 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
         overflow: 'hidden',
       }}>
         <AnimatePresence mode="wait">
-          <motion.div
-            key={centerIndex}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              maxWidth: '480px',
-            }}
-          >
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.45)',
-              fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-              fontSize: '13px',
-              fontWeight: 400,
-              letterSpacing: '0.02em',
-              margin: '0 0 4px 0',
-            }}>
-              {formatDate(posts[centerIndex].date)}  ·  {posts[centerIndex].readingTime}
-            </p>
-            <p
-              style={{
-                color: '#ffffff',
-                fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-                fontSize: '72px',
-                fontWeight: 600,
-                letterSpacing: '-0.03em',
-                lineHeight: 1,
-                margin: 0,
-                cursor: 'pointer',
-              }}
-              onClick={() => router.push(`/posts/${posts[centerIndex].slug}`)}
-            >
-              {posts[centerIndex].title}
-            </p>
-            <p style={{
-              color: 'rgba(255, 255, 255, 0.4)',
-              fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-              fontSize: '15px',
-              fontWeight: 400,
-              lineHeight: 1.6,
-              letterSpacing: '-0.01em',
-              margin: '16px 0 0 0',
-            }}>
-              {posts[centerIndex].preview}
-            </p>
-          </motion.div>
+          {(() => {
+            const displayIndex = hoveredPostIndex !== null ? hoveredPostIndex : centerIndex;
+            const displayPost = posts[displayIndex];
+            return (
+              <motion.div
+                key={displayIndex}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -16 }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  maxWidth: '480px',
+                }}
+              >
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.45)',
+                  fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
+                  fontSize: '13px',
+                  fontWeight: 400,
+                  letterSpacing: '0.02em',
+                  margin: '0 0 4px 0',
+                }}>
+                  {formatDate(displayPost.date)}  ·  {displayPost.readingTime}
+                </p>
+                <p
+                  style={{
+                    color: '#ffffff',
+                    fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
+                    fontSize: '72px',
+                    fontWeight: 600,
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1,
+                    margin: 0,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => router.push(`/posts/${displayPost.slug}`)}
+                >
+                  {displayPost.title}
+                </p>
+                <p style={{
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
+                  fontSize: '15px',
+                  fontWeight: 400,
+                  lineHeight: 1.6,
+                  letterSpacing: '-0.01em',
+                  margin: '16px 0 0 0',
+                }}>
+                  {displayPost.preview}
+                </p>
+              </motion.div>
+            );
+          })()}
         </AnimatePresence>
       </div>
     </div>
