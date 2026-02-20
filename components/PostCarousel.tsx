@@ -289,7 +289,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
               fontSize: '13px',
               fontWeight: 400,
               letterSpacing: '0.02em',
-              margin: 0,
+              margin: '0 0 -4px 0',
               textAlign: 'center',
             }}>
               {formatDate(posts[centerIndex].date)}  ·  {posts[centerIndex].readingTime}
@@ -315,7 +315,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
       </div>
 
       {/* Dots */}
-      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+      <div style={{ display: 'flex', gap: '8px', marginTop: '24px' }}>
         {posts.map((_, i) => (
           <button
             key={i}
