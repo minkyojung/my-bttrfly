@@ -1,7 +1,5 @@
-// import { getGalleryPhotos } from '@/lib/gallery';
 import { getAllPosts } from '@/lib/markdown';
-// import { GalleryBoard } from '@/components/GalleryBoard';
-import { CardDeck } from '@/components/CardDeck';
+import { PostCarousel } from '@/components/PostCarousel';
 
 export default async function Home() {
   const posts = await getAllPosts();
@@ -12,26 +10,19 @@ export default async function Home() {
     <main style={{
       backgroundColor: 'var(--bg-color)',
       minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
       padding: '56px 20px 40px',
     }}>
       {postsWithImages.length > 0 && (
-        <section style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '48px',
-          padding: '80px 0',
-        }}>
-          {postsWithImages.map(post => (
-            <CardDeck
-              key={post.slug}
-              images={post.images!}
-              title={post.title}
-              slug={post.slug}
-            />
-          ))}
-        </section>
+        <PostCarousel
+          posts={postsWithImages.map(p => ({
+            slug: p.slug,
+            title: p.title,
+            images: p.images!,
+          }))}
+        />
       )}
     </main>
   );

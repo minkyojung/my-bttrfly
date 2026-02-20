@@ -8,11 +8,13 @@ interface CardDeckProps {
   images: string[];
   title: string;
   slug: string;
+  isActive?: boolean;
+  showTitle?: boolean;
 }
 
 const MAX_CARDS = 7;
-const CARD_W = 130;
-const CARD_H = 88;
+const CARD_W = 280;
+const CARD_H = 190;
 
 function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
@@ -32,11 +34,11 @@ function generateScatter(count: number) {
     for (let attempt = 0; attempt < 80; attempt++) {
       const angle = rand(0, 360) * (Math.PI / 180);
       // 카드 수에 따라 거리 조절 — 적을수록 가까이
-      const maxDist = 40 + count * 18;
-      const dist = rand(30, maxDist);
+      const maxDist = 80 + count * 30;
+      const dist = rand(50, maxDist);
       const x = Math.cos(angle) * dist;
       // 위쪽으로만 분포 (y는 음수 = 위)
-      const y = -Math.abs(Math.sin(angle) * dist) - rand(10, 40);
+      const y = -Math.abs(Math.sin(angle) * dist) - rand(20, 60);
 
       // 기존 카드와 겹침 검사
       const overlaps = placed.some(p => {
@@ -72,12 +74,12 @@ function generateScatter(count: number) {
 
 const baseStackOffsets = [
   { x: 0,   y: 0,   rotate: -3 },
-  { x: 4,   y: -1,  rotate: 5 },
-  { x: -3,  y: -3,  rotate: -1.5 },
-  { x: 6,   y: -2,  rotate: 3.5 },
-  { x: -1,  y: -5,  rotate: -4 },
-  { x: 3,   y: -4,  rotate: 2 },
-  { x: -2,  y: -7,  rotate: -0.5 },
+  { x: 6,   y: -2,  rotate: 5 },
+  { x: -5,  y: -4,  rotate: -1.5 },
+  { x: 8,   y: -3,  rotate: 3.5 },
+  { x: -2,  y: -6,  rotate: -4 },
+  { x: 5,   y: -5,  rotate: 2 },
+  { x: -3,  y: -8,  rotate: -0.5 },
 ];
 
 const fallbackColors = [
@@ -85,16 +87,19 @@ const fallbackColors = [
   '#525252', '#5c5c5c', '#686868',
 ];
 
-export function CardDeck({ images, title, slug }: CardDeckProps) {
+export function CardDeck({ images, title, slug, isActive = true, showTitle = true }: CardDeckProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
   const cardCount = Math.min(Math.max(images.length, 1), MAX_CARDS);
   const scatterRef = useRef(generateScatter(cardCount));
 
+  const effectiveHover = isActive && isHovered;
+
   const handleEnter = useCallback(() => {
+    if (!isActive) return;
     scatterRef.current = generateScatter(cardCount);
     setIsHovered(true);
-  }, [cardCount]);
+  }, [cardCount, isActive]);
 
   const handleLeave = useCallback(() => {
     setIsHovered(false);
@@ -112,8 +117,8 @@ export function CardDeck({ images, title, slug }: CardDeckProps) {
       <div
         style={{
           position: 'relative',
-          width: '240px',
-          height: '180px',
+          width: '340px',
+          height: '280px',
           cursor: 'pointer',
         }}
         onMouseEnter={handleEnter}
@@ -130,18 +135,18 @@ export function CardDeck({ images, title, slug }: CardDeckProps) {
               key={i}
               initial={false}
               animate={{
-                x: isHovered ? scatter.x : stack.x,
-                y: isHovered ? scatter.y : stack.y,
-                rotate: isHovered ? scatter.rotate : stack.rotate,
-                scale: isHovered ? 1.08 : 1,
-                opacity: isHovered ? 1 : 0.6 + i * 0.06,
+                x: effectiveHover ? scatter.x : stack.x,
+                y: effectiveHover ? scatter.y : stack.y,
+                rotate: effectiveHover ? scatter.rotate : stack.rotate,
+                scale: effectiveHover ? 1.08 : 1,
+                opacity: 1,
               }}
               transition={{
                 type: 'spring',
                 stiffness: 260 + i * 15,
                 damping: 18 + i * 1.5,
                 mass: 0.6 + i * 0.05,
-                delay: isHovered ? i * 0.035 : (cardCount - 1 - i) * 0.025,
+                delay: effectiveHover ? i * 0.035 : (cardCount - 1 - i) * 0.025,
               }}
               style={{
                 position: 'absolute',
@@ -152,7 +157,7 @@ export function CardDeck({ images, title, slug }: CardDeckProps) {
                 height: `${CARD_H}px`,
                 borderRadius: '4px',
                 border: '1px solid rgba(255, 255, 255, 0.08)',
-                boxShadow: isHovered
+                boxShadow: effectiveHover
                   ? `0 ${10 + i * 2}px ${20 + i * 4}px rgba(0, 0, 0, ${0.3 + i * 0.05})`
                   : '0 1px 4px rgba(0, 0, 0, 0.25)',
                 zIndex: i,
@@ -167,19 +172,21 @@ export function CardDeck({ images, title, slug }: CardDeckProps) {
         })}
       </div>
 
-      <p style={{
-        color: isHovered ? '#ffffff' : '#aaaaaa',
-        fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-        fontSize: '18px',
-        fontWeight: 600,
-        letterSpacing: '-0.03em',
-        lineHeight: 1.2,
-        marginTop: '-8px',
-        transition: 'color 0.2s',
-        textAlign: 'center',
-      }}>
-        {title}
-      </p>
+      {showTitle && (
+        <p style={{
+          color: effectiveHover ? '#ffffff' : '#aaaaaa',
+          fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
+          fontSize: '18px',
+          fontWeight: 600,
+          letterSpacing: '-0.03em',
+          lineHeight: 1.2,
+          marginTop: '-8px',
+          transition: 'color 0.2s',
+          textAlign: 'center',
+        }}>
+          {title}
+        </p>
+      )}
     </div>
   );
 }
