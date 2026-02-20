@@ -1,9 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
-import Link from 'next/link';
 import type { Metadata } from 'next';
 import { AudioPlayer } from '@/components/AudioPlayer';
-import { PostASCII } from '@/components/PostASCII';
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -176,24 +174,37 @@ export default async function Post({
         }
       `}} />
       <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-        <div className="max-w-3xl mx-auto px-6 py-12" style={{ paddingTop: '64px' }}>
-        {/* 홈으로 돌아가기 링크 */}
-        <Link
-          href="/"
-          className="inline-flex items-center mb-8 text-sm hover:opacity-60 transition-opacity"
-          style={{ color: 'var(--text-color)' }}
-        >
-          ←
-        </Link>
+        {post.thumbnail && (
+          <div style={{
+            padding: '10px',
+            paddingTop: '10px',
+          }}>
+            <div style={{
+              width: '100%',
+              maxHeight: '70vh',
+              overflow: 'hidden',
+              borderRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <img
+                src={post.thumbnail}
+                alt={post.title}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
+            </div>
+          </div>
+        )}
 
+        <div className="max-w-3xl mx-auto px-6 py-12" style={{ paddingTop: post.thumbnail ? '48px' : '64px' }}>
         <article className="flex flex-col items-center">
           <header className="mb-12" style={{ width: '550px' }}>
-            <div className="flex items-center justify-center text-sm mb-4" style={{ color: '#7B7B7B', marginTop: '24px' }}>
-              <p>
-                {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')}
-              </p>
-            </div>
-
             <h1 className="text-center" style={{
               color: '#E5E5E5',
               fontFamily: 'Pretendard',
@@ -201,23 +212,16 @@ export default async function Post({
               fontSize: '60px',
               lineHeight: '1.2',
               letterSpacing: '-0.05em',
-              marginBottom: '48px'
+              marginBottom: '16px'
             }}>
               {post.title}
             </h1>
 
-            {/* ASCII Art - scaled up version */}
-            {!post.thumbnail && (
-              <div style={{
-                width: '700px',
-                height: '326px',
-                marginBottom: '0px',
-                marginLeft: '-75px'
-              }}>
-                <PostASCII text={post.ascii} width={700} height={326} />
-              </div>
-            )}
-
+            <div className="flex items-center justify-center text-sm" style={{ color: '#7B7B7B' }}>
+              <p>
+                {typeof post.date === 'string' ? post.date : new Date(post.date).toLocaleDateString('ko-KR')}
+              </p>
+            </div>
           </header>
 
           <div
