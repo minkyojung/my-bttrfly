@@ -37,7 +37,7 @@ const HOVER_SPEED_FACTOR = 0.15; // hover 시 원래 속도의 15%로 감속
 const DRAG_THRESHOLD = 50;
 
 // Circle geometry — Y-axis ferris wheel
-const RADIUS = 280; // px — vertical orbit radius
+const RADIUS = 380; // px — vertical orbit radius
 const ANGLE_PER_CARD = (2 * Math.PI) / 8;
 
 // Front = angle 0 (closest to viewer)
@@ -52,10 +52,9 @@ function getCircularTransform(angle: number) {
   // depth: cos(0)=1 앞, cos(PI)=-1 뒤
   const depthFactor = (1 + Math.cos(angle)) / 2;
   const scale = 0.45 + depthFactor * 0.55;
-  const opacity = 0.15 + depthFactor * 0.85;
   const zIndex = Math.round(depthFactor * 100);
 
-  return { x, y, z, scale, opacity, zIndex };
+  return { x, y, z, scale, opacity: 1, zIndex };
 }
 
 export function PostCarousel({ posts }: PostCarouselProps) {
