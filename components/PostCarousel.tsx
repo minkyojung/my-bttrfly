@@ -10,10 +10,17 @@ interface Post {
   title: string;
   images: string[];
   thumbnail?: string;
+  date: string;
+  readingTime: string;
 }
 
 interface PostCarouselProps {
   posts: Post[];
+}
+
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 const SPEED = 0.12;
@@ -246,36 +253,56 @@ export function PostCarousel({ posts }: PostCarouselProps) {
         })}
       </div>
 
-      {/* Title */}
+      {/* Meta + Title */}
       <div style={{
         height: '200px',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
       }}>
         <AnimatePresence mode="wait">
-          <motion.p
+          <motion.div
             key={centerIndex}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             style={{
-              color: '#ffffff',
-              fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-              fontSize: '120px',
-              fontWeight: 600,
-              letterSpacing: '-0.03em',
-              lineHeight: 1.3,
-              textAlign: 'center',
-              margin: 0,
-              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
             }}
-            onClick={() => router.push(`/posts/${posts[centerIndex].slug}`)}
           >
-            {posts[centerIndex].title}
-          </motion.p>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.45)',
+              fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
+              fontSize: '13px',
+              fontWeight: 400,
+              letterSpacing: '0.02em',
+              margin: 0,
+              textAlign: 'center',
+            }}>
+              {formatDate(posts[centerIndex].date)}  ·  {posts[centerIndex].readingTime}
+            </p>
+            <p
+              style={{
+                color: '#ffffff',
+                fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
+                fontSize: '120px',
+                fontWeight: 600,
+                letterSpacing: '-0.03em',
+                lineHeight: 1.3,
+                textAlign: 'center',
+                margin: 0,
+                cursor: 'pointer',
+              }}
+              onClick={() => router.push(`/posts/${posts[centerIndex].slug}`)}
+            >
+              {posts[centerIndex].title}
+            </p>
+          </motion.div>
         </AnimatePresence>
       </div>
 

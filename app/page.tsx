@@ -23,6 +23,8 @@ export default async function Home() {
             title: p.title,
             images: p.images || [],
             thumbnail: p.thumbnail,
+            date: p.date,
+            readingTime: p.readingTime,
           }))}
         />
       )}
