@@ -1,13 +1,31 @@
-import { getAllPosts, getPinnedPosts } from "@/lib/markdown";
-import { getGalleryPhotos } from "@/lib/gallery";
-import { MainPage } from "@/components/MainPage";
+import { getAllPosts } from '@/lib/markdown';
+import { PostCarousel2D as PostCarousel } from '@/components/PostCarousel2D';
 
 export default async function Home() {
-  const [posts, pinnedPosts, photos] = await Promise.all([
-    getAllPosts(),
-    getPinnedPosts(),
-    getGalleryPhotos()
-  ]);
+  const posts = await getAllPosts();
 
-  return <MainPage posts={posts} pinnedPosts={pinnedPosts} photos={photos} />;
+  // thumbnail 또는 본문 이미지가 있는 포스트만
+  const postsWithImages = posts.filter(p => p.thumbnail || (p.images && p.images.length > 0));
+
+  return (
+    <main style={{
+      backgroundColor: 'var(--bg-color)',
+      height: '100vh',
+      overflow: 'hidden',
+    }}>
+      {postsWithImages.length > 0 && (
+        <PostCarousel
+          posts={postsWithImages.map(p => ({
+            slug: p.slug,
+            title: p.title,
+            images: p.images || [],
+            thumbnail: p.thumbnail,
+            date: p.date,
+            readingTime: p.readingTime,
+            preview: p.preview,
+          }))}
+        />
+      )}
+    </main>
+  );
 }
