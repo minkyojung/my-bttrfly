@@ -13,8 +13,8 @@ interface CardDeckProps {
 }
 
 const MAX_CARDS = 7;
-const CARD_W = 280;
-const CARD_H = 190;
+const CARD_W = 330;
+const CARD_H = 224;
 
 function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
@@ -123,8 +123,8 @@ export function CardDeck({ images, title, slug, thumbnail, isActive = true, show
       <div
         style={{
           position: 'relative',
-          width: '340px',
-          height: '280px',
+          width: '390px',
+          height: '310px',
           cursor: 'pointer',
         }}
         onMouseEnter={handleEnter}
