@@ -35,28 +35,23 @@ const SPEED = 0.12;
 const HOVER_SPEED_FACTOR = 0.15; // hover 시 원래 속도의 15%로 감속
 const DRAG_THRESHOLD = 50;
 
-// Circle geometry
-const RADIUS = 420; // px — radius of the orbit
-const ANGLE_PER_CARD = (2 * Math.PI) / 8; // space 8 cards evenly even if fewer posts
+// Circle geometry — Y-axis ferris wheel
+const RADIUS = 280; // px — vertical orbit radius
+const ANGLE_PER_CARD = (2 * Math.PI) / 8;
 
-// Front = angle 0 (bottom of circle, closest to viewer)
-// Cards go clockwise: angle increases → moves right then back
+// Front = angle 0 (closest to viewer)
+// Ferris wheel: cards rotate in a vertical plane (up/down)
 function getCircularTransform(angle: number) {
-  // angle: 0 = front-center, positive = clockwise
-  // x: sin(angle) moves left-right
-  // y: we use a slight vertical shift so back cards rise a bit
-  // z: cos(angle) for depth — cos(0)=1 is front, cos(PI)=-1 is back
-  const x = Math.sin(angle) * RADIUS;
-  const z = (Math.cos(angle) - 1) * RADIUS * 0.5; // 0 at front, negative going back
-  const y = (1 - Math.cos(angle)) * 40; // subtle rise for back cards
+  // y: -sin(angle) → 위아래 이동 (주축)
+  // z: cos(angle) → 깊이감 (앞/뒤)
+  const x = 0;
+  const y = -Math.sin(angle) * RADIUS;
+  const z = (Math.cos(angle) - 1) * RADIUS * 0.5;
 
-  // Scale: front=1, back=smaller
-  const depthFactor = (1 + Math.cos(angle)) / 2; // 1 at front, 0 at back
-  const scale = 0.45 + depthFactor * 0.55; // range: 0.45 ~ 1.0
-
-  // Opacity: front=1, back=faded
-  const opacity = 0.2 + depthFactor * 0.8; // range: 0.2 ~ 1.0
-
+  // depth: cos(0)=1 앞, cos(PI)=-1 뒤
+  const depthFactor = (1 + Math.cos(angle)) / 2;
+  const scale = 0.45 + depthFactor * 0.55;
+  const opacity = 0.15 + depthFactor * 0.85;
   const zIndex = Math.round(depthFactor * 100);
 
   return { x, y, z, scale, opacity, zIndex };
@@ -166,8 +161,8 @@ export function PostCarousel({ posts }: PostCarouselProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') goNext();
-      if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goNext();
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goPrev();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -178,9 +173,9 @@ export function PostCarousel({ posts }: PostCarouselProps) {
       style={{
         position: 'relative',
         width: '100%',
-        height: '620px',
+        height: '100vh',
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
@@ -189,32 +184,32 @@ export function PostCarousel({ posts }: PostCarouselProps) {
       onMouseEnter={slowDown}
       onMouseLeave={speedUp}
     >
-      {/* Circular carousel */}
+      {/* Left: Ferris wheel carousel */}
       <div
         style={{
           position: 'relative',
-          width: '100%',
-          height: '500px',
+          width: '50%',
+          height: '100%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
         onPointerDown={(e) => {
-          const startX = e.clientX;
+          const startY = e.clientY;
           const wasPaused = pausedRef.current;
           pausedRef.current = true;
           let dragged = false;
 
           const onMove = (me: PointerEvent) => {
-            if (Math.abs(me.clientX - startX) > DRAG_THRESHOLD) {
+            if (Math.abs(me.clientY - startY) > DRAG_THRESHOLD) {
               dragged = true;
               me.preventDefault();
             }
           };
           const onUp = (ue: PointerEvent) => {
-            const dx = ue.clientX - startX;
-            if (dragged && Math.abs(dx) > DRAG_THRESHOLD) {
-              if (dx > 0) goPrev(); else goNext();
+            const dy = ue.clientY - startY;
+            if (dragged && Math.abs(dy) > DRAG_THRESHOLD) {
+              if (dy > 0) goPrev(); else goNext();
             }
             pausedRef.current = wasPaused;
             window.removeEventListener('pointermove', onMove);
@@ -261,13 +256,15 @@ export function PostCarousel({ posts }: PostCarouselProps) {
         })}
       </div>
 
-      {/* Meta + Title */}
+      {/* Right: Meta + Title + Dots */}
       <div style={{
-        height: '200px',
+        width: '50%',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
+        paddingLeft: '40px',
         overflow: 'hidden',
       }}>
         <AnimatePresence mode="wait">
@@ -280,7 +277,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
+              alignItems: 'flex-start',
             }}
           >
             <p style={{
@@ -289,8 +286,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
               fontSize: '13px',
               fontWeight: 400,
               letterSpacing: '0.02em',
-              margin: '0 0 2px 0',
-              textAlign: 'center',
+              margin: '0 0 4px 0',
             }}>
               {formatDate(posts[centerIndex].date)}  ·  {posts[centerIndex].readingTime}
             </p>
@@ -298,11 +294,10 @@ export function PostCarousel({ posts }: PostCarouselProps) {
               style={{
                 color: '#ffffff',
                 fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-                fontSize: '120px',
+                fontSize: '72px',
                 fontWeight: 600,
                 letterSpacing: '-0.03em',
                 lineHeight: 1,
-                textAlign: 'center',
                 margin: 0,
                 cursor: 'pointer',
               }}
@@ -312,26 +307,26 @@ export function PostCarousel({ posts }: PostCarouselProps) {
             </p>
           </motion.div>
         </AnimatePresence>
-      </div>
 
-      {/* Dots */}
-      <div style={{ display: 'flex', gap: '8px', marginTop: '24px' }}>
-        {posts.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => snapToPost(i)}
-            style={{
-              width: i === centerIndex ? '20px' : '6px',
-              height: '6px',
-              borderRadius: '3px',
-              backgroundColor: i === centerIndex ? '#ffffff' : 'rgba(255,255,255,0.25)',
-              border: 'none',
-              padding: 0,
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-            }}
-          />
-        ))}
+        {/* Dots */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '32px' }}>
+          {posts.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => snapToPost(i)}
+              style={{
+                width: i === centerIndex ? '20px' : '6px',
+                height: '6px',
+                borderRadius: '3px',
+                backgroundColor: i === centerIndex ? '#ffffff' : 'rgba(255,255,255,0.25)',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
