@@ -289,7 +289,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
               fontSize: '13px',
               fontWeight: 400,
               letterSpacing: '0.02em',
-              margin: '0 0 -4px 0',
+              margin: '0 0 2px 0',
               textAlign: 'center',
             }}>
               {formatDate(posts[centerIndex].date)}  ·  {posts[centerIndex].readingTime}
@@ -301,7 +301,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
                 fontSize: '120px',
                 fontWeight: 600,
                 letterSpacing: '-0.03em',
-                lineHeight: 1.3,
+                lineHeight: 1,
                 textAlign: 'center',
                 margin: 0,
                 cursor: 'pointer',
