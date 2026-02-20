@@ -11,6 +11,7 @@ import {
   getAllTagsFromGhost,
   searchPostsFromGhost,
 } from './ghost';
+import { extractImagesFromHtml, calculateReadingTime } from './utils';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const pagesDirectory = path.join(process.cwd(), 'content/pages');
@@ -51,25 +52,6 @@ export interface Post {
   headingAscii?: HeadingAscii[];
   sectionAscii?: SectionAscii[];
   images?: string[];
-}
-
-// HTML에서 이미지 URL 추출
-function extractImagesFromHtml(htmlStr: string): string[] {
-  const regex = /<img[^>]+src="([^"]+)"/g;
-  const images: string[] = [];
-  let match;
-  while ((match = regex.exec(htmlStr)) !== null) {
-    images.push(match[1]);
-  }
-  return images;
-}
-
-// 읽는 시간 계산 (한글 기준 분당 400자)
-function calculateReadingTime(content: string): string {
-  const plainText = content.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
-  const chars = plainText.length;
-  const minutes = Math.max(1, Math.ceil(chars / 400));
-  return `${minutes} min read`;
 }
 
 // heading에 ASCII 아트 삽입

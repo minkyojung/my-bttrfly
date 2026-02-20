@@ -4,32 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CardDeck } from './CardDeck';
-
-interface Post {
-  slug: string;
-  title: string;
-  images: string[];
-  thumbnail?: string;
-  date: string;
-  readingTime: string;
-  preview: string;
-}
+import { formatDate } from '@/lib/utils';
+import type { CarouselPostRequired } from '@/lib/types';
 
 interface PostCarouselProps {
-  posts: Post[];
-}
-
-function formatDate(dateStr: string): string {
-  if (!dateStr) return '';
-  // YYYY-MM-DD → 명시적으로 파싱 (UTC 타임존 이슈 방지)
-  const parts = dateStr.split('-');
-  if (parts.length === 3) {
-    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  }
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  posts: CarouselPostRequired[];
 }
 
 const SPEED = 0.12;

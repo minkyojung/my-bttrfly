@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import type { Post, HeadingAscii, SectionAscii } from './markdown';
+import { extractImagesFromHtml, calculateReadingTime } from './utils';
 
 const GHOST_URL = process.env.GHOST_URL || 'http://localhost:2368';
 const GHOST_CONTENT_API_KEY = process.env.GHOST_CONTENT_API_KEY || '';
@@ -75,23 +76,6 @@ async function ghostFetch<T>(endpoint: string, params: Record<string, string> = 
   }
 
   return res.json();
-}
-
-function extractImagesFromHtml(htmlStr: string): string[] {
-  const regex = /<img[^>]+src="([^"]+)"/g;
-  const images: string[] = [];
-  let match;
-  while ((match = regex.exec(htmlStr)) !== null) {
-    images.push(match[1]);
-  }
-  return images;
-}
-
-function calculateReadingTime(html: string): string {
-  const plainText = html.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ');
-  const chars = plainText.length;
-  const minutes = Math.max(1, Math.ceil(chars / 400));
-  return `${minutes} min read`;
 }
 
 function ghostPostToPost(gp: GhostPost): Post {
