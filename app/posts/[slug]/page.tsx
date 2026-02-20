@@ -295,7 +295,7 @@ export default async function Post({
               fontWeight: 500,
               textAlign: 'justify',
               '--tw-prose-headings': '#E5E5E5',
-              '--tw-prose-body': '#B0B0B0',
+              '--tw-prose-body': '#D4D4D4',
               '--tw-prose-bold': '#939393',
               '--tw-prose-quotes': '#939393',
               '--tw-prose-quote-borders': 'var(--profile-border-color)',
