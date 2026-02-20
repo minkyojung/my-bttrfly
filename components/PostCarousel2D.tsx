@@ -53,6 +53,7 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
   const scrollOffsetRef = useRef(0);
   const hoveredRef = useRef(false);
   const draggingRef = useRef(false);
+  const didDragRef = useRef(false);
   const dragStartYRef = useRef(0);
   const dragOffsetStartRef = useRef(0);
   const dragVelocityRef = useRef(0);
@@ -214,31 +215,41 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
         onMouseLeave={speedUp}
         onPointerDown={(e) => {
           draggingRef.current = true;
+          didDragRef.current = false;
           dragVelocityRef.current = 0;
           dragStartYRef.current = e.clientY;
           dragOffsetStartRef.current = scrollOffsetRef.current;
           dragLastYRef.current = e.clientY;
           dragLastTimeRef.current = performance.now();
-          (e.currentTarget as HTMLElement).style.cursor = 'grabbing';
-          e.currentTarget.setPointerCapture(e.pointerId);
-        }}
-        onPointerMove={(e) => {
-          if (!draggingRef.current) return;
-          const dy = e.clientY - dragStartYRef.current;
-          scrollOffsetRef.current = dragOffsetStartRef.current + dy;
+          const container = e.currentTarget as HTMLElement;
+          container.style.cursor = 'grabbing';
 
-          // velocity 계산 (최근 움직임 기반)
-          const now = performance.now();
-          const timeDelta = (now - dragLastTimeRef.current) / 1000;
-          if (timeDelta > 0) {
-            dragVelocityRef.current = (e.clientY - dragLastYRef.current) / timeDelta;
-          }
-          dragLastYRef.current = e.clientY;
-          dragLastTimeRef.current = now;
-        }}
-        onPointerUp={(e) => {
-          draggingRef.current = false;
-          (e.currentTarget as HTMLElement).style.cursor = 'grab';
+          const onMove = (me: PointerEvent) => {
+            if (!draggingRef.current) return;
+            const dy = me.clientY - dragStartYRef.current;
+            if (Math.abs(dy) > 5) {
+              didDragRef.current = true;
+            }
+            scrollOffsetRef.current = dragOffsetStartRef.current + dy;
+
+            const now = performance.now();
+            const timeDelta = (now - dragLastTimeRef.current) / 1000;
+            if (timeDelta > 0) {
+              dragVelocityRef.current = (me.clientY - dragLastYRef.current) / timeDelta;
+            }
+            dragLastYRef.current = me.clientY;
+            dragLastTimeRef.current = now;
+          };
+
+          const onUp = () => {
+            draggingRef.current = false;
+            container.style.cursor = 'grab';
+            window.removeEventListener('pointermove', onMove);
+            window.removeEventListener('pointerup', onUp);
+          };
+
+          window.addEventListener('pointermove', onMove);
+          window.addEventListener('pointerup', onUp);
         }}
       >
         {Array.from({ length: slotCount }, (_, slot) => {
@@ -259,17 +270,10 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
                 willChange: 'transform',
                 cursor: 'pointer',
               }}
-              onClick={(e) => {
-                // 드래그 후 클릭 방지 — 시작 위치에서 많이 이동했으면 무시
-                const dragDist = Math.abs(e.clientY - dragStartYRef.current);
-                if (dragDist > 5) return;
-
-                const postIdx = slot % total;
-                if (postIdx === centerIndex) {
-                  router.push(`/posts/${post.slug}`);
-                } else {
-                  snapToSlot(slot);
-                }
+              onClick={() => {
+                // 드래그 후 클릭 방지
+                if (didDragRef.current) return;
+                router.push(`/posts/${post.slug}`);
               }}
             >
               <CardDeck
