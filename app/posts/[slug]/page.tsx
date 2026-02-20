@@ -290,11 +290,12 @@ export default async function Post({
               prose-a:underline hover:prose-a:opacity-60"
             style={{
               width: '600px',
+              fontSize: '18px',
               lineHeight: '1.7',
               fontWeight: 500,
               textAlign: 'justify',
               '--tw-prose-headings': '#E5E5E5',
-              '--tw-prose-body': '#939393',
+              '--tw-prose-body': '#B0B0B0',
               '--tw-prose-bold': '#939393',
               '--tw-prose-quotes': '#939393',
               '--tw-prose-quote-borders': 'var(--profile-border-color)',
