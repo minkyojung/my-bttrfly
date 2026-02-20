@@ -22,6 +22,11 @@ function rand(min: number, max: number) {
 }
 
 // 카드끼리 겹치지 않게 배치 — 중앙 중력 + 충돌 회피
+// 컨테이너 안에서 카드가 잘리지 않도록 scatter 범위 제한
+const SCATTER_MAX_X = 120; // 좌우 최대 이동
+const SCATTER_MAX_Y = -200; // 위쪽 최대 이동 (음수 = 위)
+const SCATTER_MIN_Y = -20;  // 아래쪽 최소 이동
+
 function generateScatter(count: number) {
   const placed: { x: number; y: number }[] = [];
   const results: { x: number; y: number; rotate: number }[] = [];
@@ -31,17 +36,17 @@ function generateScatter(count: number) {
     let bestY = 0;
     let found = false;
 
-    // 여러 후보 중 겹치지 않는 가장 가까운 위치 선택
     for (let attempt = 0; attempt < 80; attempt++) {
       const angle = rand(0, 360) * (Math.PI / 180);
-      // 카드 수에 따라 거리 조절 — 적을수록 가까이
-      const maxDist = 80 + count * 30;
-      const dist = rand(50, maxDist);
-      const x = Math.cos(angle) * dist;
-      // 위쪽으로만 분포 (y는 음수 = 위)
-      const y = -Math.abs(Math.sin(angle) * dist) - rand(20, 60);
+      const maxDist = 60 + count * 20;
+      const dist = rand(40, maxDist);
+      let x = Math.cos(angle) * dist;
+      let y = -Math.abs(Math.sin(angle) * dist) - rand(15, 40);
 
-      // 기존 카드와 겹침 검사
+      // 범위 클램프
+      x = Math.max(-SCATTER_MAX_X, Math.min(SCATTER_MAX_X, x));
+      y = Math.max(SCATTER_MAX_Y, Math.min(SCATTER_MIN_Y, y));
+
       const overlaps = placed.some(p => {
         const dx = Math.abs(p.x - x);
         const dy = Math.abs(p.y - y);
@@ -55,7 +60,6 @@ function generateScatter(count: number) {
         break;
       }
 
-      // 겹치더라도 가장 멀리 떨어진 후보 저장
       if (!found || attempt === 79) {
         bestX = x;
         bestY = y;
@@ -66,7 +70,7 @@ function generateScatter(count: number) {
     results.push({
       x: bestX,
       y: bestY,
-      rotate: rand(-20, 20),
+      rotate: rand(-15, 15),
     });
   }
 

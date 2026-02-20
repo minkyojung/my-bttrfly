@@ -236,7 +236,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
 
       {/* Title */}
       <div style={{
-        height: '60px',
+        height: '200px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -252,7 +252,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
             style={{
               color: '#ffffff',
               fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-              fontSize: '22px',
+              fontSize: '160px',
               fontWeight: 600,
               letterSpacing: '-0.03em',
               lineHeight: 1.3,
