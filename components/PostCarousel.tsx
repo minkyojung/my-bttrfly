@@ -117,7 +117,14 @@ export function PostCarousel({ posts }: PostCarouselProps) {
     return () => cancelAnimationFrame(rafRef.current);
   }, [total, wrapIndex]);
 
-  const pause = useCallback(() => { pausedRef.current = true; }, []);
+  const pause = useCallback(() => {
+    pausedRef.current = true;
+    // snap 중이면 가장 가까운 카드로 즉시 스냅
+    if (snapTargetRef.current !== null) {
+      rotationRef.current = Math.round(rotationRef.current);
+      snapTargetRef.current = null;
+    }
+  }, []);
   const resume = useCallback(() => {
     pausedRef.current = false;
     snapTargetRef.current = null;
@@ -183,11 +190,17 @@ export function PostCarousel({ posts }: PostCarouselProps) {
           const startX = e.clientX;
           const wasPaused = pausedRef.current;
           pausedRef.current = true;
+          let dragged = false;
 
-          const onMove = (me: PointerEvent) => { me.preventDefault(); };
+          const onMove = (me: PointerEvent) => {
+            if (Math.abs(me.clientX - startX) > DRAG_THRESHOLD) {
+              dragged = true;
+              me.preventDefault();
+            }
+          };
           const onUp = (ue: PointerEvent) => {
             const dx = ue.clientX - startX;
-            if (Math.abs(dx) > DRAG_THRESHOLD) {
+            if (dragged && Math.abs(dx) > DRAG_THRESHOLD) {
               if (dx > 0) goPrev(); else goNext();
             }
             pausedRef.current = wasPaused;
@@ -214,7 +227,8 @@ export function PostCarousel({ posts }: PostCarouselProps) {
                 cursor: 'pointer',
               }}
               onClick={() => {
-                if (idx === centerIndex) {
+                const currentCenter = wrapIndex(Math.round(rotationRef.current));
+                if (idx === currentCenter) {
                   router.push(`/posts/${post.slug}`);
                 } else {
                   snapToPost(idx);

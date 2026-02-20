@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
 interface CardDeckProps {
@@ -93,7 +92,6 @@ const fallbackColors = [
 ];
 
 export function CardDeck({ images, title, slug, thumbnail, isActive = true, showTitle = true }: CardDeckProps) {
-  const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
 
   // thumbnail을 맨 위에, 나머지 본문 이미지는 뒤에
@@ -131,7 +129,6 @@ export function CardDeck({ images, title, slug, thumbnail, isActive = true, show
         }}
         onMouseEnter={handleEnter}
         onMouseLeave={handleLeave}
-        onClick={() => router.push(`/posts/${slug}`)}
       >
         {Array.from({ length: cardCount }).map((_, i) => {
           const stack = baseStackOffsets[i % baseStackOffsets.length];
