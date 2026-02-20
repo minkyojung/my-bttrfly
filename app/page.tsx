@@ -1,5 +1,5 @@
 import { getAllPosts } from '@/lib/markdown';
-import { PostCarousel } from '@/components/PostCarousel';
+import { PostCarousel2D as PostCarousel } from '@/components/PostCarousel2D';
 
 export default async function Home() {
   const posts = await getAllPosts();
