@@ -13,46 +13,42 @@ export function NavBar() {
       left: 0,
       right: 0,
       zIndex: 100,
-      padding: '12px 24px',
+      padding: '16px 28px',
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: 'rgba(14, 14, 14, 0.8)',
-      backdropFilter: 'blur(8px)',
-      WebkitBackdropFilter: 'blur(8px)',
-      borderBottom: '1px solid rgba(255,255,255,0.04)',
     }}>
       <Link
         href="/"
         style={{
-          color: pathname === '/' ? '#ffffff' : '#7B7B7B',
+          color: '#ffffff',
           fontFamily: "'Pretendard', sans-serif",
-          fontWeight: 600,
-          fontSize: '14px',
-          letterSpacing: '-0.03em',
+          fontWeight: 500,
+          fontSize: '13px',
+          letterSpacing: '0.02em',
           textDecoration: 'none',
-          transition: 'color 0.2s',
+          opacity: pathname === '/' ? 1 : 0.5,
+          transition: 'opacity 0.3s',
         }}
       >
-        Minkyo Jung
+        MJ
       </Link>
 
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-        <Link
-          href="/about"
-          style={{
-            color: pathname === '/about' ? '#ffffff' : '#7B7B7B',
-            fontFamily: "'Pretendard', sans-serif",
-            fontWeight: 500,
-            fontSize: '13px',
-            letterSpacing: '-0.02em',
-            textDecoration: 'none',
-            transition: 'color 0.2s',
-          }}
-        >
-          About
-        </Link>
-      </div>
+      <Link
+        href="/about"
+        style={{
+          color: '#ffffff',
+          fontFamily: "'Pretendard', sans-serif",
+          fontWeight: 400,
+          fontSize: '12px',
+          letterSpacing: '0.04em',
+          textDecoration: 'none',
+          opacity: pathname === '/about' ? 1 : 0.4,
+          transition: 'opacity 0.3s',
+        }}
+      >
+        About
+      </Link>
     </nav>
   );
 }
