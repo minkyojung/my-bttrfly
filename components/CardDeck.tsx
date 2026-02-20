@@ -118,6 +118,8 @@ export function CardDeck({ images, title, slug, thumbnail, isActive = true, show
         flexDirection: 'column',
         alignItems: 'center',
         gap: '0px',
+        transition: 'transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        transform: effectiveHover ? 'scale(1.06) rotate(-2deg)' : 'scale(1) rotate(0deg)',
       }}
     >
       <div
