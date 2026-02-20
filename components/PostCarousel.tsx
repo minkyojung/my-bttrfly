@@ -252,7 +252,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
             style={{
               color: '#ffffff',
               fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
-              fontSize: '160px',
+              fontSize: '120px',
               fontWeight: 600,
               letterSpacing: '-0.03em',
               lineHeight: 1.3,
