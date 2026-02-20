@@ -12,6 +12,7 @@ interface Post {
   thumbnail?: string;
   date: string;
   readingTime: string;
+  preview: string;
 }
 
 interface PostCarouselProps {
@@ -181,8 +182,6 @@ export function PostCarousel({ posts }: PostCarouselProps) {
         overflow: 'hidden',
         userSelect: 'none',
       }}
-      onMouseEnter={slowDown}
-      onMouseLeave={speedUp}
     >
       {/* Left: Ferris wheel carousel */}
       <div
@@ -194,6 +193,8 @@ export function PostCarousel({ posts }: PostCarouselProps) {
           alignItems: 'center',
           justifyContent: 'center',
         }}
+        onMouseEnter={slowDown}
+        onMouseLeave={speedUp}
         onPointerDown={(e) => {
           const startY = e.clientY;
           const wasPaused = pausedRef.current;
@@ -256,15 +257,16 @@ export function PostCarousel({ posts }: PostCarouselProps) {
         })}
       </div>
 
-      {/* Right: Meta + Title + Dots */}
+      {/* Right: Meta + Title + Preview */}
       <div style={{
         width: '50%',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'center',
-        paddingLeft: '40px',
+        paddingBottom: '10vh',
+        paddingRight: '40px',
         overflow: 'hidden',
       }}>
         <AnimatePresence mode="wait">
@@ -277,7 +279,8 @@ export function PostCarousel({ posts }: PostCarouselProps) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'flex-start',
+              alignItems: 'center',
+              maxWidth: '480px',
             }}
           >
             <p style={{
@@ -287,6 +290,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
               fontWeight: 400,
               letterSpacing: '0.02em',
               margin: '0 0 4px 0',
+              textAlign: 'center',
             }}>
               {formatDate(posts[centerIndex].date)}  ·  {posts[centerIndex].readingTime}
             </p>
@@ -300,33 +304,26 @@ export function PostCarousel({ posts }: PostCarouselProps) {
                 lineHeight: 1,
                 margin: 0,
                 cursor: 'pointer',
+                textAlign: 'center',
               }}
               onClick={() => router.push(`/posts/${posts[centerIndex].slug}`)}
             >
               {posts[centerIndex].title}
             </p>
+            <p style={{
+              color: 'rgba(255, 255, 255, 0.4)',
+              fontFamily: "-apple-system, 'SF Pro Display', 'Pretendard', sans-serif",
+              fontSize: '15px',
+              fontWeight: 400,
+              lineHeight: 1.6,
+              letterSpacing: '-0.01em',
+              margin: '16px 0 0 0',
+              textAlign: 'center',
+            }}>
+              {posts[centerIndex].preview}
+            </p>
           </motion.div>
         </AnimatePresence>
-
-        {/* Dots */}
-        <div style={{ display: 'flex', gap: '8px', marginTop: '32px' }}>
-          {posts.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => snapToPost(i)}
-              style={{
-                width: i === centerIndex ? '20px' : '6px',
-                height: '6px',
-                borderRadius: '3px',
-                backgroundColor: i === centerIndex ? '#ffffff' : 'rgba(255,255,255,0.25)',
-                border: 'none',
-                padding: 0,
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-              }}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );

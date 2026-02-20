@@ -25,6 +25,7 @@ export default async function Home() {
             thumbnail: p.thumbnail,
             date: p.date,
             readingTime: p.readingTime,
+            preview: p.preview,
           }))}
         />
       )}
