@@ -263,10 +263,10 @@ export function PostCarousel({ posts }: PostCarouselProps) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         paddingBottom: '10vh',
-        paddingRight: '40px',
+        paddingLeft: '40px',
         overflow: 'hidden',
       }}>
         <AnimatePresence mode="wait">
@@ -279,7 +279,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
+              alignItems: 'flex-start',
               maxWidth: '480px',
             }}
           >
@@ -290,7 +290,6 @@ export function PostCarousel({ posts }: PostCarouselProps) {
               fontWeight: 400,
               letterSpacing: '0.02em',
               margin: '0 0 4px 0',
-              textAlign: 'center',
             }}>
               {formatDate(posts[centerIndex].date)}  ·  {posts[centerIndex].readingTime}
             </p>
@@ -304,7 +303,6 @@ export function PostCarousel({ posts }: PostCarouselProps) {
                 lineHeight: 1,
                 margin: 0,
                 cursor: 'pointer',
-                textAlign: 'center',
               }}
               onClick={() => router.push(`/posts/${posts[centerIndex].slug}`)}
             >
@@ -318,7 +316,6 @@ export function PostCarousel({ posts }: PostCarouselProps) {
               lineHeight: 1.6,
               letterSpacing: '-0.01em',
               margin: '16px 0 0 0',
-              textAlign: 'center',
             }}>
               {posts[centerIndex].preview}
             </p>
