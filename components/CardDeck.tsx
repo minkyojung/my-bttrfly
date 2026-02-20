@@ -8,6 +8,7 @@ interface CardDeckProps {
   images: string[];
   title: string;
   slug: string;
+  thumbnail?: string;
   isActive?: boolean;
   showTitle?: boolean;
 }
@@ -87,10 +88,13 @@ const fallbackColors = [
   '#525252', '#5c5c5c', '#686868',
 ];
 
-export function CardDeck({ images, title, slug, isActive = true, showTitle = true }: CardDeckProps) {
+export function CardDeck({ images, title, slug, thumbnail, isActive = true, showTitle = true }: CardDeckProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
-  const cardCount = Math.min(Math.max(images.length, 1), MAX_CARDS);
+
+  // thumbnail을 맨 위에, 나머지 본문 이미지는 뒤에
+  const allImages = thumbnail ? [thumbnail, ...images.filter(img => img !== thumbnail)] : images;
+  const cardCount = Math.min(Math.max(allImages.length, 1), MAX_CARDS);
   const scatterRef = useRef(generateScatter(cardCount));
 
   const effectiveHover = isActive && isHovered;
@@ -128,7 +132,7 @@ export function CardDeck({ images, title, slug, isActive = true, showTitle = tru
         {Array.from({ length: cardCount }).map((_, i) => {
           const stack = baseStackOffsets[i % baseStackOffsets.length];
           const scatter = scatterRef.current[i];
-          const hasImage = i < images.length;
+          const hasImage = i < allImages.length;
 
           return (
             <motion.div
@@ -163,7 +167,7 @@ export function CardDeck({ images, title, slug, isActive = true, showTitle = tru
                 zIndex: i,
                 overflow: 'hidden',
                 backgroundColor: hasImage ? '#1a1a1a' : fallbackColors[i % fallbackColors.length],
-                backgroundImage: hasImage ? `url(${images[i]})` : undefined,
+                backgroundImage: hasImage ? `url(${allImages[i]})` : undefined,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}

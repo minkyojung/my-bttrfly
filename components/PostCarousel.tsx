@@ -9,6 +9,7 @@ interface Post {
   slug: string;
   title: string;
   images: string[];
+  thumbnail?: string;
 }
 
 interface PostCarouselProps {
@@ -224,6 +225,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
                 images={post.images}
                 title={post.title}
                 slug={post.slug}
+                thumbnail={post.thumbnail}
                 isActive={idx === centerIndex}
                 showTitle={false}
               />

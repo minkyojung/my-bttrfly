@@ -4,7 +4,8 @@ import { PostCarousel } from '@/components/PostCarousel';
 export default async function Home() {
   const posts = await getAllPosts();
 
-  const postsWithImages = posts.filter(p => p.images && p.images.length > 0);
+  // thumbnail 또는 본문 이미지가 있는 포스트만
+  const postsWithImages = posts.filter(p => p.thumbnail || (p.images && p.images.length > 0));
 
   return (
     <main style={{
@@ -20,7 +21,8 @@ export default async function Home() {
           posts={postsWithImages.map(p => ({
             slug: p.slug,
             title: p.title,
-            images: p.images!,
+            images: p.images || [],
+            thumbnail: p.thumbnail,
           }))}
         />
       )}
