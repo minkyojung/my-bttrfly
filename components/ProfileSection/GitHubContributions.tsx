@@ -6,9 +6,7 @@ import styles from './GitHubContributions.module.css';
 import 'react-tooltip/dist/react-tooltip.css';
 
 const GitHubCalendar = dynamic(
-  () => import('react-github-calendar').then((mod) => ({
-    default: mod.GitHubCalendar
-  })),
+  () => import('react-github-calendar').then((mod) => mod.GitHubCalendar || mod.default),
   {
     ssr: false,
     loading: () => (
@@ -22,9 +20,7 @@ const GitHubCalendar = dynamic(
 );
 
 const Tooltip = dynamic(
-  () => import('react-tooltip').then((mod) => ({
-    default: mod.Tooltip
-  })),
+  () => import('react-tooltip').then((mod) => mod.Tooltip || mod.default),
   {
     ssr: false,
     loading: () => null
