@@ -36,12 +36,20 @@ const HOVER_SPEED_FACTOR = 0.15;
 const CARD_SLOT_HEIGHT = 340; // CardDeck height (310) + gap (30)
 const SNAP_LERP_SPEED = 8;
 
+// 화면을 빈틈없이 채우기 위해 포스트를 반복 렌더링
+// 뷰포트 높이 ~1000px 기준, 슬롯 340px → 최소 4~5개 보여야 함
+// 원본 포스트 수가 적으면 반복해서 충분한 슬롯 확보
+function getSlotCount(total: number): number {
+  const minSlots = Math.ceil(1200 / CARD_SLOT_HEIGHT) + 2; // 화면 + 여유분
+  if (total >= minSlots) return total;
+  return Math.ceil(minSlots / total) * total; // total의 배수로
+}
+
 export function PostCarousel2D({ posts }: PostCarousel2DProps) {
   const router = useRouter();
   const total = posts.length;
+  const slotCount = getSlotCount(total);
 
-  // scrollOffset tracks the continuous vertical scroll position in pixels.
-  // It increases as cards move upward. The total loop length is total * CARD_SLOT_HEIGHT.
   const scrollOffsetRef = useRef(0);
   const hoveredRef = useRef(false);
   const rafRef = useRef<number>(0);
@@ -53,9 +61,8 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
 
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  const totalLoopHeight = total * CARD_SLOT_HEIGHT;
+  const totalLoopHeight = slotCount * CARD_SLOT_HEIGHT;
 
-  // Wrap a pixel offset into [0, totalLoopHeight)
   const wrapOffset = useCallback((offset: number) => {
     return ((offset % totalLoopHeight) + totalLoopHeight) % totalLoopHeight;
   }, [totalLoopHeight]);
@@ -68,7 +75,6 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
       const dt = (time - lastTimeRef.current) / 1000;
       lastTimeRef.current = time;
 
-      // Clamp dt to avoid large jumps on tab-switch or frame drops
       const clampedDt = Math.min(dt, 0.1);
 
       if (snapTargetRef.current !== null) {
@@ -82,57 +88,48 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
         }
       } else {
         const speedFactor = hoveredRef.current ? HOVER_SPEED_FACTOR : 1;
-        scrollOffsetRef.current += SPEED * speedFactor * clampedDt;
+        // 음수 방향 → 카드가 위에서 아래로 내려옴
+        scrollOffsetRef.current -= SPEED * speedFactor * clampedDt;
       }
 
       const containerHeight = containerRef.current?.clientHeight ?? 800;
       const viewCenterY = containerHeight / 2;
-      const currentOffset = scrollOffsetRef.current;
+      const currentOffset = wrapOffset(scrollOffsetRef.current);
 
-      let closestIndex = 0;
+      let closestSlot = 0;
       let closestDist = Infinity;
 
-      for (let idx = 0; idx < total; idx++) {
-        const el = cardRefs.current.get(idx);
+      for (let slot = 0; slot < slotCount; slot++) {
+        const el = cardRefs.current.get(slot);
         if (!el) continue;
 
-        // Each card has a "home" position in the virtual strip: idx * CARD_SLOT_HEIGHT.
-        // The visible Y position is computed by subtracting the scroll offset,
-        // then wrapping so that cards loop seamlessly.
-        const homeY = idx * CARD_SLOT_HEIGHT;
-        let visibleY = homeY - wrapOffset(currentOffset);
+        const homeY = slot * CARD_SLOT_HEIGHT;
+        let visibleY = homeY - currentOffset;
 
-        // Wrap into a range that keeps cards distributed around the viewport.
-        // We center the wrap range so cards are roughly from -totalLoopHeight/2 to +totalLoopHeight/2
-        // relative to the top of the container, then shift to center in the viewport.
-        if (visibleY < -CARD_SLOT_HEIGHT) {
-          visibleY += totalLoopHeight;
-        }
-        if (visibleY > totalLoopHeight - CARD_SLOT_HEIGHT) {
-          visibleY -= totalLoopHeight;
-        }
+        // 범위를 [-totalLoopHeight/2, totalLoopHeight/2) 로 래핑
+        while (visibleY < -totalLoopHeight / 2) visibleY += totalLoopHeight;
+        while (visibleY >= totalLoopHeight / 2) visibleY -= totalLoopHeight;
 
-        // Shift so that offset=0 places card 0 at the vertical center
         const finalY = visibleY + viewCenterY - CARD_SLOT_HEIGHT / 2;
-
         el.style.transform = `translateY(${finalY}px)`;
 
-        // Determine the center card: the one whose center is closest to the viewport center
         const cardCenterY = finalY + CARD_SLOT_HEIGHT / 2;
         const distFromCenter = Math.abs(cardCenterY - viewCenterY);
         if (distFromCenter < closestDist) {
           closestDist = distFromCenter;
-          closestIndex = idx;
+          closestSlot = slot;
         }
       }
 
-      setCenterIndex(prev => prev !== closestIndex ? closestIndex : prev);
+      // slot → 원본 post index
+      const newCenter = closestSlot % total;
+      setCenterIndex(prev => prev !== newCenter ? newCenter : prev);
       rafRef.current = requestAnimationFrame(loop);
     };
 
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [total, totalLoopHeight, wrapOffset]);
+  }, [total, slotCount, totalLoopHeight, wrapOffset]);
 
   const slowDown = useCallback(() => {
     hoveredRef.current = true;
@@ -143,17 +140,12 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
     snapTargetRef.current = null;
   }, []);
 
-  const snapToIndex = useCallback((targetIdx: number) => {
-    // Snap so that the target card ends up at the viewport center.
-    // At offset = targetIdx * CARD_SLOT_HEIGHT, card targetIdx is at center.
-    const targetOffset = targetIdx * CARD_SLOT_HEIGHT;
+  const snapToSlot = useCallback((slotIdx: number) => {
+    const targetOffset = slotIdx * CARD_SLOT_HEIGHT;
     const current = scrollOffsetRef.current;
-
-    // Find the nearest equivalent offset (accounting for wrapping)
     const wrappedCurrent = wrapOffset(current);
     let diff = targetOffset - wrappedCurrent;
 
-    // Take the shortest path around the loop
     if (diff > totalLoopHeight / 2) diff -= totalLoopHeight;
     if (diff < -totalLoopHeight / 2) diff += totalLoopHeight;
 
@@ -164,12 +156,12 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
-        const nextOffset = Math.round(scrollOffsetRef.current / CARD_SLOT_HEIGHT) + 1;
-        snapTargetRef.current = nextOffset * CARD_SLOT_HEIGHT;
+        const next = Math.round(scrollOffsetRef.current / CARD_SLOT_HEIGHT) - 1;
+        snapTargetRef.current = next * CARD_SLOT_HEIGHT;
       }
       if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-        const prevOffset = Math.round(scrollOffsetRef.current / CARD_SLOT_HEIGHT) - 1;
-        snapTargetRef.current = prevOffset * CARD_SLOT_HEIGHT;
+        const prev = Math.round(scrollOffsetRef.current / CARD_SLOT_HEIGHT) + 1;
+        snapTargetRef.current = prev * CARD_SLOT_HEIGHT;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -204,29 +196,30 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
         onMouseEnter={slowDown}
         onMouseLeave={speedUp}
       >
-        {Array.from({ length: total }, (_, idx) => {
-          const post = posts[idx];
+        {Array.from({ length: slotCount }, (_, slot) => {
+          const post = posts[slot % total];
           return (
             <div
-              key={post.slug}
+              key={`${post.slug}-${slot}`}
               ref={(el) => {
-                if (el) cardRefs.current.set(idx, el);
-                else cardRefs.current.delete(idx);
+                if (el) cardRefs.current.set(slot, el);
+                else cardRefs.current.delete(slot);
               }}
               style={{
                 position: 'absolute',
                 left: '50%',
                 top: 0,
                 transform: 'translateY(0px)',
-                marginLeft: '-195px', // half of CardDeck width (390/2)
+                marginLeft: '-195px',
                 willChange: 'transform',
                 cursor: 'pointer',
               }}
               onClick={() => {
-                if (idx === centerIndex) {
+                const postIdx = slot % total;
+                if (postIdx === centerIndex) {
                   router.push(`/posts/${post.slug}`);
                 } else {
-                  snapToIndex(idx);
+                  snapToSlot(slot);
                 }
               }}
             >
@@ -235,7 +228,7 @@ export function PostCarousel2D({ posts }: PostCarousel2DProps) {
                 title={post.title}
                 slug={post.slug}
                 thumbnail={post.thumbnail}
-                isActive={idx === centerIndex}
+                isActive={(slot % total) === centerIndex}
                 showTitle={false}
               />
             </div>
