@@ -17,6 +17,7 @@ interface PostCarouselProps {
 }
 
 const SPEED = 0.12;
+const HOVER_SPEED_FACTOR = 0.15; // hover 시 원래 속도의 15%로 감속
 const DRAG_THRESHOLD = 50;
 
 // Circle geometry
@@ -52,6 +53,7 @@ export function PostCarousel({ posts }: PostCarouselProps) {
 
   const rotationRef = useRef(0); // continuous float, in "card units"
   const pausedRef = useRef(false);
+  const hoveredRef = useRef(false);
   const rafRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
   const snapTargetRef = useRef<number | null>(null);
@@ -84,7 +86,8 @@ export function PostCarousel({ posts }: PostCarouselProps) {
           rotationRef.current += diff * Math.min(1, dt * 8);
         }
       } else if (!pausedRef.current) {
-        rotationRef.current += SPEED * dt;
+        const speedFactor = hoveredRef.current ? HOVER_SPEED_FACTOR : 1;
+        rotationRef.current += SPEED * speedFactor * dt;
       }
 
       const rotation = rotationRef.current;
@@ -117,16 +120,11 @@ export function PostCarousel({ posts }: PostCarouselProps) {
     return () => cancelAnimationFrame(rafRef.current);
   }, [total, wrapIndex]);
 
-  const pause = useCallback(() => {
-    pausedRef.current = true;
-    // snap 중이면 가장 가까운 카드로 즉시 스냅
-    if (snapTargetRef.current !== null) {
-      rotationRef.current = Math.round(rotationRef.current);
-      snapTargetRef.current = null;
-    }
+  const slowDown = useCallback(() => {
+    hoveredRef.current = true;
   }, []);
-  const resume = useCallback(() => {
-    pausedRef.current = false;
+  const speedUp = useCallback(() => {
+    hoveredRef.current = false;
     snapTargetRef.current = null;
   }, []);
 
@@ -173,8 +171,8 @@ export function PostCarousel({ posts }: PostCarouselProps) {
         overflow: 'hidden',
         userSelect: 'none',
       }}
-      onMouseEnter={pause}
-      onMouseLeave={resume}
+      onMouseEnter={slowDown}
+      onMouseLeave={speedUp}
     >
       {/* Circular carousel */}
       <div
