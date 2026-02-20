@@ -10,11 +10,8 @@ export default async function Home() {
   return (
     <main style={{
       backgroundColor: 'var(--bg-color)',
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '56px 20px 40px',
+      height: '100vh',
+      overflow: 'hidden',
     }}>
       {postsWithImages.length > 0 && (
         <PostCarousel
