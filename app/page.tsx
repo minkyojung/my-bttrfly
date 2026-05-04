@@ -1,31 +1,48 @@
 import { getAllPosts } from '@/lib/markdown';
-import { PostCarousel2D as PostCarousel } from '@/components/PostCarousel2D';
+import { ProfileSection } from '@/components/ProfileSection/ProfileSection';
+import { PostList } from '@/components/PostList';
 
 export default async function Home() {
   const posts = await getAllPosts();
 
-  // thumbnail 또는 본문 이미지가 있는 포스트만
-  const postsWithImages = posts.filter(p => p.thumbnail || (p.images && p.images.length > 0));
-
   return (
-    <main style={{
-      backgroundColor: 'var(--bg-color)',
-      height: '100vh',
-      overflow: 'hidden',
-    }}>
-      {postsWithImages.length > 0 && (
-        <PostCarousel
-          posts={postsWithImages.map(p => ({
-            slug: p.slug,
-            title: p.title,
-            images: p.images || [],
-            thumbnail: p.thumbnail,
-            date: p.date,
-            readingTime: p.readingTime,
-            preview: p.preview,
-          }))}
-        />
-      )}
+    <main
+      style={{
+        backgroundColor: 'var(--bg-color)',
+        minHeight: '100vh',
+        paddingTop: '64px',
+        paddingBottom: '96px',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '600px',
+          margin: '0 auto',
+          padding: '0 24px',
+        }}
+      >
+        <ProfileSection />
+
+        {posts.length > 0 && (
+          <section style={{ marginTop: '64px' }}>
+            <h2
+              style={{
+                color: 'rgba(255,255,255,0.4)',
+                fontFamily: "'Pretendard', sans-serif",
+                fontSize: '12px',
+                fontWeight: 500,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                marginBottom: '16px',
+              }}
+            >
+              Writing
+            </h2>
+            <PostList posts={posts} />
+          </section>
+        )}
+      </div>
     </main>
   );
 }
