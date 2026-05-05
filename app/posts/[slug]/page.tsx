@@ -1,9 +1,10 @@
-import { notFound, redirect } from 'next/navigation';
-import Image from 'next/image';
-import { getAllPosts, getPostBySlug } from '@/lib/markdown';
-import { formatDate } from '@/lib/utils';
-import { PostBody } from '@/components/PostBody';
-import type { Metadata } from 'next';
+import { notFound, redirect } from "next/navigation";
+import Image from "next/image";
+import { getAllPosts, getPostBySlug } from "@/lib/markdown";
+import { formatDate } from "@/lib/utils";
+import { PostBody } from "@/components/PostBody";
+import { PageHeader } from "@/components/ui/page-header";
+import type { Metadata } from "next";
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
@@ -19,7 +20,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  if (!post) return { title: 'Not found' };
+  if (!post) return { title: "Not found" };
 
   return {
     title: post.title,
@@ -27,7 +28,7 @@ export async function generateMetadata({
     openGraph: {
       title: post.title,
       description: post.preview,
-      type: 'article',
+      type: "article",
       publishedTime: post.date,
     },
   };
@@ -45,19 +46,16 @@ export default async function Post({
   if (post.external) redirect(post.external);
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
+    <main className="min-h-screen bg-bg">
       {post.thumbnail && (
-        <div style={{ padding: '10px' }}>
+        <div className="p-[10px]">
           <div
+            className="relative w-full overflow-hidden rounded-lg"
             style={{
-              position: 'relative',
-              width: '100%',
-              maxHeight: '70vh',
+              maxHeight: "70vh",
               aspectRatio: post.thumbnailMeta
                 ? `${post.thumbnailMeta.width} / ${post.thumbnailMeta.height}`
-                : '16 / 9',
-              overflow: 'hidden',
-              borderRadius: '12px',
+                : "16 / 9",
             }}
           >
             <Image
@@ -66,7 +64,7 @@ export default async function Post({
               fill
               priority
               sizes="100vw"
-              style={{ objectFit: 'cover' }}
+              className="object-cover"
               {...(post.thumbnailMeta ? {} : { unoptimized: true })}
             />
           </div>
@@ -74,32 +72,18 @@ export default async function Post({
       )}
 
       <div
-        className="max-w-3xl mx-auto px-6 py-12"
-        style={{ paddingTop: post.thumbnail ? '48px' : '64px' }}
+        className={`max-w-3xl mx-auto px-6 py-12 ${
+          post.thumbnail ? "pt-12" : "pt-16"
+        }`}
       >
         <article className="flex flex-col items-center">
-          <header className="mb-12" style={{ width: '100%', maxWidth: '600px' }}>
-            <h1
-              className="text-center"
-              style={{
-                color: '#E5E5E5',
-                fontFamily: 'Pretendard',
-                fontWeight: 700,
-                fontSize: '60px',
-                lineHeight: '1.2',
-                letterSpacing: '-0.05em',
-                marginBottom: '16px',
-              }}
-            >
-              {post.title}
-            </h1>
-            <div className="flex items-center justify-center text-sm" style={{ color: '#7B7B7B' }}>
-              <p>{formatDate(post.date)}</p>
-            </div>
-          </header>
+          <PageHeader
+            title={post.title}
+            meta={<p>{formatDate(post.date)}</p>}
+          />
 
           <div
-            className="prose prose-serif max-w-none
+            className="prose prose-serif w-full max-w-content text-[18px] leading-[1.7] font-medium
               prose-headings:font-black
               prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
               prose-h2:text-2xl prose-h2:mb-4 prose-h2:mt-8
@@ -110,29 +94,24 @@ export default async function Post({
               prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-5
               prose-li:mb-1
               prose-hr:my-8
-              prose-code:px-1 prose-code:rounded prose-code:text-sm
-              prose-pre:rounded prose-pre:p-4 prose-pre:mb-4
+              prose-code:px-1 prose-code:rounded-sm prose-code:text-sm
+              prose-pre:rounded-md prose-pre:p-4 prose-pre:mb-4
               prose-a:underline hover:prose-a:opacity-60"
             style={
               {
-                width: '100%',
-                maxWidth: '600px',
-                fontSize: '18px',
-                lineHeight: '1.7',
-                fontWeight: 500,
-                '--tw-prose-headings': '#E5E5E5',
-                '--tw-prose-body': '#D4D4D4',
-                '--tw-prose-bold': '#939393',
-                '--tw-prose-quotes': '#939393',
-                '--tw-prose-quote-borders': 'var(--profile-border-color)',
-                '--tw-prose-links': '#939393',
-                '--tw-prose-code': '#939393',
-                '--tw-prose-pre-code': '#939393',
-                '--tw-prose-pre-bg': 'var(--bg-color)',
-                '--tw-prose-borders': 'var(--border-color)',
-                '--tw-prose-counters': '#E5E5E5',
-                '--tw-prose-bullets': '#E5E5E5',
-                '--tw-prose-hr': '#5A5A5A',
+                "--tw-prose-headings": "var(--color-fg)",
+                "--tw-prose-body": "var(--color-fg)",
+                "--tw-prose-bold": "var(--color-fg-muted)",
+                "--tw-prose-quotes": "var(--color-fg-muted)",
+                "--tw-prose-quote-borders": "var(--color-fg)",
+                "--tw-prose-links": "var(--color-fg-muted)",
+                "--tw-prose-code": "var(--color-fg-muted)",
+                "--tw-prose-pre-code": "var(--color-fg-muted)",
+                "--tw-prose-pre-bg": "var(--color-bg)",
+                "--tw-prose-borders": "var(--color-surface-elevated)",
+                "--tw-prose-counters": "var(--color-fg)",
+                "--tw-prose-bullets": "var(--color-fg)",
+                "--tw-prose-hr": "var(--color-fg-subtle)",
               } as React.CSSProperties
             }
           >
