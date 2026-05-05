@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
-import { siteConfig } from "@/lib/site-config";
+import { JsonLd } from "@/components/JsonLd";
+import { personSchema, siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -39,6 +40,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className="antialiased">
+        <JsonLd data={personSchema()} />
         <NavBar />
         {children}
       </body>

@@ -4,6 +4,8 @@ import { getAllPosts, getPostBySlug } from "@/lib/markdown";
 import { formatDate } from "@/lib/utils";
 import { PostBody } from "@/components/PostBody";
 import { PageHeader } from "@/components/ui/page-header";
+import { JsonLd } from "@/components/JsonLd";
+import { blogPostingSchema } from "@/lib/site-config";
 import type { Metadata } from "next";
 
 export async function generateStaticParams() {
@@ -47,6 +49,15 @@ export default async function Post({
 
   return (
     <main className="min-h-screen bg-bg">
+      <JsonLd
+        data={blogPostingSchema({
+          title: post.title,
+          slug: post.slug,
+          date: post.date,
+          description: post.preview,
+          image: post.thumbnail,
+        })}
+      />
       {post.thumbnail && (
         <div className="p-[10px]">
           <div
