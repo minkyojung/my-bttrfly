@@ -97,23 +97,6 @@ export default async function Post({
               prose-code:px-1 prose-code:rounded-sm prose-code:text-sm
               prose-pre:rounded-md prose-pre:p-4 prose-pre:mb-4
               prose-a:underline hover:prose-a:opacity-60"
-            style={
-              {
-                "--tw-prose-headings": "var(--color-fg)",
-                "--tw-prose-body": "var(--color-fg)",
-                "--tw-prose-bold": "var(--color-fg-muted)",
-                "--tw-prose-quotes": "var(--color-fg-muted)",
-                "--tw-prose-quote-borders": "var(--color-fg)",
-                "--tw-prose-links": "var(--color-fg-muted)",
-                "--tw-prose-code": "var(--color-fg-muted)",
-                "--tw-prose-pre-code": "var(--color-fg-muted)",
-                "--tw-prose-pre-bg": "var(--color-bg)",
-                "--tw-prose-borders": "var(--color-surface-elevated)",
-                "--tw-prose-counters": "var(--color-fg)",
-                "--tw-prose-bullets": "var(--color-fg)",
-                "--tw-prose-hr": "var(--color-fg-subtle)",
-              } as React.CSSProperties
-            }
           >
             <PostBody content={post.content} imageMeta={post.imageMeta} />
           </div>

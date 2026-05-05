@@ -40,6 +40,25 @@ const config: Config = {
       fontFamily: {
         serif: ["'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            "--tw-prose-headings": "var(--color-fg)",
+            "--tw-prose-body": "var(--color-fg)",
+            "--tw-prose-bold": "var(--color-fg-muted)",
+            "--tw-prose-quotes": "var(--color-fg-muted)",
+            "--tw-prose-quote-borders": "var(--color-fg)",
+            "--tw-prose-links": "var(--color-fg-muted)",
+            "--tw-prose-code": "var(--color-fg-muted)",
+            "--tw-prose-pre-code": "var(--color-fg-muted)",
+            "--tw-prose-pre-bg": "var(--color-bg)",
+            "--tw-prose-borders": "var(--color-surface-elevated)",
+            "--tw-prose-counters": "var(--color-fg)",
+            "--tw-prose-bullets": "var(--color-fg)",
+            "--tw-prose-hr": "var(--color-fg-subtle)",
+          },
+        },
+      },
     },
   },
   plugins: [require("@tailwindcss/typography")],
