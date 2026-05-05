@@ -1,17 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { remark } from 'remark';
-import html from 'remark-html';
-import breaks from 'remark-breaks';
+import { imageSize } from 'image-size';
 import { calculateReadingTime } from './utils';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
+const publicDirectory = path.join(process.cwd(), 'public');
 
-function normalizeDate(value: unknown): string {
-  if (value instanceof Date) return value.toISOString().split('T')[0];
-  if (typeof value === 'string' && value.length > 0) return value;
-  return new Date().toISOString().split('T')[0];
+export interface ImageMeta {
+  width: number;
+  height: number;
 }
 
 export interface Post {
@@ -19,9 +17,65 @@ export interface Post {
   title: string;
   date: string;
   preview: string;
-  htmlContent: string;
+  content: string;
   readingTime: string;
   thumbnail?: string;
+  thumbnailMeta?: ImageMeta;
+  imageMeta: Record<string, ImageMeta>;
+}
+
+function normalizeDate(value: unknown): string {
+  if (value instanceof Date) return value.toISOString().split('T')[0];
+  if (typeof value === 'string' && value.length > 0) return value;
+  return new Date().toISOString().split('T')[0];
+}
+
+function readLocalImageMeta(src: string): ImageMeta | undefined {
+  if (!src.startsWith('/')) return undefined;
+  const absolute = path.join(publicDirectory, src);
+  if (!fs.existsSync(absolute)) return undefined;
+  try {
+    const buffer = fs.readFileSync(absolute);
+    const { width, height } = imageSize(buffer);
+    if (!width || !height) return undefined;
+    return { width, height };
+  } catch {
+    return undefined;
+  }
+}
+
+function collectImageMeta(markdown: string): Record<string, ImageMeta> {
+  const meta: Record<string, ImageMeta> = {};
+  const regex = /!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(markdown)) !== null) {
+    const src = match[1];
+    if (meta[src]) continue;
+    const dim = readLocalImageMeta(src);
+    if (dim) meta[src] = dim;
+  }
+  return meta;
+}
+
+function buildPreview(content: string): string {
+  const plain = content.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
+  return plain.substring(0, 150) + (plain.length > 150 ? '...' : '');
+}
+
+function parseFile(slug: string, fileContents: string): Post {
+  const { data, content } = matter(fileContents);
+  const thumbnail = typeof data.thumbnail === 'string' ? data.thumbnail : undefined;
+  return {
+    slug,
+    title: data.title || slug.replace(/-/g, ' '),
+    date: normalizeDate(data.date),
+    preview: buildPreview(content),
+    content,
+    readingTime: calculateReadingTime(content),
+    thumbnail,
+    thumbnailMeta: thumbnail ? readLocalImageMeta(thumbnail) : undefined,
+    imageMeta: collectImageMeta(content),
+  };
 }
 
 export async function getAllPosts(): Promise<Post[]> {
@@ -31,33 +85,12 @@ export async function getAllPosts(): Promise<Post[]> {
     .readdirSync(postsDirectory)
     .filter((fileName) => fileName.endsWith('.md'));
 
-  const posts = await Promise.all(
-    fileNames.map(async (fileName) => {
-      const slug = fileName.replace(/\.md$/, '');
-      const fullPath = path.join(postsDirectory, fileName);
-      const fileContents = fs.readFileSync(fullPath, 'utf8');
-      const { data, content } = matter(fileContents);
-
-      const processed = await remark()
-        .use(breaks)
-        .use(html, { sanitize: false })
-        .process(content);
-
-      const htmlContent = processed.toString();
-      const plainText = content.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
-      const preview = plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
-
-      return {
-        slug,
-        title: data.title || slug.replace(/-/g, ' '),
-        date: normalizeDate(data.date),
-        preview,
-        htmlContent,
-        readingTime: calculateReadingTime(content),
-        thumbnail: data.thumbnail,
-      } satisfies Post;
-    })
-  );
+  const posts = fileNames.map((fileName) => {
+    const slug = fileName.replace(/\.md$/, '');
+    const fullPath = path.join(postsDirectory, fileName);
+    const fileContents = fs.readFileSync(fullPath, 'utf8');
+    return parseFile(slug, fileContents);
+  });
 
   return posts.sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
@@ -67,26 +100,6 @@ export async function getAllPosts(): Promise<Post[]> {
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   if (!fs.existsSync(fullPath)) return null;
-
   const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const { data, content } = matter(fileContents);
-
-  const processed = await remark()
-    .use(breaks)
-    .use(html, { sanitize: false })
-    .process(content);
-
-  const htmlContent = processed.toString();
-  const plainText = content.replace(/[#*`\[\]!]/g, '').replace(/\n+/g, ' ');
-  const preview = plainText.substring(0, 150) + (plainText.length > 150 ? '...' : '');
-
-  return {
-    slug,
-    title: data.title || slug.replace(/-/g, ' '),
-    date: normalizeDate(data.date),
-    preview,
-    htmlContent,
-    readingTime: calculateReadingTime(content),
-    thumbnail: data.thumbnail,
-  };
+  return parseFile(slug, fileContents);
 }

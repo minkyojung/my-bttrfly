@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import { getAllPosts, getPostBySlug } from '@/lib/markdown';
 import { formatDate } from '@/lib/utils';
+import { PostBody } from '@/components/PostBody';
 import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
@@ -45,19 +47,24 @@ export default async function Post({
         <div style={{ padding: '10px' }}>
           <div
             style={{
+              position: 'relative',
               width: '100%',
               maxHeight: '70vh',
+              aspectRatio: post.thumbnailMeta
+                ? `${post.thumbnailMeta.width} / ${post.thumbnailMeta.height}`
+                : '16 / 9',
               overflow: 'hidden',
               borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
             }}
           >
-            <img
+            <Image
               src={post.thumbnail}
               alt={post.title}
-              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              fill
+              priority
+              sizes="100vw"
+              style={{ objectFit: 'cover' }}
+              {...(post.thumbnailMeta ? {} : { unoptimized: true })}
             />
           </div>
         </div>
@@ -89,7 +96,6 @@ export default async function Post({
           </header>
 
           <div
-            dangerouslySetInnerHTML={{ __html: post.htmlContent }}
             className="prose prose-serif max-w-none
               prose-headings:font-black
               prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
@@ -101,7 +107,6 @@ export default async function Post({
               prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-5
               prose-li:mb-1
               prose-hr:my-8
-              prose-img:w-full prose-img:rounded prose-img:my-4
               prose-code:px-1 prose-code:rounded prose-code:text-sm
               prose-pre:rounded prose-pre:p-4 prose-pre:mb-4
               prose-a:underline hover:prose-a:opacity-60"
@@ -127,7 +132,9 @@ export default async function Post({
                 '--tw-prose-hr': '#5A5A5A',
               } as React.CSSProperties
             }
-          />
+          >
+            <PostBody content={post.content} imageMeta={post.imageMeta} />
+          </div>
         </article>
       </div>
     </main>
