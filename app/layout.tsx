@@ -1,10 +1,34 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Minkyo Jung",
-  description: "A minimal black and white blog",
+  metadataBase: new URL(siteConfig.url),
+  title: {
+    default: siteConfig.alternateName,
+    template: `%s — ${siteConfig.alternateName}`,
+  },
+  description: siteConfig.description,
+  authors: [{ name: siteConfig.name, url: siteConfig.url }],
+  creator: siteConfig.name,
+  openGraph: {
+    type: "profile",
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: `${siteConfig.name} — ${siteConfig.role}`,
+    description: siteConfig.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.name} — ${siteConfig.role}`,
+    description: siteConfig.description,
+    creator: siteConfig.social.twitter.handle,
+  },
+  alternates: {
+    canonical: siteConfig.url,
+  },
 };
 
 export default function RootLayout({
