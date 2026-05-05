@@ -22,6 +22,9 @@ export interface Post {
   thumbnail?: string;
   thumbnailMeta?: ImageMeta;
   imageMeta: Record<string, ImageMeta>;
+  external?: string;
+  label?: string;
+  labelColor?: string;
 }
 
 function normalizeDate(value: unknown): string {
@@ -65,6 +68,7 @@ function buildPreview(content: string): string {
 function parseFile(slug: string, fileContents: string): Post {
   const { data, content } = matter(fileContents);
   const thumbnail = typeof data.thumbnail === 'string' ? data.thumbnail : undefined;
+  const external = typeof data.external === 'string' ? data.external : undefined;
   return {
     slug,
     title: data.title || slug.replace(/-/g, ' '),
@@ -75,6 +79,9 @@ function parseFile(slug: string, fileContents: string): Post {
     thumbnail,
     thumbnailMeta: thumbnail ? readLocalImageMeta(thumbnail) : undefined,
     imageMeta: collectImageMeta(content),
+    external,
+    label: typeof data.label === 'string' ? data.label : undefined,
+    labelColor: typeof data.labelColor === 'string' ? data.labelColor : undefined,
   };
 }
 

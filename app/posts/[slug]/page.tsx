@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Image from 'next/image';
 import { getAllPosts, getPostBySlug } from '@/lib/markdown';
 import { formatDate } from '@/lib/utils';
@@ -7,7 +7,9 @@ import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  return posts
+    .filter((post) => !post.external)
+    .map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
@@ -40,6 +42,7 @@ export default async function Post({
   const post = await getPostBySlug(slug);
 
   if (!post) notFound();
+  if (post.external) redirect(post.external);
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
