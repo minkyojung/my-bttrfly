@@ -1,48 +1,25 @@
-import { getAllPosts } from '@/lib/markdown';
-import { ProfileSection } from '@/components/ProfileSection/ProfileSection';
-import { PostList } from '@/components/PostList';
+import { getAllPosts } from "@/lib/markdown";
+import { ProfileSection } from "@/components/ProfileSection/ProfileSection";
+import { PostList } from "@/components/PostList";
+import { Container } from "@/components/ui/container";
 
 export default async function Home() {
   const posts = await getAllPosts();
 
   return (
-    <main
-      style={{
-        backgroundColor: 'var(--bg-color)',
-        minHeight: '100vh',
-        paddingTop: '64px',
-        paddingBottom: '96px',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '600px',
-          margin: '0 auto',
-          padding: '0 24px',
-        }}
-      >
+    <main className="min-h-screen bg-bg pt-16 pb-24">
+      <Container>
         <ProfileSection />
 
         {posts.length > 0 && (
-          <section style={{ marginTop: '64px' }}>
-            <h2
-              style={{
-                color: 'rgba(255,255,255,0.4)',
-                fontFamily: "'Pretendard', sans-serif",
-                fontSize: '12px',
-                fontWeight: 500,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                marginBottom: '16px',
-              }}
-            >
+          <section className="mt-16">
+            <h2 className="text-fg-subtle text-xs font-medium tracking-[0.08em] uppercase mb-4">
               Writing
             </h2>
             <PostList posts={posts} />
           </section>
         )}
-      </div>
+      </Container>
     </main>
   );
 }
