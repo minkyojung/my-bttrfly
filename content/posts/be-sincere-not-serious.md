@@ -1,6 +1,7 @@
 ---
 title: "Be Sincere—Not Serious"
 date: "2024-08-06"
+labelImage: "/badges/substack.png"
 ---
 
 좋은 아침입니다! 비가 많이 오네요.

@@ -26,6 +26,8 @@ export interface Post {
   external?: string;
   label?: string;
   labelColor?: string;
+  labelTextColor?: string;
+  labelImage?: string;
 }
 
 function normalizeDate(value: unknown): string {
@@ -84,6 +86,8 @@ function parseFile(slug: string, fileContents: string): Post {
     external,
     label: typeof data.label === 'string' ? data.label : undefined,
     labelColor: typeof data.labelColor === 'string' ? data.labelColor : undefined,
+    labelTextColor: typeof data.labelTextColor === 'string' ? data.labelTextColor : undefined,
+    labelImage: typeof data.labelImage === 'string' ? data.labelImage : undefined,
   };
 }
 
