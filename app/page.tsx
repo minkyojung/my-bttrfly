@@ -1,5 +1,6 @@
 import { getAllPosts } from "@/lib/markdown";
 import { ProfileSection } from "@/components/ProfileSection/ProfileSection";
+import { AboutSection } from "@/components/AboutSection";
 import { PostList } from "@/components/PostList";
 import { Container } from "@/components/ui/container";
 
@@ -10,6 +11,10 @@ export default async function Home() {
     <main className="min-h-screen bg-bg pt-16 pb-24">
       <Container>
         <ProfileSection />
+
+        <section className="mt-16">
+          <AboutSection />
+        </section>
 
         {posts.length > 0 && (
           <section className="mt-16">

@@ -1,3 +1,5 @@
+import { aboutContent } from "./about-content";
+
 export const siteConfig = {
   url: "https://www.minkyojung.com",
   name: "William Jung",
@@ -61,14 +63,9 @@ export function personSchema() {
     name: siteConfig.name,
     alternateName: siteConfig.alternateName,
     url: siteConfig.url,
-    jobTitle: siteConfig.role,
-    description: siteConfig.description,
+    description: aboutContent.intro.join(" "),
     email: `mailto:${siteConfig.email}`,
-    worksFor: {
-      "@type": "Organization",
-      name: siteConfig.employer.name,
-      url: siteConfig.employer.url,
-    },
+    knowsAbout: [...aboutContent.stack, ...aboutContent.exploring],
     sameAs: [
       siteConfig.social.twitter.url,
       siteConfig.social.github.url,
