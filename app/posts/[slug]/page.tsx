@@ -1,18 +1,24 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
 import { formatDate } from "@/lib/utils";
 import { PostBody } from "@/components/PostBody";
 import { PageHeader } from "@/components/ui/page-header";
 import { JsonLd } from "@/components/JsonLd";
-import { blogPostingSchema } from "@/lib/site-config";
+import { blogPostingSchema, siteConfig } from "@/lib/site-config";
 import type { Metadata } from "next";
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
-  return posts
-    .filter((post) => !post.external)
-    .map((post) => ({ slug: post.slug }));
+  return posts.map((post) => ({ slug: post.slug }));
+}
+
+function externalHostname(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
 }
 
 export async function generateMetadata({
@@ -24,14 +30,20 @@ export async function generateMetadata({
   const post = await getPostBySlug(slug);
   if (!post) return { title: "Not found" };
 
+  const description = post.summary ?? post.preview;
+  const canonical = post.external ?? `${siteConfig.url}/posts/${post.slug}`;
+
   return {
     title: post.title,
-    description: post.preview,
+    description,
+    alternates: { canonical },
+    robots: post.external ? { index: false, follow: true } : undefined,
     openGraph: {
       title: post.title,
-      description: post.preview,
+      description,
       type: "article",
       publishedTime: post.date,
+      url: canonical,
     },
   };
 }
@@ -45,7 +57,47 @@ export default async function Post({
   const post = await getPostBySlug(slug);
 
   if (!post) notFound();
-  if (post.external) redirect(post.external);
+
+  if (post.external) {
+    return (
+      <>
+        <meta httpEquiv="refresh" content={`0;url=${post.external}`} />
+        <main className="min-h-screen bg-bg">
+          <JsonLd
+            data={blogPostingSchema({
+              title: post.title,
+              slug: post.slug,
+              date: post.date,
+              description: post.summary ?? post.preview,
+              image: post.thumbnail,
+            })}
+          />
+          <div className="max-w-3xl mx-auto px-6 py-16">
+            <article className="flex flex-col items-center">
+              <PageHeader
+                title={post.title}
+                meta={<time dateTime={post.date}>{formatDate(post.date)}</time>}
+              />
+              {post.summary && (
+                <p className="w-full max-w-content text-fg-muted text-[17px] leading-[1.7] mt-2">
+                  {post.summary}
+                </p>
+              )}
+              <p className="w-full max-w-content mt-8 text-[15px]">
+                <a
+                  href={post.external}
+                  rel="noopener noreferrer"
+                  className="text-fg underline hover:opacity-60"
+                >
+                  Read the full post on {externalHostname(post.external)} →
+                </a>
+              </p>
+            </article>
+          </div>
+        </main>
+      </>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-bg">
@@ -54,7 +106,7 @@ export default async function Post({
           title: post.title,
           slug: post.slug,
           date: post.date,
-          description: post.preview,
+          description: post.summary ?? post.preview,
           image: post.thumbnail,
         })}
       />

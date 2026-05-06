@@ -8,8 +8,10 @@ function formatPostLine(input: {
   title: string;
   url: string;
   date: string;
+  summary?: string;
 }): string {
-  return `- [${input.title}](${input.url}) (${input.date})`;
+  const head = `- [${input.title}](${input.url}) (${input.date})`;
+  return input.summary ? `${head}\n  ${input.summary}` : head;
 }
 
 export async function GET() {
@@ -54,6 +56,7 @@ export async function GET() {
           title: post.title,
           url: `${siteConfig.url}/posts/${post.slug}`,
           date: post.date,
+          summary: post.summary,
         })
       );
     }
@@ -68,6 +71,7 @@ export async function GET() {
           title: post.title,
           url: post.external!,
           date: post.date,
+          summary: post.summary,
         })
       );
     }

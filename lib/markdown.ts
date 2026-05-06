@@ -17,6 +17,7 @@ export interface Post {
   title: string;
   date: string;
   preview: string;
+  summary?: string;
   content: string;
   readingTime: string;
   thumbnail?: string;
@@ -74,6 +75,7 @@ function parseFile(slug: string, fileContents: string): Post {
     title: data.title || slug.replace(/-/g, ' '),
     date: normalizeDate(data.date),
     preview: buildPreview(content),
+    summary: typeof data.summary === 'string' ? data.summary.trim() : undefined,
     content,
     readingTime: calculateReadingTime(content),
     thumbnail,
