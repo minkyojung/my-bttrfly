@@ -4,10 +4,10 @@ export const siteConfig = {
   url: "https://www.minkyojung.com",
   name: "William Jung",
   alternateName: "Minkyo Jung",
-  role: "Founding Engineer at Momo",
+  role: "Operations × Engineering",
   headline: "Building AI Memory at Momo",
   description:
-    "Founding engineer at Momo, building AI memory systems. Writing about products, AI, and craft.",
+    "Operations × engineering. Previously led operations at Disquiet (15K → 100K members). Now building flowcap and writing about products & AI.",
   locale: "ko_KR",
   email: "williamjung0130@gmail.com",
   social: {
