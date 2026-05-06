@@ -19,9 +19,12 @@ export function PostList({ posts }: { posts: Post[] }) {
               {post.label && (
                 <Badge color={post.labelColor}>{post.label}</Badge>
               )}
-              <span className="text-fg-subtle text-[13px] tabular-nums">
+              <time
+                dateTime={post.date}
+                className="text-fg-subtle text-[13px] tabular-nums"
+              >
                 {formatDate(post.date)}
-              </span>
+              </time>
             </>
           }
         />

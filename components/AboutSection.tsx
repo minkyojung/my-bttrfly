@@ -5,9 +5,9 @@ const TEXT_CLASS = "text-fg-muted text-[15px] font-normal leading-[1.6]";
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-fg-subtle text-xs font-medium tracking-[0.08em] uppercase mb-3">
+    <h2 className="text-fg-subtle text-xs font-medium tracking-[0.08em] uppercase mb-3">
       {children}
-    </h3>
+    </h2>
   );
 }
 

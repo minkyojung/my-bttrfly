@@ -11,7 +11,7 @@ export function ProfileInfo() {
         <a
           href="https://usemomo.com"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="me noopener noreferrer"
           className={styles.link}
         >
           Momo
@@ -21,7 +21,7 @@ export function ProfileInfo() {
         <a
           href="https://x.com/imwilliamjung"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="me noopener noreferrer"
           className={styles.socialLink}
         >
           <svg
@@ -38,7 +38,7 @@ export function ProfileInfo() {
         <a
           href="https://github.com/minkyojung"
           target="_blank"
-          rel="noopener noreferrer"
+          rel="me noopener noreferrer"
           className={styles.socialLink}
         >
           <svg
@@ -54,6 +54,7 @@ export function ProfileInfo() {
         </a>
         <a
           href="mailto:williamjung0130@gmail.com"
+          rel="me"
           className={styles.socialLink}
         >
           <svg

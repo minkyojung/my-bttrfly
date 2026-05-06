@@ -90,7 +90,7 @@ export default async function Post({
         <article className="flex flex-col items-center">
           <PageHeader
             title={post.title}
-            meta={<p>{formatDate(post.date)}</p>}
+            meta={<time dateTime={post.date}>{formatDate(post.date)}</time>}
           />
 
           <div
