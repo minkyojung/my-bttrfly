@@ -4,10 +4,10 @@ export const siteConfig = {
   url: "https://www.minkyojung.com",
   name: "William Jung",
   alternateName: "Minkyo Jung",
-  role: "Operations × Engineering",
-  headline: "Building AI Memory at Momo",
+  role: "Operator × Engineer",
+  headline: "Operator × Engineer · Previously Operations at Disquiet (15K → 100K)",
   description:
-    "Operations × engineering. Previously led operations at Disquiet (15K → 100K members). Now building flowcap and writing about products & AI.",
+    "Operator × engineer. Previously led operations at Disquiet, growing the community from 15,000 to 100,000 members. Now building independent products and writing about products & AI.",
   locale: "ko_KR",
   email: "williamjung0130@gmail.com",
   social: {
@@ -21,10 +21,6 @@ export const siteConfig = {
     },
     substack: "https://williamjung0130.substack.com",
     disquiet: "https://disquiet.io/@williamjung",
-  },
-  employer: {
-    name: "Momo",
-    url: "https://usemomo.com",
   },
 } as const;
 

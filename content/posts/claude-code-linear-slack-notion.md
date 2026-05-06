@@ -1,6 +1,7 @@
 ---
 title: "Claude Code팀은 Linear, Slack, Notion을 안 씀, 해적과 건축가, 실험과 느낀 점"
 date: "2026-04-26"
+labelImage: "/badges/substack.png"
 ---
 
 (이번 주에 재밌는 에피소드가 갑자기 많이 나와서 급하게 적느라 음악은 없습니다 ㅎㅎ)

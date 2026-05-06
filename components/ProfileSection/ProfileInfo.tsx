@@ -7,15 +7,16 @@ export function ProfileInfo() {
     <div className={styles.container}>
       <h1 className={styles.name}>William Jung</h1>
       <p className={styles.bio}>
-        Building AI Memory at{' '}
+        Operator × Engineer · Previously Operations at{' '}
         <a
-          href="https://usemomo.com"
+          href="https://disquiet.io/@williamjung"
           target="_blank"
           rel="me noopener noreferrer"
           className={styles.link}
         >
-          Momo
+          Disquiet
         </a>
+        {' '}(15K → 100K)
       </p>
       <div className={styles.links}>
         <a

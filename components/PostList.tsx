@@ -16,8 +16,16 @@ export function PostList({ posts }: { posts: Post[] }) {
           showExternalIcon={Boolean(post.external)}
           meta={
             <>
-              {post.label && (
-                <Badge color={post.labelColor}>{post.label}</Badge>
+              {(post.label || post.labelImage) && (
+                <Badge
+                  color={post.labelColor}
+                  textColor={post.labelTextColor}
+                  image={post.labelImage}
+                  label={post.label}
+                  shape={post.labelImage ? undefined : "square"}
+                >
+                  {post.label}
+                </Badge>
               )}
               <time
                 dateTime={post.date}
