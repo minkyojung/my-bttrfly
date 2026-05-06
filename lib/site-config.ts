@@ -36,8 +36,9 @@ export function blogPostingSchema(input: {
   date: string;
   description: string;
   image?: string;
+  canonicalUrl?: string;
 }) {
-  const url = `${siteConfig.url}/posts/${input.slug}`;
+  const url = input.canonicalUrl ?? `${siteConfig.url}/posts/${input.slug}`;
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",

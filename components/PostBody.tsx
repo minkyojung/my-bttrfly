@@ -3,6 +3,7 @@ import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import type { ImageMeta } from '@/lib/markdown';
 import { PostImage } from './PostImage';
+import { SmartLink } from './ui/link';
 
 interface PostBodyProps {
   content: string;
@@ -18,19 +19,14 @@ export function PostBody({ content, imageMeta }: PostBodyProps) {
           if (typeof src !== 'string') return null;
           return <PostImage src={src} alt={alt ?? ''} meta={imageMeta[src]} />;
         },
-        a: ({ href, children, ...rest }) => {
-          const isExternal =
-            typeof href === 'string' && /^https?:\/\//.test(href);
+        a: ({ href, children, ref: _ref, ...rest }) => {
+          if (typeof href !== 'string') {
+            return <a {...rest}>{children}</a>;
+          }
           return (
-            <a
-              href={href}
-              {...rest}
-              {...(isExternal
-                ? { target: '_blank', rel: 'noopener noreferrer' }
-                : {})}
-            >
+            <SmartLink href={href} {...rest}>
               {children}
-            </a>
+            </SmartLink>
           );
         },
       }}

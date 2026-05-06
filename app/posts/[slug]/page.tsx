@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { PostBody } from "@/components/PostBody";
 import { PageHeader } from "@/components/ui/page-header";
 import { JsonLd } from "@/components/JsonLd";
@@ -70,6 +70,7 @@ export default async function Post({
               date: post.date,
               description: post.summary ?? post.preview,
               image: post.thumbnail,
+              canonicalUrl: post.external,
             })}
           />
           <div className="max-w-3xl mx-auto px-6 py-16">
@@ -135,9 +136,10 @@ export default async function Post({
       )}
 
       <div
-        className={`max-w-3xl mx-auto px-6 py-12 ${
+        className={cn(
+          "max-w-3xl mx-auto px-6 py-12",
           post.thumbnail ? "pt-12" : "pt-16"
-        }`}
+        )}
       >
         <article className="flex flex-col items-center">
           <PageHeader
