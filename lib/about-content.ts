@@ -1,7 +1,6 @@
 export const aboutContent = {
   intro: [
     "I work between operations and engineering. After leading operations at Disquiet — Korea's largest startup community, growing from 15,000 to 100,000 members in twelve months — I've been building independent projects during my alternative civilian service.",
-    "The main one is flowcap, an open-source macOS menu-bar app that records workflows and turns them into AI-generated documentation. I've also worked on Momo's early memory engine prototype.",
   ],
   background: [
     { period: "2024–2026", role: "Alternative civilian service · independent building" },

@@ -1,16 +1,20 @@
 import { getAllPosts } from "@/lib/markdown";
+import { getGitHubData } from "@/lib/github";
 import { ProfileSection } from "@/components/ProfileSection/ProfileSection";
 import { AboutSection } from "@/components/AboutSection";
 import { PostList } from "@/components/PostList";
 import { Container } from "@/components/ui/container";
 
 export default async function Home() {
-  const posts = await getAllPosts();
+  const [posts, githubData] = await Promise.all([
+    getAllPosts(),
+    getGitHubData(),
+  ]);
 
   return (
     <main className="min-h-screen bg-bg pt-16 pb-24">
       <Container>
-        <ProfileSection />
+        <ProfileSection githubData={githubData} />
 
         <section className="mt-16">
           <AboutSection />
