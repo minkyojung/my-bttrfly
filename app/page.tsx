@@ -1,31 +1,34 @@
-import { getAllPosts } from '@/lib/markdown';
-import { PostCarousel2D as PostCarousel } from '@/components/PostCarousel2D';
+import { getAllPosts } from "@/lib/markdown";
+import { getGitHubData } from "@/lib/github";
+import { ProfileSection } from "@/components/ProfileSection/ProfileSection";
+import { AboutSection } from "@/components/AboutSection";
+import { PostList } from "@/components/PostList";
+import { Container } from "@/components/ui/container";
 
 export default async function Home() {
-  const posts = await getAllPosts();
-
-  // thumbnail 또는 본문 이미지가 있는 포스트만
-  const postsWithImages = posts.filter(p => p.thumbnail || (p.images && p.images.length > 0));
+  const [posts, githubData] = await Promise.all([
+    getAllPosts(),
+    getGitHubData(),
+  ]);
 
   return (
-    <main style={{
-      backgroundColor: 'var(--bg-color)',
-      height: '100vh',
-      overflow: 'hidden',
-    }}>
-      {postsWithImages.length > 0 && (
-        <PostCarousel
-          posts={postsWithImages.map(p => ({
-            slug: p.slug,
-            title: p.title,
-            images: p.images || [],
-            thumbnail: p.thumbnail,
-            date: p.date,
-            readingTime: p.readingTime,
-            preview: p.preview,
-          }))}
-        />
-      )}
+    <main className="min-h-screen bg-bg pt-16 pb-24">
+      <Container>
+        <ProfileSection githubData={githubData} />
+
+        <section className="mt-16">
+          <AboutSection />
+        </section>
+
+        {posts.length > 0 && (
+          <section className="mt-16">
+            <h2 className="text-fg-subtle text-xs font-medium tracking-[0.08em] uppercase mb-4">
+              Writing
+            </h2>
+            <PostList posts={posts} />
+          </section>
+        )}
+      </Container>
     </main>
   );
 }
