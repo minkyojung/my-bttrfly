@@ -64,6 +64,7 @@
 
     /* Layout */
     --content-width: 600px;
+    --front-page-width: 1200px;
 
     /* === Legacy aliases (mapped to new tokens; remove after migration) === */
     --bg-color: var(--color-bg);

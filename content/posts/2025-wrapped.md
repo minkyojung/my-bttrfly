@@ -1,6 +1,8 @@
 ---
 title: 2025 Wrapped
 date: 2025-12-31
+category: "Retrospectives"
+featured: true
 tags:
 audio: /audio/Prince Ralis is Saved - Twilight Princess (For Sleep_Relaxing) [Rain] - Yuzulink.mp3
 audioTitle: Prince Ralis is Saved

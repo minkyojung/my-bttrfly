@@ -9,6 +9,12 @@ export function NavBar() {
       >
         MJ
       </Link>
+      <Link
+        href="/about"
+        className="text-fg-muted text-[13px] font-medium tracking-[0.02em] no-underline transition-opacity duration-300"
+      >
+        About
+      </Link>
     </nav>
   );
 }

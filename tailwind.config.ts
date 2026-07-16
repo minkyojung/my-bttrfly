@@ -36,9 +36,10 @@ const config: Config = {
       },
       maxWidth: {
         content: "var(--content-width)",
+        wide: "var(--front-page-width)",
       },
       fontFamily: {
-        serif: ["'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
+        serif: ["var(--font-serif)", "'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
       },
       typography: {
         DEFAULT: {

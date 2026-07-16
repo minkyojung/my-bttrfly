@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
+import { Noto_Serif_KR } from "next/font/google";
 import "./globals.css";
 import { NavBar } from "@/components/NavBar";
 import { JsonLd } from "@/components/JsonLd";
 import { personSchema, siteConfig } from "@/lib/site-config";
+
+const serif = Noto_Serif_KR({
+  weight: ["600", "700"],
+  variable: "--font-serif",
+  display: "swap",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -38,7 +46,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={serif.variable}>
       <body className="antialiased">
         <JsonLd data={personSchema()} />
         <NavBar />
