@@ -1,11 +1,14 @@
 import { config, fields, collection } from '@keystatic/core';
 
-// 프로덕션에서는 어드민 UI/API를 비활성화한다 (로컬 모드는 dev 전용).
-// GitHub 모드로 전환하면 이 플래그를 제거하고 storage를 교체한다.
-export const showAdminUI = process.env.NODE_ENV === 'development';
+// GitHub 모드: 어드민은 프로덕션에서도 열리고, 접근은 GitHub 로그인
+// (repo 쓰기 권한)으로 게이팅된다. 저장 = git 커밋 → Vercel 자동 배포.
+export const showAdminUI = true;
 
 export default config({
-  storage: { kind: 'local' },
+  storage: {
+    kind: 'github',
+    repo: 'minkyojung/my-bttrfly',
+  },
   collections: {
     posts: collection({
       label: 'Posts',
