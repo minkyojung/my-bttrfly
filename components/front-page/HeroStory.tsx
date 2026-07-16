@@ -16,7 +16,7 @@ export function HeroStory({ post }: { post: Post }) {
         priority
         sizes="(min-width: 1024px) 50vw, 100vw"
       />
-      <div className="mt-6 text-center">
+      <div className="mt-6">
         <Kicker category={post.category} date={post.date} />
         <h2 className="font-serif text-fg text-3xl md:text-4xl font-bold leading-snug tracking-[-0.01em] mt-3 group-hover:opacity-60 transition-opacity">
           {post.title}
