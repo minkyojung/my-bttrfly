@@ -3,6 +3,7 @@ title: "훈련소 수료, 좋은 제품이란, 워즈니악과 잡스의 차이,
 date: "2024-11-17"
 labelImage: "/badges/substack.png"
 category: "Newsletter"
+draft: true
 ---
 
 훈련소를 마치고 돌아왔습니다. 전자기기와 떨어져 책만 붙잡고 있었더니 깊은 생각을 오래 할 수 있었습니다. 오늘은 책을 읽으며 인상깊었던 부분과 제 생각을 적어봤습니다.

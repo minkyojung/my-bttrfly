@@ -28,6 +28,7 @@ export interface Post {
   coverMeta?: ImageMeta;
   category?: string;
   featured?: boolean;
+  draft?: boolean;
   label?: string;
   labelColor?: string;
   labelTextColor?: string;
@@ -93,6 +94,7 @@ function parseFile(slug: string, fileContents: string): Post {
     coverMeta: cover ? readLocalImageMeta(cover) : undefined,
     category: typeof data.category === 'string' ? data.category : undefined,
     featured: data.featured === true,
+    draft: data.draft === true,
     label: typeof data.label === 'string' ? data.label : undefined,
     labelColor: typeof data.labelColor === 'string' ? data.labelColor : undefined,
     labelTextColor: typeof data.labelTextColor === 'string' ? data.labelTextColor : undefined,
@@ -114,7 +116,9 @@ export async function getAllPosts(): Promise<Post[]> {
     return parseFile(slug, fileContents);
   });
 
-  return posts.sort(
+  return posts
+    .filter((post) => !post.draft)
+    .sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 }
@@ -123,5 +127,6 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   if (!fs.existsSync(fullPath)) return null;
   const fileContents = fs.readFileSync(fullPath, 'utf8');
-  return parseFile(slug, fileContents);
+  const post = parseFile(slug, fileContents);
+  return post.draft ? null : post;
 }
