@@ -1,4 +1,0 @@
-{
-  "crons": [],
-  "buildCommand": "next build"
-}

@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# editors / local tooling
+.obsidian/
+.conductor/
+/my-bttrfly
+.claude/settings.local.json
