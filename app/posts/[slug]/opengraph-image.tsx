@@ -1,10 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { ImageResponse } from "next/og";
+import { notFound } from "next/navigation";
 import { getPostBySlug } from "@/lib/markdown";
 import { formatDate } from "@/lib/utils";
 import { siteConfig } from "@/lib/site-config";
 
+export const alt = "Post cover";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -26,8 +28,9 @@ export default async function PostOpengraphImage({
 }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  const title = post?.title ?? "Post";
-  const date = post?.date ? formatDate(post.date) : "";
+  if (!post) notFound();
+  const title = post.title;
+  const date = formatDate(post.date);
   const profile = loadProfile();
   const fontData = loadFont();
 
@@ -49,6 +52,7 @@ export default async function PostOpengraphImage({
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
           <img
             src={profile}
+            alt=""
             width={72}
             height={72}
             style={{
@@ -66,7 +70,7 @@ export default async function PostOpengraphImage({
         <div
           style={{
             fontSize: 64,
-            fontWeight: 600,
+            fontWeight: 700,
             lineHeight: 1.2,
             letterSpacing: "-0.02em",
             display: "flex",

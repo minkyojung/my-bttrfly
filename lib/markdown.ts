@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { imageSize } from 'image-size';
-import { calculateReadingTime } from './utils';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const publicDirectory = path.join(process.cwd(), 'public');
@@ -19,26 +18,30 @@ export interface Post {
   preview: string;
   summary?: string;
   content: string;
-  readingTime: string;
-  thumbnail?: string;
-  thumbnailMeta?: ImageMeta;
   imageMeta: Record<string, ImageMeta>;
   external?: string;
   cover?: string;
   coverMeta?: ImageMeta;
   category?: string;
-  featured?: boolean;
-  draft?: boolean;
+  featured: boolean;
+  draft: boolean;
   label?: string;
   labelColor?: string;
   labelTextColor?: string;
   labelImage?: string;
 }
 
-function normalizeDate(value: unknown): string {
+// 날짜가 없거나 형식이 깨진 글이 조용히 "오늘 날짜"로 1면 최상단에 올라가는
+// 사고를 막기 위해, 파싱 불가 시 빌드를 명시적으로 실패시킨다.
+function normalizeDate(value: unknown, slug: string): string {
   if (value instanceof Date) return value.toISOString().split('T')[0];
   if (typeof value === 'string' && value.length > 0) return value;
-  return new Date().toISOString().split('T')[0];
+  throw new Error(`Missing or invalid date in content/posts/${slug}.md`);
+}
+
+// CMS가 빈 문자열로 저장한 optional 필드를 undefined로 정규화한다.
+function optionalString(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined;
 }
 
 function readLocalImageMeta(src: string): ImageMeta | undefined {
@@ -75,31 +78,36 @@ function buildPreview(content: string): string {
 
 function parseFile(slug: string, fileContents: string): Post {
   const { data, content } = matter(fileContents);
-  const thumbnail = typeof data.thumbnail === 'string' ? data.thumbnail : undefined;
-  const external = typeof data.external === 'string' ? data.external : undefined;
-  const cover = typeof data.cover === 'string' ? data.cover : undefined;
+  const cover = optionalString(data.cover);
   return {
     slug,
     title: data.title || slug.replace(/-/g, ' '),
-    date: normalizeDate(data.date),
+    date: normalizeDate(data.date, slug),
     preview: buildPreview(content),
-    summary: typeof data.summary === 'string' ? data.summary.trim() : undefined,
+    summary: optionalString(data.summary)?.trim(),
     content,
-    readingTime: calculateReadingTime(content),
-    thumbnail,
-    thumbnailMeta: thumbnail ? readLocalImageMeta(thumbnail) : undefined,
     imageMeta: collectImageMeta(content),
-    external,
+    external: optionalString(data.external),
     cover,
     coverMeta: cover ? readLocalImageMeta(cover) : undefined,
-    category: typeof data.category === 'string' ? data.category : undefined,
+    category: optionalString(data.category),
     featured: data.featured === true,
     draft: data.draft === true,
-    label: typeof data.label === 'string' ? data.label : undefined,
-    labelColor: typeof data.labelColor === 'string' ? data.labelColor : undefined,
-    labelTextColor: typeof data.labelTextColor === 'string' ? data.labelTextColor : undefined,
-    labelImage: typeof data.labelImage === 'string' ? data.labelImage : undefined,
+    label: optionalString(data.label),
+    labelColor: optionalString(data.labelColor),
+    labelTextColor: optionalString(data.labelTextColor),
+    labelImage: optionalString(data.labelImage),
   };
+}
+
+// 파싱 실패 시 어느 파일이 문제인지 알 수 있게 파일명을 붙여 던진다
+// (frontmatter가 CMS와 손편집 양쪽에서 수정되므로 방어 필수).
+function parseFileOrThrow(slug: string, fileContents: string): Post {
+  try {
+    return parseFile(slug, fileContents);
+  } catch (cause) {
+    throw new Error(`Failed to parse content/posts/${slug}.md`, { cause });
+  }
 }
 
 export async function getAllPosts(): Promise<Post[]> {
@@ -113,7 +121,7 @@ export async function getAllPosts(): Promise<Post[]> {
     const slug = fileName.replace(/\.md$/, '');
     const fullPath = path.join(postsDirectory, fileName);
     const fileContents = fs.readFileSync(fullPath, 'utf8');
-    return parseFile(slug, fileContents);
+    return parseFileOrThrow(slug, fileContents);
   });
 
   return posts
@@ -124,9 +132,11 @@ export async function getAllPosts(): Promise<Post[]> {
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
+  // URL 인코딩된 경로 탈출(%2F 등) 차단
+  if (!/^[\w-]+$/.test(slug)) return null;
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   if (!fs.existsSync(fullPath)) return null;
   const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const post = parseFile(slug, fileContents);
+  const post = parseFileOrThrow(slug, fileContents);
   return post.draft ? null : post;
 }

@@ -18,7 +18,6 @@ export function GitHubContributions({ data }: GitHubContributionsProps) {
     <div className={styles.container}>
       <style>{`
         .react-activity-calendar__footer { color: rgba(255,255,255,0.25) !important; }
-        .react-activity-calendar__count { color: rgba(255,255,255,0.25) !important; }
         .react-activity-calendar__legend-colors + span,
         .react-activity-calendar__legend-colors ~ span { color: rgba(255,255,255,0.25) !important; }
         .react-activity-calendar text { fill: rgba(255,255,255,0.25) !important; }
@@ -43,7 +42,7 @@ export function GitHubContributions({ data }: GitHubContributionsProps) {
         blockMargin={2}
         fontSize={11}
         colorScheme="dark"
-        hideTotalCount
+        showTotalCount={false}
         theme={{
           dark: ["rgba(255,255,255,0.03)", "#ff6b35"],
         }}

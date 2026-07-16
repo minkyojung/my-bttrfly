@@ -40,6 +40,7 @@ export default async function OpengraphImage() {
       >
         <img
           src={profile}
+          alt=""
           width={200}
           height={200}
           style={{

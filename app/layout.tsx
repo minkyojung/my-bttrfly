@@ -22,17 +22,17 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.name, url: siteConfig.url }],
   creator: siteConfig.name,
   openGraph: {
-    type: "profile",
+    type: "website",
     locale: siteConfig.locale,
     url: siteConfig.url,
     siteName: siteConfig.name,
     title: `${siteConfig.name} — ${siteConfig.role}`,
     description: siteConfig.description,
   },
+  // title/description은 명시하지 않는다 — 명시하면 하위 페이지(글)의
+  // 트위터 카드 제목까지 사이트 제목으로 고정돼버린다 (메타데이터는 키 단위 상속).
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} — ${siteConfig.role}`,
-    description: siteConfig.description,
     creator: siteConfig.social.twitter.handle,
   },
   alternates: {

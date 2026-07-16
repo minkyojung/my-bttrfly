@@ -19,6 +19,8 @@ export function PostBody({ content, imageMeta }: PostBodyProps) {
           if (typeof src !== 'string') return null;
           return <PostImage src={src} alt={alt ?? ''} meta={imageMeta[src]} />;
         },
+        // react-markdown이 넘기는 ref는 SmartLink와 호환되지 않아 제외한다
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         a: ({ href, children, ref: _ref, ...rest }) => {
           if (typeof href !== 'string') {
             return <a {...rest}>{children}</a>;

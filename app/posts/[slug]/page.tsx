@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
 import { cn, formatDate } from "@/lib/utils";
@@ -11,14 +11,6 @@ import type { Metadata } from "next";
 export async function generateStaticParams() {
   const posts = await getAllPosts();
   return posts.map((post) => ({ slug: post.slug }));
-}
-
-function externalHostname(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
 }
 
 export async function generateMetadata({
@@ -58,47 +50,9 @@ export default async function Post({
 
   if (!post) notFound();
 
-  if (post.external) {
-    return (
-      <>
-        <meta httpEquiv="refresh" content={`0;url=${post.external}`} />
-        <main className="min-h-screen bg-bg">
-          <JsonLd
-            data={blogPostingSchema({
-              title: post.title,
-              slug: post.slug,
-              date: post.date,
-              description: post.summary ?? post.preview,
-              image: post.thumbnail,
-              canonicalUrl: post.external,
-            })}
-          />
-          <div className="max-w-3xl mx-auto px-6 py-16">
-            <article className="flex flex-col items-center">
-              <PageHeader
-                title={post.title}
-                meta={<time dateTime={post.date}>{formatDate(post.date)}</time>}
-              />
-              {post.summary && (
-                <p className="w-full max-w-content text-fg-muted text-[17px] leading-[1.7] mt-2">
-                  {post.summary}
-                </p>
-              )}
-              <p className="w-full max-w-content mt-8 text-[15px]">
-                <a
-                  href={post.external}
-                  rel="noopener noreferrer"
-                  className="text-fg underline hover:opacity-60"
-                >
-                  Read the full post on {externalHostname(post.external)} →
-                </a>
-              </p>
-            </article>
-          </div>
-        </main>
-      </>
-    );
-  }
+  // 외부 발행 글: 목록에서는 원문으로 직접 링크되지만, 옛 링크/검색 유입은
+  // 이 경로로 들어오므로 원문으로 리다이렉트한다.
+  if (post.external) redirect(post.external);
 
   return (
     <main className="min-h-screen bg-bg">
@@ -108,28 +62,28 @@ export default async function Post({
           slug: post.slug,
           date: post.date,
           description: post.summary ?? post.preview,
-          image: post.thumbnail,
+          image: post.cover,
         })}
       />
-      {post.thumbnail && (
+      {post.cover && (
         <div className="p-[10px]">
           <div
             className="relative w-full overflow-hidden rounded-lg"
             style={{
               maxHeight: "70vh",
-              aspectRatio: post.thumbnailMeta
-                ? `${post.thumbnailMeta.width} / ${post.thumbnailMeta.height}`
+              aspectRatio: post.coverMeta
+                ? `${post.coverMeta.width} / ${post.coverMeta.height}`
                 : "16 / 9",
             }}
           >
             <Image
-              src={post.thumbnail}
+              src={post.cover}
               alt={post.title}
               fill
               priority
               sizes="100vw"
               className="object-cover"
-              {...(post.thumbnailMeta ? {} : { unoptimized: true })}
+              {...(post.coverMeta ? {} : { unoptimized: true })}
             />
           </div>
         </div>
@@ -138,7 +92,7 @@ export default async function Post({
       <div
         className={cn(
           "max-w-3xl mx-auto px-6 py-12",
-          post.thumbnail ? "pt-12" : "pt-16"
+          post.cover ? "pt-12" : "pt-16"
         )}
       >
         <article className="flex flex-col items-center">
