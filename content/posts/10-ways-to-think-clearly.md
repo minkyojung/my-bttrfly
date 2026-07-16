@@ -7,4 +7,3 @@ featured: false
 draft: true
 labelImage: /badges/substack.png
 ---
-asdasd
