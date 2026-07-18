@@ -1,4 +1,5 @@
 import { config, fields, collection } from '@keystatic/core';
+import { COLUMNS } from './lib/columns';
 
 // GitHub 모드: 어드민은 프로덕션에서도 열리고, 접근은 GitHub 로그인
 // (repo 쓰기 권한)으로 게이팅된다. 저장 = git 커밋 → Vercel 자동 배포.
@@ -21,12 +22,8 @@ export default config({
         date: fields.date({ label: 'Date', validation: { isRequired: true } }),
         category: fields.select({
           label: 'Category',
-          options: [
-            { label: 'Essays', value: 'Essays' },
-            { label: 'Interviews', value: 'Interviews' },
-            { label: 'Newsletter', value: 'Newsletter' },
-            { label: 'Retrospectives', value: 'Retrospectives' },
-          ],
+          // 선택지는 lib/columns.ts 단일 출처에서 파생 (홈 섹션과 동기화)
+          options: COLUMNS.map((c) => ({ label: c.label, value: c.value })),
           defaultValue: 'Essays',
         }),
         summary: fields.text({
