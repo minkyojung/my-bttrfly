@@ -1,9 +1,11 @@
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
-import { cn, formatDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { PostBody } from "@/components/PostBody";
 import { PageHeader } from "@/components/ui/page-header";
+import { Kicker } from "@/components/front-page/Kicker";
+import { ColumnSection } from "@/components/front-page/ColumnSection";
 import { JsonLd } from "@/components/JsonLd";
 import { blogPostingSchema, postUrl } from "@/lib/site-config";
 import type { Metadata } from "next";
@@ -70,6 +72,12 @@ export default async function Post({
   // 이 경로로 들어오므로 원문으로 리다이렉트한다.
   if (post.external) redirect(post.external);
 
+  const morePosts = post.category
+    ? (await getAllPosts())
+        .filter((p) => p.category === post.category && p.slug !== post.slug)
+        .slice(0, 3)
+    : [];
+
   return (
     <main className="min-h-screen bg-bg">
       <JsonLd
@@ -114,7 +122,8 @@ export default async function Post({
         <article className="flex flex-col items-center">
           <PageHeader
             title={post.title}
-            meta={<time dateTime={post.date}>{formatDate(post.date)}</time>}
+            eyebrow={<Kicker category={post.category} date={post.date} />}
+            dek={post.summary}
           />
 
           <div className={postProseClass}>
@@ -122,6 +131,18 @@ export default async function Post({
           </div>
         </article>
       </div>
+
+      {morePosts.length > 0 && (
+        <div className="max-w-wide mx-auto px-6 pb-20 mt-8">
+          <ColumnSection
+            group={{
+              value: post.category!,
+              label: `More in ${post.category}`,
+              posts: morePosts,
+            }}
+          />
+        </div>
+      )}
     </main>
   );
 }
