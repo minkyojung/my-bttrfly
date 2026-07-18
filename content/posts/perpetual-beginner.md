@@ -1,7 +1,7 @@
 ---
 title: "계속해서 초보자가 되는 불편함"
 date: "2024-03-23"
-labelImage: "/badges/substack.png"
+source: substack
 category: "Essays"
 draft: true
 ---

@@ -1,7 +1,7 @@
 ---
 title: "직군이라는 허상"
 date: "2024-02-24"
-labelImage: "/badges/substack.png"
+source: substack
 category: "Essays"
 draft: true
 ---

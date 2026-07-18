@@ -1,7 +1,7 @@
 ---
 title: "Be Sincere—Not Serious"
 date: "2024-08-06"
-labelImage: "/badges/substack.png"
+source: substack
 category: "Newsletter"
 draft: true
 ---

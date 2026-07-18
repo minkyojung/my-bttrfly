@@ -5,5 +5,5 @@ category: Newsletter
 external: https://williamjung0130.substack.com/p/10
 featured: false
 draft: true
-labelImage: /badges/substack.png
+source: substack
 ---

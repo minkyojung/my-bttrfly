@@ -26,10 +26,7 @@ export interface Post {
   category?: string;
   featured: boolean;
   draft: boolean;
-  label?: string;
-  labelColor?: string;
-  labelTextColor?: string;
-  labelImage?: string;
+  source?: 'disquiet' | 'substack';
 }
 
 // 날짜가 없거나 형식이 깨진 글이 조용히 "오늘 날짜"로 1면 최상단에 올라가는
@@ -94,10 +91,10 @@ function parseFile(slug: string, fileContents: string): Post {
     category: optionalString(data.category),
     featured: data.featured === true,
     draft: data.draft === true,
-    label: optionalString(data.label),
-    labelColor: optionalString(data.labelColor),
-    labelTextColor: optionalString(data.labelTextColor),
-    labelImage: optionalString(data.labelImage),
+    source:
+      data.source === 'disquiet' || data.source === 'substack'
+        ? data.source
+        : undefined,
   };
 }
 
