@@ -1,13 +1,25 @@
 import type { Post } from "@/lib/markdown";
 import { SmartLink } from "@/components/ui/link";
+import { cn } from "@/lib/utils";
 import { CoverSlot } from "./CoverSlot";
 import { Kicker } from "./Kicker";
 
-export function StoryCard({ post }: { post: Post }) {
+interface StoryCardProps {
+  post: Post;
+  // "list": 세로로 쌓이는 단일 컬럼(구분선 있음, 기존 히어로 블록 좌/우).
+  // "grid": 여러 열 그리드에 놓이는 카드(구분선 없음, 칼럼 섹션용).
+  variant?: "list" | "grid";
+}
+
+export function StoryCard({ post, variant = "list" }: StoryCardProps) {
   return (
     <SmartLink
       href={post.external ?? `/posts/${post.slug}`}
-      className="block group py-5 first:pt-0 border-b border-border last:border-b-0"
+      className={cn(
+        "block group",
+        variant === "list" &&
+          "py-5 first:pt-0 border-b border-border last:border-b-0"
+      )}
     >
       <CoverSlot
         src={post.cover}
