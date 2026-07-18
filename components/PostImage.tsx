@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import type { ImageMeta } from '@/lib/markdown';
-import styles from './PostImage.module.css';
 
 interface PostImageProps {
   src: string;
@@ -11,13 +10,13 @@ interface PostImageProps {
 export function PostImage({ src, alt, meta }: PostImageProps) {
   if (meta) {
     return (
-      <span className={styles.figure}>
+      <span className="block my-6 rounded-md overflow-hidden">
         <Image
           src={src}
           alt={alt}
           width={meta.width}
           height={meta.height}
-          className={styles.image}
+          className="block w-full h-auto max-w-full"
           sizes="(max-width: 600px) 100vw, 600px"
         />
       </span>
@@ -25,12 +24,12 @@ export function PostImage({ src, alt, meta }: PostImageProps) {
   }
 
   return (
-    <span className={`${styles.figure} ${styles.fillFigure}`}>
+    <span className="block my-6 rounded-md overflow-hidden relative aspect-video w-full">
       <Image
         src={src}
         alt={alt}
         fill
-        className={styles.image}
+        className="block w-full h-auto max-w-full object-cover"
         sizes="(max-width: 600px) 100vw, 600px"
         unoptimized
       />

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import styles from './ASCIIHeader.module.css';
 
 export function ASCIIHeader() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -117,12 +116,12 @@ export function ASCIIHeader() {
   }, [dimensions]);
 
   return (
-    <div ref={containerRef} className={styles.container}>
+    <div ref={containerRef} className="w-full max-w-content">
       <canvas
         ref={canvasRef}
         width={dimensions.width}
         height={dimensions.height}
-        className={styles.canvas}
+        className="w-full max-w-content h-[200px] block bg-transparent max-[640px]:h-[150px]"
       />
     </div>
   );
