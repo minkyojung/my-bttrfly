@@ -5,13 +5,13 @@ export function NavBar() {
     <nav className="fixed inset-x-0 top-0 z-[100] flex items-center justify-between px-7 py-4">
       <Link
         href="/"
-        className="text-fg text-[13px] font-medium tracking-[0.02em] no-underline transition-opacity duration-300"
+        className="text-fg text-[13px] font-medium tracking-[0.02em] no-underline transition-opacity duration-300 hover:opacity-60"
       >
         MJ
       </Link>
       <Link
         href="/about"
-        className="text-fg-muted text-[13px] font-medium tracking-[0.02em] no-underline transition-opacity duration-300"
+        className="text-fg-muted text-[13px] font-medium tracking-[0.02em] no-underline transition-opacity duration-300 hover:opacity-60"
       >
         About
       </Link>

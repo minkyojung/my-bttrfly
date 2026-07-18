@@ -7,7 +7,7 @@ export function StoryCard({ post }: { post: Post }) {
   return (
     <SmartLink
       href={post.external ?? `/posts/${post.slug}`}
-      className="block group hover:!opacity-100 py-5 first:pt-0 border-b border-border last:border-b-0"
+      className="block group py-5 first:pt-0 border-b border-border last:border-b-0"
     >
       <CoverSlot
         src={post.cover}

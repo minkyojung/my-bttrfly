@@ -7,7 +7,7 @@ export function HeroStory({ post }: { post: Post }) {
   return (
     <SmartLink
       href={post.external ?? `/posts/${post.slug}`}
-      className="block group hover:!opacity-100"
+      className="block group"
     >
       <CoverSlot
         src={post.cover}

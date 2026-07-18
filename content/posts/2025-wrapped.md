@@ -2,18 +2,6 @@
 title: 2025 Wrapped
 date: 2025-12-31
 category: "Retrospectives"
-tags:
-pinned:
-ascii: "2025"
-sectionAscii:
-  - afterHeading: "Obsessions on 2025"
-    type: blackhole
-    width: 600
-    height: 150
-  - afterHeading: "How to learn fast"
-    type: pipeline
-    width: 600
-    height: 150
 draft: true
 ---
 ## Intro

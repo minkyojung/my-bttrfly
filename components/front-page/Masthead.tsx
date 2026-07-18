@@ -19,8 +19,8 @@ export function Masthead() {
       <div className="flex items-baseline justify-between text-fg-subtle text-[11px] font-medium uppercase tracking-[0.12em] mt-6">
         <span className="tabular-nums">{today}</span>
         <nav className="flex gap-5">
-          <Link href="/about">About</Link>
-          <SmartLink href={siteConfig.social.substack}>Substack ↗</SmartLink>
+          <Link href="/about" className="transition-opacity hover:opacity-60">About</Link>
+          <SmartLink href={siteConfig.social.substack} className="transition-opacity hover:opacity-60">Substack ↗</SmartLink>
         </nav>
       </div>
       <div className="border-b-2 border-border-strong mt-2" />

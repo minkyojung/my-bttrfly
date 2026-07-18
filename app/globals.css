@@ -112,10 +112,6 @@
   a {
     color: var(--text-color);
   }
-
-  a:hover {
-    @apply opacity-60;
-  }
 }
 
 @layer utilities {

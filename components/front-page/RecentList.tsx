@@ -19,7 +19,7 @@ export function RecentList({ posts }: { posts: Post[] }) {
           >
             <SmartLink
               href={post.external ?? `/posts/${post.slug}`}
-              className="flex items-start gap-4 group hover:!opacity-100 py-4"
+              className="flex items-start gap-4 group py-4"
             >
               <div className="flex-1 min-w-0">
                 <h3 className="font-serif text-fg text-[15px] font-semibold leading-snug line-clamp-2 group-hover:opacity-60 transition-opacity">
