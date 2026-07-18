@@ -1,6 +1,7 @@
 import type { Post } from "@/lib/markdown";
 import { SmartLink } from "@/components/ui/link";
 import { cn } from "@/lib/utils";
+import { SourceBadge } from "@/components/ui/source-badge";
 import { CoverSlot } from "./CoverSlot";
 import { Kicker } from "./Kicker";
 
@@ -28,7 +29,10 @@ export function StoryCard({ post, variant = "list" }: StoryCardProps) {
         sizes="(min-width: 1024px) 25vw, 100vw"
       />
       <div className="mt-3">
-        <Kicker category={post.category} date={post.date} />
+        <div className="flex items-center gap-1.5">
+          <SourceBadge source={post.source} />
+          <Kicker category={post.category} date={post.date} />
+        </div>
         <h3 className="font-serif text-fg text-lg font-bold leading-snug line-clamp-3 mt-1.5 group-hover:opacity-60 transition-opacity">
           {post.title}
           {post.external && (
