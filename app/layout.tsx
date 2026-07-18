@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Serif_KR } from "next/font/google";
 import "./globals.css";
-import { NavBar } from "@/components/NavBar";
-import { JsonLd } from "@/components/JsonLd";
-import { personSchema, siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/lib/site-config";
 
 const serif = Noto_Serif_KR({
   weight: ["600", "700"],
@@ -47,11 +45,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={serif.variable}>
-      <body className="antialiased">
-        <JsonLd data={personSchema()} />
-        <NavBar />
-        {children}
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
