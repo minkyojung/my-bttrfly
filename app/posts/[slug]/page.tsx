@@ -8,6 +8,22 @@ import { JsonLd } from "@/components/JsonLd";
 import { blogPostingSchema, postUrl } from "@/lib/site-config";
 import type { Metadata } from "next";
 
+// 본문 prose 스타일. 이 페이지에서만 쓰이므로 JSX를 어지럽히지 않게 상수로 분리.
+const postProseClass = `prose prose-serif w-full max-w-content text-[18px] leading-[1.7] font-medium
+  prose-headings:font-black
+  prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
+  prose-h2:text-2xl prose-h2:mb-4 prose-h2:mt-8
+  prose-h3:text-xl prose-h3:mb-3 prose-h3:mt-6
+  prose-p:mb-2
+  prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
+  prose-ul:mb-2 prose-ul:list-disc prose-ul:pl-5
+  prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-5
+  prose-li:mb-1
+  prose-hr:my-8
+  prose-code:px-1 prose-code:rounded-sm prose-code:text-sm
+  prose-pre:rounded-md prose-pre:p-4 prose-pre:mb-4
+  prose-a:underline hover:prose-a:opacity-60`;
+
 export async function generateStaticParams() {
   const posts = await getAllPosts();
   return posts.map((post) => ({ slug: post.slug }));
@@ -101,22 +117,7 @@ export default async function Post({
             meta={<time dateTime={post.date}>{formatDate(post.date)}</time>}
           />
 
-          <div
-            className="prose prose-serif w-full max-w-content text-[18px] leading-[1.7] font-medium
-              prose-headings:font-black
-              prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
-              prose-h2:text-2xl prose-h2:mb-4 prose-h2:mt-8
-              prose-h3:text-xl prose-h3:mb-3 prose-h3:mt-6
-              prose-p:mb-2
-              prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
-              prose-ul:mb-2 prose-ul:list-disc prose-ul:pl-5
-              prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-5
-              prose-li:mb-1
-              prose-hr:my-8
-              prose-code:px-1 prose-code:rounded-sm prose-code:text-sm
-              prose-pre:rounded-md prose-pre:p-4 prose-pre:mb-4
-              prose-a:underline hover:prose-a:opacity-60"
-          >
+          <div className={postProseClass}>
             <PostBody content={post.content} imageMeta={post.imageMeta} />
           </div>
         </article>
