@@ -108,37 +108,57 @@ function parseFileOrThrow(slug: string, fileContents: string): Post {
   }
 }
 
-async function getAllPostsUncached(): Promise<Post[]> {
+function readAllPosts(): Post[] {
   if (!fs.existsSync(postsDirectory)) return [];
 
   const fileNames = fs
     .readdirSync(postsDirectory)
     .filter((fileName) => fileName.endsWith('.md'));
 
-  const posts = fileNames.map((fileName) => {
-    const slug = fileName.replace(/\.md$/, '');
-    const fullPath = path.join(postsDirectory, fileName);
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    return parseFileOrThrow(slug, fileContents);
-  });
+  return fileNames
+    .map((fileName) => {
+      const slug = fileName.replace(/\.md$/, '');
+      const fullPath = path.join(postsDirectory, fileName);
+      const fileContents = fs.readFileSync(fullPath, 'utf8');
+      return parseFileOrThrow(slug, fileContents);
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
 
-  return posts
-    .filter((post) => !post.draft)
-    .sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
+async function getAllPostsUncached(): Promise<Post[]> {
+  return readAllPosts().filter((post) => !post.draft);
 }
 
 export const getAllPosts = cache(getAllPostsUncached);
 
-async function getPostBySlugUncached(slug: string): Promise<Post | null> {
+// draft를 포함해 전부 조회한다. 글쓰기 UI(/write) 목록 전용 —
+// 공개 목록/사이트맵/OG 등 사용자 대면 경로에는 절대 쓰지 않는다.
+async function getAllPostsForEditUncached(): Promise<Post[]> {
+  return readAllPosts();
+}
+
+export const getAllPostsForEdit = cache(getAllPostsForEditUncached);
+
+function readPostFile(slug: string): Post | null {
   // URL 인코딩된 경로 탈출(%2F 등) 차단
   if (!/^[\w-]+$/.test(slug)) return null;
   const fullPath = path.join(postsDirectory, `${slug}.md`);
   if (!fs.existsSync(fullPath)) return null;
   const fileContents = fs.readFileSync(fullPath, 'utf8');
-  const post = parseFileOrThrow(slug, fileContents);
-  return post.draft ? null : post;
+  return parseFileOrThrow(slug, fileContents);
+}
+
+async function getPostBySlugUncached(slug: string): Promise<Post | null> {
+  const post = readPostFile(slug);
+  return post && !post.draft ? post : null;
 }
 
 export const getPostBySlug = cache(getPostBySlugUncached);
+
+// draft여도 조회된다. 글쓰기 UI(/write/[slug]) 편집 화면 전용 — 초안을 열람
+// 하려는데 getPostBySlug가 null을 반환해 404가 나는 문제를 피하기 위함.
+async function getPostBySlugForEditUncached(slug: string): Promise<Post | null> {
+  return readPostFile(slug);
+}
+
+export const getPostBySlugForEdit = cache(getPostBySlugForEditUncached);
