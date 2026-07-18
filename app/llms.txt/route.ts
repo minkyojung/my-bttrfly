@@ -1,5 +1,5 @@
 import { getAllPosts } from "@/lib/markdown";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig, postUrl } from "@/lib/site-config";
 import { aboutContent } from "@/lib/about-content";
 
 export const dynamic = "force-static";
@@ -54,7 +54,7 @@ export async function GET() {
       sections.push(
         formatPostLine({
           title: post.title,
-          url: `${siteConfig.url}/posts/${post.slug}`,
+          url: postUrl(post.slug),
           date: post.date,
           summary: post.summary,
         })

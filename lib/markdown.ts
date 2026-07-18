@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -110,7 +111,7 @@ function parseFileOrThrow(slug: string, fileContents: string): Post {
   }
 }
 
-export async function getAllPosts(): Promise<Post[]> {
+async function getAllPostsUncached(): Promise<Post[]> {
   if (!fs.existsSync(postsDirectory)) return [];
 
   const fileNames = fs
@@ -131,7 +132,9 @@ export async function getAllPosts(): Promise<Post[]> {
   );
 }
 
-export async function getPostBySlug(slug: string): Promise<Post | null> {
+export const getAllPosts = cache(getAllPostsUncached);
+
+async function getPostBySlugUncached(slug: string): Promise<Post | null> {
   // URL 인코딩된 경로 탈출(%2F 등) 차단
   if (!/^[\w-]+$/.test(slug)) return null;
   const fullPath = path.join(postsDirectory, `${slug}.md`);
@@ -140,3 +143,5 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   const post = parseFileOrThrow(slug, fileContents);
   return post.draft ? null : post;
 }
+
+export const getPostBySlug = cache(getPostBySlugUncached);

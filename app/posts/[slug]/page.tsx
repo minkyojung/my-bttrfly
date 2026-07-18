@@ -5,7 +5,7 @@ import { cn, formatDate } from "@/lib/utils";
 import { PostBody } from "@/components/PostBody";
 import { PageHeader } from "@/components/ui/page-header";
 import { JsonLd } from "@/components/JsonLd";
-import { blogPostingSchema, siteConfig } from "@/lib/site-config";
+import { blogPostingSchema, postUrl } from "@/lib/site-config";
 import type { Metadata } from "next";
 
 export async function generateStaticParams() {
@@ -23,7 +23,7 @@ export async function generateMetadata({
   if (!post) return { title: "Not found" };
 
   const description = post.summary ?? post.preview;
-  const canonical = post.external ?? `${siteConfig.url}/posts/${post.slug}`;
+  const canonical = post.external ?? postUrl(post.slug);
 
   return {
     title: post.title,

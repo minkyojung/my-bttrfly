@@ -26,6 +26,8 @@ export const siteConfig = {
 
 export type SiteConfig = typeof siteConfig;
 
+export const postUrl = (slug: string) => `${siteConfig.url}/posts/${slug}`;
+
 export function blogPostingSchema(input: {
   title: string;
   slug: string;
@@ -34,7 +36,7 @@ export function blogPostingSchema(input: {
   image?: string;
   canonicalUrl?: string;
 }) {
-  const url = input.canonicalUrl ?? `${siteConfig.url}/posts/${input.slug}`;
+  const url = input.canonicalUrl ?? postUrl(input.slug);
   return {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
