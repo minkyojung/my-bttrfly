@@ -40,7 +40,6 @@ export interface FrontPageSlices {
   hero: Post;
   secondary: Post[];
   recent: Post[];
-  archive: Post[];
 }
 
 // posts는 getAllPosts()에서 날짜 내림차순으로 정렬되어 들어온다.
@@ -53,8 +52,7 @@ export function sliceFrontPage(posts: Post[]): FrontPageSlices | null {
 
   return {
     hero,
-    secondary: rest.slice(0, 4),
-    recent: rest.slice(4, 10),
-    archive: rest.slice(10),
+    secondary: rest.slice(0, 2),
+    recent: rest.slice(2, 4),
   };
 }

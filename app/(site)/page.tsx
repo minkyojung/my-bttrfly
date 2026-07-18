@@ -3,8 +3,6 @@ import { sliceFrontPage } from "@/lib/front-page";
 import { Masthead } from "@/components/front-page/Masthead";
 import { HeroStory } from "@/components/front-page/HeroStory";
 import { StoryCard } from "@/components/front-page/StoryCard";
-import { RecentList } from "@/components/front-page/RecentList";
-import { PostList } from "@/components/PostList";
 import { Container } from "@/components/ui/container";
 
 export default async function Home() {
@@ -28,19 +26,12 @@ export default async function Home() {
                   <StoryCard key={post.slug} post={post} />
                 ))}
               </section>
-              <aside className="lg:order-3 lg:pl-8">
-                <RecentList posts={slices.recent} />
-              </aside>
-            </div>
-
-            {slices.archive.length > 0 && (
-              <section className="mt-20 mx-auto max-w-content">
-                <h2 className="text-fg-subtle text-xs font-medium tracking-[0.08em] uppercase mb-4">
-                  Archive
-                </h2>
-                <PostList posts={slices.archive} />
+              <section className="lg:order-3 lg:pl-8">
+                {slices.recent.map((post) => (
+                  <StoryCard key={post.slug} post={post} />
+                ))}
               </section>
-            )}
+            </div>
           </>
         )}
       </Container>
