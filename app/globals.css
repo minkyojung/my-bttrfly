@@ -65,29 +65,13 @@
     /* Layout */
     --content-width: 600px;
     --front-page-width: 1200px;
-
-    /* === Legacy aliases (mapped to new tokens; remove after migration) === */
-    --bg-color: var(--color-bg);
-    --text-color: var(--color-fg);
-    --border-color: var(--color-surface-elevated);
-    --profile-border-color: var(--color-fg);
-    --bg-color-rgb: 14, 14, 14;
-  }
-
-  [data-theme="dark"],
-  .dark {
-    --bg-color: var(--color-bg);
-    --text-color: var(--color-fg);
-    --border-color: var(--color-surface-elevated);
-    --profile-border-color: var(--color-fg);
-    --bg-color-rgb: 14, 14, 14;
   }
 
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    background-color: var(--color-bg);
+    color: var(--color-fg);
     transition: background-color 0.3s ease, color 0.3s ease;
     -webkit-text-size-adjust: 100%;
     -moz-text-size-adjust: 100%;
@@ -95,8 +79,8 @@
   }
   
   body {
-    color: var(--text-color);
-    background-color: var(--bg-color);
+    color: var(--color-fg);
+    background-color: var(--color-bg);
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     line-height: 30px;
     font-size: 18px;
@@ -105,12 +89,12 @@
   }
 
   ::selection {
-    background-color: var(--text-color);
-    color: var(--bg-color);
+    background-color: var(--color-fg);
+    color: var(--color-bg);
   }
 
   a {
-    color: var(--text-color);
+    color: var(--color-fg);
   }
 }
 
