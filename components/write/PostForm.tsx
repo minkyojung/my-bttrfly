@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { COLUMNS } from "@/lib/columns";
 import { PostBody } from "@/components/PostBody";
@@ -50,6 +50,90 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+
+  // --- 이탈/유실 방어 ---
+  // 현재 폼 전체를 직렬화해 초기 상태와 비교하는 것으로 "변경됨(dirty)"을 판정한다.
+  const snapshot: PostFormValues = {
+    title,
+    date,
+    category,
+    summary,
+    cover,
+    external,
+    featured,
+    draft,
+    source: source || undefined,
+    content,
+  };
+  const serialized = JSON.stringify(snapshot);
+  // 최초 렌더 시점의 값을 기준선으로 고정(저장 성공 시 갱신).
+  const baselineRef = useRef(serialized);
+  const dirty = serialized !== baselineRef.current;
+  const draftKey = `write-draft:${slug ?? "new"}`;
+
+  const [recoverable, setRecoverable] = useState<PostFormValues | null>(null);
+
+  function applyValues(v: PostFormValues) {
+    setTitle(v.title);
+    setDate(v.date);
+    setCategory(v.category ?? "");
+    setSummary(v.summary ?? "");
+    setCover(v.cover ?? "");
+    setExternal(v.external ?? "");
+    setFeatured(v.featured);
+    setDraft(v.draft);
+    setSource(v.source ?? "");
+    setContent(v.content);
+  }
+
+  // 마운트 시: 저장된 로컬 초안이 초기값과 다르면 복구 배너를 띄운다.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as PostFormValues;
+      if (JSON.stringify(parsed) !== baselineRef.current) {
+        setRecoverable(parsed);
+      } else {
+        localStorage.removeItem(draftKey);
+      }
+    } catch {
+      /* 손상된 초안은 무시 */
+    }
+    // draftKey는 마운트 시 고정이므로 1회만 실행
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 변경 시 디바운스로 로컬에 초안 저장(서버 저장 = git 커밋이라 자주 못 함).
+  useEffect(() => {
+    if (!dirty) return;
+    const id = setTimeout(() => {
+      try {
+        localStorage.setItem(draftKey, serialized);
+      } catch {
+        /* 용량 초과 등은 무시 */
+      }
+    }, 800);
+    return () => clearTimeout(id);
+  }, [dirty, serialized, draftKey]);
+
+  // 새로고침·탭닫기·URL이동 등 하드 내비게이션에 브라우저 기본 경고를 띄운다.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
+  // 앱 내 링크(←, Back)는 App Router가 소프트 내비를 못 막으므로 직접 확인한다.
+  function confirmLeave(e: React.MouseEvent) {
+    if (dirty && !window.confirm("Unsaved changes will be lost. Leave anyway?")) {
+      e.preventDefault();
+    }
+  }
 
   async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -119,6 +203,14 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
       // 저장 = GitHub 커밋. Vercel 재배포 전까지 현재 파일시스템은 옛 내용을
       // 읽으므로 방금 저장한 글로 자동 이동하지 않고 여기 머물며 안내만 한다.
       setSavedSlug(data.slug);
+      // 저장 성공 → 로컬 초안 제거 + 현재 값을 새 기준선으로(=더 이상 dirty 아님).
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {
+        /* noop */
+      }
+      baselineRef.current = serialized;
+      setRecoverable(null);
     } catch {
       setError("Save failed");
     } finally {
@@ -134,11 +226,21 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
       {/* 상단 액션 바 */}
       <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-bg/90 px-6 py-3 backdrop-blur">
         <div className="flex items-center gap-3 text-sm">
-          <Link href="/write" className="text-fg-muted hover:text-fg">
+          <Link
+            href="/write"
+            onClick={confirmLeave}
+            className="text-fg-muted hover:text-fg"
+          >
             ←
           </Link>
           <span className="text-fg-subtle">
-            {savedSlug ? "Saved" : mode === "edit" ? "Editing" : "Draft"}
+            {dirty
+              ? "Unsaved changes"
+              : savedSlug
+                ? "Saved"
+                : mode === "edit"
+                  ? "Editing"
+                  : "Draft"}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -166,6 +268,40 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
         </div>
       </div>
 
+      {recoverable && (
+        <div className="mx-auto mt-4 flex max-w-[680px] items-center justify-between gap-4 rounded-sm border border-border bg-surface px-4 py-3">
+          <p className="text-sm text-fg-muted">
+            You have unsaved local changes for this post.
+          </p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                applyValues(recoverable);
+                setRecoverable(null);
+              }}
+              className="rounded-sm bg-accent-warm px-3 py-1 text-sm font-bold text-white"
+            >
+              Restore
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                try {
+                  localStorage.removeItem(draftKey);
+                } catch {
+                  /* noop */
+                }
+                setRecoverable(null);
+              }}
+              className="rounded-sm border border-border px-3 py-1 text-sm text-fg-muted hover:text-fg"
+            >
+              Discard
+            </button>
+          </div>
+        </div>
+      )}
+
       {(error || savedSlug) && (
         <div className="mx-auto max-w-[680px] px-6 pt-4">
           {error && <p className="text-sm text-red-500">{error}</p>}
@@ -173,7 +309,11 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
             <p className="text-sm text-fg-muted">
               Saved as <span className="text-fg">{savedSlug}</span>. It&apos;ll
               appear on the site once the new deploy finishes (~1–2 min).{" "}
-              <Link href="/write" className="text-accent-warm underline">
+              <Link
+                href="/write"
+                onClick={confirmLeave}
+                className="text-accent-warm underline"
+              >
                 Back to list
               </Link>
             </p>
