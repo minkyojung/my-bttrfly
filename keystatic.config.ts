@@ -1,5 +1,6 @@
 import { config, fields, collection } from '@keystatic/core';
 import { COLUMNS } from './lib/columns';
+import { GITHUB_REPO } from './lib/repo';
 
 // GitHub 모드: 어드민은 프로덕션에서도 열리고, 접근은 GitHub 로그인
 // (repo 쓰기 권한)으로 게이팅된다. 저장 = git 커밋 → Vercel 자동 배포.
@@ -8,7 +9,7 @@ export const showAdminUI = true;
 export default config({
   storage: {
     kind: 'github',
-    repo: 'minkyojung/my-bttrfly',
+    repo: GITHUB_REPO,
   },
   collections: {
     posts: collection({

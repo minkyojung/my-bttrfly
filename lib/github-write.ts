@@ -5,7 +5,7 @@
  * 전용이며, `Buffer` 등 Node API를 쓰므로 미들웨어(Edge)에서 import하면 안 된다.
  */
 import "server-only";
-import keystaticConfig from "@/keystatic.config";
+import { GITHUB_REPO } from "@/lib/repo";
 
 const GITHUB_API = "https://api.github.com";
 
@@ -19,17 +19,8 @@ export class GitHubWriteError extends Error {
 }
 
 function getRepo(): { owner: string; name: string } {
-  const storage = keystaticConfig.storage;
-  if (storage.kind !== "github") {
-    throw new Error("Keystatic storage is not configured for GitHub");
-  }
-  // RepoConfig는 "owner/name" 문자열 또는 {owner,name} 객체 둘 다 허용한다.
-  const repo = storage.repo;
-  if (typeof repo === "string") {
-    const [owner, name] = repo.split("/");
-    return { owner, name };
-  }
-  return repo;
+  const [owner, name] = GITHUB_REPO.split("/");
+  return { owner, name };
 }
 
 function getToken(): string {
