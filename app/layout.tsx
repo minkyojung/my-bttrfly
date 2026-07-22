@@ -4,8 +4,8 @@ import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 
 const serif = Noto_Serif_KR({
-  // 400/500: 본문(serif) 렌더용 · 600/700: 제목용
-  weight: ["400", "500", "600", "700"],
+  // 400: 본문(serif) · 700: 제목. 그 외 웨이트는 미사용이라 로드하지 않음(용량).
+  weight: ["400", "700"],
   variable: "--font-serif",
   display: "swap",
   preload: false,

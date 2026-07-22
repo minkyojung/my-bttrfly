@@ -11,7 +11,7 @@ import { blogPostingSchema, postUrl } from "@/lib/site-config";
 import type { Metadata } from "next";
 
 // 본문 prose 스타일. 이 페이지에서만 쓰이므로 JSX를 어지럽히지 않게 상수로 분리.
-const postProseClass = `prose prose-serif font-serif w-full max-w-content text-[18px] leading-[1.7] font-medium
+const postProseClass = `prose prose-serif font-serif w-full max-w-content text-[18px] leading-[1.7] font-normal
   prose-headings:font-black
   prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
   prose-h2:text-2xl prose-h2:mb-4 prose-h2:mt-8
