@@ -2,9 +2,42 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { COLUMNS } from "@/lib/columns";
 import { PostBody } from "@/components/PostBody";
 import { MarkdownEditor } from "@/components/write/MarkdownEditor";
+
+// 제목/소제목용 자동 높이 textarea. <input>은 단일 라인이라 긴 텍스트가 가로로
+// 잘리므로, 내용에 맞춰 높이를 늘려 여러 줄로 감싸지게 한다.
+function AutoTextarea({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, [value]);
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      rows={1}
+      className={cn("resize-none overflow-hidden", className)}
+    />
+  );
+}
 
 interface PostFormValues {
   title: string;
@@ -329,20 +362,18 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
           </p>
         )}
 
-        <input
-          type="text"
+        <AutoTextarea
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={setTitle}
           placeholder="Title"
-          className="w-full border-0 bg-transparent p-0 font-serif text-4xl font-bold leading-tight text-fg outline-none placeholder:text-fg-subtle"
+          className="block w-full border-0 bg-transparent p-0 font-serif text-4xl font-bold leading-tight text-fg outline-none placeholder:text-fg-subtle"
         />
 
-        <input
-          type="text"
+        <AutoTextarea
           value={summary}
-          onChange={(e) => setSummary(e.target.value)}
+          onChange={setSummary}
           placeholder="Add a subtitle…"
-          className="mt-4 w-full border-0 bg-transparent p-0 text-xl text-fg-muted outline-none placeholder:text-fg-subtle"
+          className="mt-4 block w-full border-0 bg-transparent p-0 text-xl leading-snug text-fg-muted outline-none placeholder:text-fg-subtle"
         />
 
         <div className="mt-8 border-t border-border pt-8">
