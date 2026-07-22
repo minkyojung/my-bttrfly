@@ -9,11 +9,6 @@ import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table
 import { Markdown } from "tiptap-markdown";
 import { cn } from "@/lib/utils";
 
-interface MarkdownEditorProps {
-  value: string;
-  onChange: (markdown: string) => void;
-}
-
 // 이미지 업로드(툴바·붙여넣기·드래그 공용). 성공 시 공개 경로, 실패 시 null.
 async function uploadImage(file: File): Promise<string | null> {
   const formData = new FormData();
@@ -38,7 +33,13 @@ function imageFilesFrom(list: FileList | null | undefined): File[] {
 // TipTap 코어는 HTML 기반이라, tiptap-markdown 확장으로 초기 content를
 // 마크다운으로 파싱하고 getMarkdown()으로 다시 마크다운을 뽑아낸다.
 // StarterKit/Markdown 모두 공식/표준 확장이며 커스텀 직렬화 로직은 두지 않는다.
-export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
+// 에디터 인스턴스를 생성해 반환하는 훅. 툴바를 문서 최상단(제목 위)에 두려면
+// PostForm이 editor 인스턴스에 접근해야 하므로, 툴바/본문을 한 컴포넌트에
+// 묶지 않고 훅으로 분리한다.
+export function usePostEditor(
+  value: string,
+  onChange: (markdown: string) => void
+): Editor | null {
   // 붙여넣기/드래그 핸들러는 editorProps 안(초기화 시점)에서 정의되므로,
   // 업로드 완료 후 삽입할 때 쓸 editor 인스턴스를 ref로 참조한다.
   const editorRef = useRef<Editor | null>(null);
@@ -117,18 +118,16 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
   });
 
   editorRef.current = editor;
-
-  if (!editor) return null;
-
-  return (
-    <div>
-      <Toolbar editor={editor} />
-      <EditorContent editor={editor} />
-    </div>
-  );
+  return editor;
 }
 
-function Toolbar({ editor }: { editor: Editor }) {
+// 본문(에디터 콘텐츠 영역).
+export function EditorSurface({ editor }: { editor: Editor }) {
+  return <EditorContent editor={editor} />;
+}
+
+// 서식 툴바. 위치(sticky/배경/구분선)는 PostForm의 헤더 래퍼가 담당한다.
+export function EditorToolbar({ editor }: { editor: Editor }) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
@@ -159,7 +158,7 @@ function Toolbar({ editor }: { editor: Editor }) {
   }
 
   return (
-    <div className="sticky top-[57px] z-10 mb-6 flex flex-wrap items-center gap-1 border-b border-border bg-bg/90 py-2 backdrop-blur">
+    <div className="flex flex-wrap items-center gap-1">
       <Btn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} label="B" bold />
       <Btn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} label="I" italic />
       <Btn onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive("strike")} label="S" strike />

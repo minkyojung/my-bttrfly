@@ -5,7 +5,11 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { COLUMNS } from "@/lib/columns";
 import { PostBody } from "@/components/PostBody";
-import { MarkdownEditor } from "@/components/write/MarkdownEditor";
+import {
+  usePostEditor,
+  EditorToolbar,
+  EditorSurface,
+} from "@/components/write/MarkdownEditor";
 
 // 제목/소제목용 자동 높이 textarea. <input>은 단일 라인이라 긴 텍스트가 가로로
 // 잘리므로, 내용에 맞춰 높이를 늘려 여러 줄로 감싸지게 한다.
@@ -76,6 +80,8 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
   );
   const [content, setContent] = useState(initialValues?.content ?? "");
 
+  const editor = usePostEditor(content, setContent);
+
   const [uploading, setUploading] = useState(false);
   const [coverFileName, setCoverFileName] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -117,6 +123,8 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
     setDraft(v.draft);
     setSource(v.source ?? "");
     setContent(v.content);
+    // WYSIWYG 에디터는 초기 content만 읽으므로, 복구 시 본문도 직접 반영.
+    editor?.commands.setContent(v.content);
   }
 
   // 마운트 시: 저장된 로컬 초안이 초기값과 다르면 복구 배너를 띄운다.
@@ -256,49 +264,57 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {/* 상단 액션 바 */}
-      <div className="sticky top-0 z-20 flex items-center justify-between border-b border-border bg-bg/90 px-6 py-3 backdrop-blur">
-        <div className="flex items-center gap-3 text-sm">
-          <Link
-            href="/write"
-            onClick={confirmLeave}
-            className="text-fg-muted hover:text-fg"
-          >
-            ←
-          </Link>
-          <span className="text-fg-subtle">
-            {dirty
-              ? "Unsaved changes"
-              : savedSlug
-                ? "Saved"
-                : mode === "edit"
-                  ? "Editing"
-                  : "Draft"}
-          </span>
+      {/* 상단 헤더: 액션 바 + 서식 툴바를 한 sticky 블록으로 묶는다
+          (툴바를 제목 위 최상단에 두고, 픽셀 오프셋 없이 함께 고정된다) */}
+      <div className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
+        <div className="flex items-center justify-between px-6 py-3">
+          <div className="flex min-w-0 items-center gap-3 text-sm">
+            <Link
+              href="/write"
+              onClick={confirmLeave}
+              className="shrink-0 text-fg-muted hover:text-fg"
+            >
+              ←
+            </Link>
+            <span className="truncate text-fg-muted">
+              {mode === "edit" ? slug : "New post"}
+            </span>
+            <span className="shrink-0 text-xs text-fg-subtle">
+              {dirty ? "· Unsaved" : savedSlug ? "· Saved" : ""}
+            </span>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowPreview((v) => !v)}
+              className="rounded-sm border border-border px-3 py-1.5 text-sm text-fg-muted hover:text-fg"
+            >
+              {showPreview ? "Edit" : "Preview"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSettings((v) => !v)}
+              className="rounded-sm border border-border px-3 py-1.5 text-sm text-fg-muted hover:text-fg"
+            >
+              Settings
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="rounded-sm bg-accent-warm px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
+            >
+              {submitting ? "Saving…" : mode === "create" ? "Publish" : "Save"}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowPreview((v) => !v)}
-            className="rounded-sm border border-border px-3 py-1.5 text-sm text-fg-muted hover:text-fg"
-          >
-            {showPreview ? "Edit" : "Preview"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setShowSettings((v) => !v)}
-            className="rounded-sm border border-border px-3 py-1.5 text-sm text-fg-muted hover:text-fg"
-          >
-            Settings
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-sm bg-accent-warm px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
-          >
-            {submitting ? "Saving…" : mode === "create" ? "Publish" : "Save"}
-          </button>
-        </div>
+
+        {editor && !showPreview && (
+          <div className="border-t border-border px-6 py-1.5">
+            <div className="mx-auto max-w-[680px]">
+              <EditorToolbar editor={editor} />
+            </div>
+          </div>
+        )}
       </div>
 
       {recoverable && (
@@ -356,12 +372,6 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
 
       {/* 중앙 문서 영역 */}
       <div className="mx-auto max-w-[680px] px-6 py-12">
-        {mode === "edit" && slug && (
-          <p className="mb-6 text-xs text-fg-subtle">
-            {slug} · slug can&apos;t be changed
-          </p>
-        )}
-
         <AutoTextarea
           value={title}
           onChange={setTitle}
@@ -382,7 +392,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
               <PostBody content={content} imageMeta={{}} />
             </div>
           ) : (
-            <MarkdownEditor value={content} onChange={setContent} />
+            editor && <EditorSurface editor={editor} />
           )}
         </div>
       </div>
