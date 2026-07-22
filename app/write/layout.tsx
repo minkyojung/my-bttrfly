@@ -1,19 +1,8 @@
-import Link from "next/link";
-
 export default function WriteLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="min-h-screen bg-bg text-fg">
-      <div className="flex items-center justify-between border-b border-border px-6 py-3">
-        <span className="font-bold">Write</span>
-        <Link href="/" className="text-sm text-fg-muted hover:text-fg">
-          Back to site
-        </Link>
-      </div>
-      {children}
-    </div>
-  );
+  // 각 페이지(목록/로그인/에디터)가 자체 헤더를 가지므로 여기선 바탕만 제공한다.
+  return <div className="min-h-screen bg-bg text-fg">{children}</div>;
 }
