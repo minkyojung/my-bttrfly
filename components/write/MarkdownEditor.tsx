@@ -14,11 +14,59 @@ interface MarkdownEditorProps {
   onChange: (markdown: string) => void;
 }
 
+// 이미지 업로드(툴바·붙여넣기·드래그 공용). 성공 시 공개 경로, 실패 시 null.
+async function uploadImage(file: File): Promise<string | null> {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const res = await fetch("/api/write/images", {
+      method: "POST",
+      body: formData,
+    });
+    const data = await res.json().catch(() => ({}));
+    return res.ok && data.path ? (data.path as string) : null;
+  } catch {
+    return null;
+  }
+}
+
+function imageFilesFrom(list: FileList | null | undefined): File[] {
+  return Array.from(list ?? []).filter((f) => f.type.startsWith("image/"));
+}
+
 // 본문은 마크다운으로 저장된다(공개 사이트·Keystatic 모두 마크다운을 읽음).
 // TipTap 코어는 HTML 기반이라, tiptap-markdown 확장으로 초기 content를
 // 마크다운으로 파싱하고 getMarkdown()으로 다시 마크다운을 뽑아낸다.
 // StarterKit/Markdown 모두 공식/표준 확장이며 커스텀 직렬화 로직은 두지 않는다.
 export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
+  // 붙여넣기/드래그 핸들러는 editorProps 안(초기화 시점)에서 정의되므로,
+  // 업로드 완료 후 삽입할 때 쓸 editor 인스턴스를 ref로 참조한다.
+  const editorRef = useRef<Editor | null>(null);
+
+  async function insertImages(files: File[], pos?: number) {
+    for (const file of files) {
+      const path = await uploadImage(file);
+      const ed = editorRef.current;
+      if (!path) {
+        window.alert("Image upload failed");
+        continue;
+      }
+      if (!ed) continue;
+      if (pos != null) {
+        ed
+          .chain()
+          .focus()
+          .insertContentAt(pos, {
+            type: "image",
+            attrs: { src: path, alt: file.name },
+          })
+          .run();
+      } else {
+        ed.chain().focus().setImage({ src: path, alt: file.name }).run();
+      }
+    }
+  }
+
   const editor = useEditor({
     immediatelyRender: false, // Next SSR 하이드레이션 미스매치 방지
     extensions: [
@@ -37,6 +85,26 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
         class:
           "prose max-w-none min-h-[400px] text-[18px] leading-[1.7] text-fg focus:outline-none",
       },
+      // 클립보드 이미지 붙여넣기: 이미지가 있으면 가로채 업로드 후 삽입.
+      handlePaste: (_view, event) => {
+        const files = imageFilesFrom(event.clipboardData?.files);
+        if (files.length === 0) return false;
+        event.preventDefault();
+        void insertImages(files);
+        return true;
+      },
+      // 파일 드래그&드롭: 드롭 지점 위치에 업로드 후 삽입.
+      handleDrop: (view, event) => {
+        const files = imageFilesFrom(event.dataTransfer?.files);
+        if (files.length === 0) return false;
+        event.preventDefault();
+        const coords = view.posAtCoords({
+          left: event.clientX,
+          top: event.clientY,
+        });
+        void insertImages(files, coords?.pos);
+        return true;
+      },
     },
     onUpdate: ({ editor }) => {
       // tiptap-markdown이 editor.storage.markdown에 getMarkdown()을 붙이지만
@@ -47,6 +115,8 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
       onChange(storage.markdown.getMarkdown());
     },
   });
+
+  editorRef.current = editor;
 
   if (!editor) return null;
 
@@ -73,30 +143,18 @@ function Toolbar({ editor }: { editor: Editor }) {
     editor.chain().focus().setLink({ href: url }).run();
   }
 
-  // 본문 이미지: 커버 업로드와 동일한 /api/write/images를 재사용한 뒤
-  // 반환된 공개 경로를 TipTap 이미지 노드로 삽입한다(마크다운 ![](path)로 저장됨).
+  // 툴바 이미지 버튼: 붙여넣기/드래그와 동일한 공용 업로드 헬퍼 사용.
   async function handleImageFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = ""; // 같은 파일 재선택 허용
     if (!file) return;
     setUploadingImage(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/write/images", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.path) {
-        editor.chain().focus().setImage({ src: data.path, alt: file.name }).run();
-      } else {
-        window.alert(data.error ?? "Image upload failed");
-      }
-    } catch {
+    const path = await uploadImage(file);
+    setUploadingImage(false);
+    if (path) {
+      editor.chain().focus().setImage({ src: path, alt: file.name }).run();
+    } else {
       window.alert("Image upload failed");
-    } finally {
-      setUploadingImage(false);
     }
   }
 
