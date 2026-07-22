@@ -1,8 +1,10 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import { Markdown } from "tiptap-markdown";
 import { cn } from "@/lib/utils";
 
@@ -20,6 +22,7 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
     immediatelyRender: false, // Next SSR 하이드레이션 미스매치 방지
     extensions: [
       StarterKit,
+      Image,
       Markdown,
       Placeholder.configure({ placeholder: "Start writing…" }),
     ],
@@ -51,6 +54,9 @@ export function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
 }
 
 function Toolbar({ editor }: { editor: Editor }) {
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
   function promptLink() {
     const previous = editor.getAttributes("link").href as string | undefined;
     const url = window.prompt("Link URL", previous ?? "https://");
@@ -60,6 +66,33 @@ function Toolbar({ editor }: { editor: Editor }) {
       return;
     }
     editor.chain().focus().setLink({ href: url }).run();
+  }
+
+  // 본문 이미지: 커버 업로드와 동일한 /api/write/images를 재사용한 뒤
+  // 반환된 공개 경로를 TipTap 이미지 노드로 삽입한다(마크다운 ![](path)로 저장됨).
+  async function handleImageFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // 같은 파일 재선택 허용
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/write/images", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.path) {
+        editor.chain().focus().setImage({ src: data.path, alt: file.name }).run();
+      } else {
+        window.alert(data.error ?? "Image upload failed");
+      }
+    } catch {
+      window.alert("Image upload failed");
+    } finally {
+      setUploadingImage(false);
+    }
   }
 
   return (
@@ -79,7 +112,19 @@ function Toolbar({ editor }: { editor: Editor }) {
       <Btn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive("codeBlock")} label="Code" />
       <Divider />
       <Btn onClick={promptLink} active={editor.isActive("link")} label="Link" />
+      <Btn
+        onClick={() => imageInputRef.current?.click()}
+        active={false}
+        label={uploadingImage ? "…" : "Image"}
+      />
       <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()} active={false} label="―" />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageFile}
+        className="hidden"
+      />
     </div>
   );
 }
