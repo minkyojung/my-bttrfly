@@ -15,11 +15,11 @@ export function PageHeader({ title, eyebrow, dek, className }: PageHeaderProps) 
           {eyebrow}
         </div>
       )}
-      <h1 className="text-fg font-bold text-[60px] leading-[1.2] tracking-[-0.05em]">
+      <h1 className="font-serif text-fg font-bold text-[60px] leading-[1.2] tracking-[-0.05em]">
         {title}
       </h1>
       {dek && (
-        <p className="text-fg-muted text-lg leading-relaxed mt-5 max-w-xl mx-auto">
+        <p className="font-serif text-fg-muted text-lg leading-relaxed mt-5 max-w-xl mx-auto">
           {dek}
         </p>
       )}

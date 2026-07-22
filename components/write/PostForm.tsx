@@ -383,7 +383,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
           value={summary}
           onChange={setSummary}
           placeholder="Add a subtitle…"
-          className="mt-4 block w-full border-0 bg-transparent p-0 text-xl leading-snug text-fg-muted outline-none placeholder:text-fg-subtle"
+          className="mt-4 block w-full border-0 bg-transparent p-0 font-serif text-xl leading-snug text-fg-muted outline-none placeholder:text-fg-subtle"
         />
 
         <div className="mt-8 border-t border-border pt-8">
