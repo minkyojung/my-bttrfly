@@ -388,7 +388,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
 
         <div className="mt-8 border-t border-border pt-8">
           {showPreview ? (
-            <div className="prose prose-serif max-w-none text-[18px] leading-[1.7]">
+            <div className="prose prose-serif font-serif max-w-none text-[18px] leading-[1.7]">
               <PostBody content={content} imageMeta={{}} />
             </div>
           ) : (

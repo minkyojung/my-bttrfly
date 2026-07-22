@@ -84,7 +84,7 @@ export function usePostEditor(
     editorProps: {
       attributes: {
         class:
-          "prose max-w-none min-h-[400px] text-[18px] leading-[1.7] text-fg focus:outline-none",
+          "prose font-serif max-w-none min-h-[400px] text-[18px] leading-[1.7] text-fg focus:outline-none",
       },
       // 클립보드 이미지 붙여넣기: 이미지가 있으면 가로채 업로드 후 삽입.
       handlePaste: (_view, event) => {
