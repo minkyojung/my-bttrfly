@@ -123,3 +123,61 @@
   height: 0;
   pointer-events: none;
 }
+
+/* TipTap 체크리스트 — 체크박스와 내용을 한 줄에(불릿 제거).
+   (prose가 ul에 불릿/들여쓰기를 붙이므로 에디터 내에서만 덮어쓴다) */
+.ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin: 0.25rem 0;
+}
+.ProseMirror ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+  margin-top: 0.35rem;
+  user-select: none;
+}
+.ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+.ProseMirror ul[data-type="taskList"] li > div > p {
+  margin: 0;
+}
+
+/* TipTap 표 — 셀 테두리/헤더 배경(없으면 그리드가 안 보임) */
+.ProseMirror table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid var(--color-border-strong);
+  padding: 6px 10px;
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  min-width: 3rem;
+}
+.ProseMirror table th {
+  font-weight: 700;
+  text-align: left;
+  background: var(--color-surface);
+}
+.ProseMirror table .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+}
+.ProseMirror table p {
+  margin: 0;
+}
