@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { COLUMNS } from "@/lib/columns";
 import { PostBody } from "@/components/PostBody";
+import { MarkdownEditor } from "@/components/write/MarkdownEditor";
 
 interface PostFormValues {
   title: string;
@@ -210,13 +211,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
               <PostBody content={content} imageMeta={{}} />
             </div>
           ) : (
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Start writing…"
-              rows={20}
-              className="w-full resize-none border-0 bg-transparent p-0 font-mono text-base leading-relaxed text-fg outline-none placeholder:text-fg-subtle"
-            />
+            <MarkdownEditor value={content} onChange={setContent} />
           )}
         </div>
       </div>
