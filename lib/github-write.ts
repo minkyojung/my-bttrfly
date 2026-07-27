@@ -61,12 +61,14 @@ export async function getFile(path: string): Promise<GitHubFile | null> {
 
 // 신규 생성이면 sha 없이, 기존 파일 수정이면 sha를 반드시 넘겨야 GitHub이
 // 받아준다. sha 불일치는 GitHub이 409/422로 알려주므로 별도 락 구현은 불필요.
+// 쓰기 후의 새 sha를 돌려준다 — 에디터가 저장 직후에도 최신 지문을 들고 있어야
+// 연속 저장이 동시 수정으로 오인되지 않는다.
 export async function putFile(
   path: string,
   content: string,
   message: string,
   sha?: string
-): Promise<void> {
+): Promise<string> {
   const res = await githubFetch(`/contents/${encodeURI(path)}`, {
     method: "PUT",
     body: JSON.stringify({
@@ -79,6 +81,8 @@ export async function putFile(
   if (!res.ok) {
     throw new GitHubWriteError(await res.text(), res.status);
   }
+  const json = (await res.json()) as { content?: { sha?: string } };
+  return json.content?.sha ?? "";
 }
 
 // 삭제도 커밋이므로 git 히스토리에 남는다(되돌릴 수 있음). sha는 필수 —

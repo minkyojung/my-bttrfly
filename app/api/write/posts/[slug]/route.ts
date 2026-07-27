@@ -3,7 +3,10 @@ import matter from "gray-matter";
 import { getFile, putFile, deleteFile, GitHubWriteError } from "@/lib/github-write";
 import { buildFrontmatter, type PostBody } from "@/lib/post-frontmatter";
 
-type UpdatePostBody = PostBody;
+interface UpdatePostBody extends PostBody {
+  // 에디터가 읽은 시점의 파일 지문(git blob sha).
+  baseSha?: unknown;
+}
 
 export async function PUT(
   request: NextRequest,
@@ -38,17 +41,30 @@ export async function PUT(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
+    // 에디터가 읽은 이후 다른 경로(목록의 발행 토글, Keystatic, 다른 탭)에서
+    // 파일이 바뀌었으면 덮어쓰지 않고 거절한다. 저장 직전에 sha를 새로 읽어
+    // 쓰기만 하면 GitHub의 충돌 검사가 무력화되어 남의 변경이 조용히 사라진다.
+    if (typeof body.baseSha === "string" && body.baseSha !== existing.sha) {
+      return NextResponse.json(
+        {
+          error:
+            "This post changed somewhere else since you opened it. Reload to get the latest version.",
+        },
+        { status: 409 }
+      );
+    }
+
     // 기존 프론트매터를 넘겨 폼이 다루지 않는 필드가 보존되게 한다.
     const frontmatterData = buildFrontmatter(body, matter(existing.content).data);
     const fileText = matter.stringify(content, frontmatterData);
-    await putFile(
+    const newSha = await putFile(
       `content/posts/${slug}.md`,
       fileText,
       `content: update ${slug}`,
       existing.sha
     );
 
-    return NextResponse.json({ slug }, { status: 200 });
+    return NextResponse.json({ slug, sha: newSha }, { status: 200 });
   } catch (err) {
     if (err instanceof GitHubWriteError) {
       const status = err.status && err.status >= 100 ? err.status : 502;

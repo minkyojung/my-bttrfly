@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPostBySlugForEdit } from "@/lib/markdown";
+import { getPostBySlugForEdit, getPostFileShaForEdit } from "@/lib/markdown";
 import { PostForm } from "@/components/write/PostForm";
 
 export default async function EditPostPage({
@@ -15,6 +15,7 @@ export default async function EditPostPage({
     <PostForm
       mode="edit"
       slug={slug}
+      baseSha={getPostFileShaForEdit(slug) ?? undefined}
       initialValues={{
         title: post.title,
         date: post.date,

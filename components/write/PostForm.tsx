@@ -63,6 +63,8 @@ interface PostFormValues {
 interface PostFormProps {
   mode: "create" | "edit";
   slug?: string;
+  // 편집 화면이 읽은 파일의 지문. 저장 시 함께 보내 동시 수정을 감지한다.
+  baseSha?: string;
   initialValues?: PostFormValues;
 }
 
@@ -70,8 +72,16 @@ function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormProps) {
+export function PostForm({
+  mode,
+  slug: initialSlug,
+  baseSha,
+  initialValues,
+}: PostFormProps) {
   const router = useRouter();
+  // 저장에 성공하면 새 지문으로 갱신한다. 그러지 않으면 두 번째 저장이
+  // 자기 자신의 변경을 "다른 곳의 수정"으로 오인해 409가 난다.
+  const shaRef = useRef(baseSha);
   // slug는 저자가 직접 편집하는 필드다. 생성 시 제목에서 초안을 자동으로
   // 채우되(아직 저자가 손대지 않았을 때만), 발행 후에는 불변이므로 편집
   // 화면에서는 읽기 전용으로 보여준다.
@@ -315,6 +325,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
         draft,
         source: source || undefined,
         content,
+        ...(mode === "edit" ? { baseSha: shaRef.current } : {}),
       };
 
       const res = await fetch(
@@ -333,6 +344,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
       // 저장 = GitHub 커밋. Vercel 재배포 전까지 현재 파일시스템은 옛 내용을
       // 읽으므로 방금 저장한 글로 자동 이동하지 않고 여기 머물며 안내만 한다.
       setSavedSlug(data.slug);
+      if (typeof data.sha === "string") shaRef.current = data.sha;
       // 저장 성공 → 로컬 초안 제거 + 현재 값을 새 기준선으로(=더 이상 dirty 아님).
       try {
         localStorage.removeItem(draftKey);

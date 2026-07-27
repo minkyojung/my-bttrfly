@@ -1,4 +1,5 @@
 import { cache } from 'react';
+import { gitBlobSha } from './git-blob-sha';
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
@@ -163,6 +164,15 @@ export const getPostBySlug = cache(getPostBySlugUncached);
 // 하려는데 getPostBySlug가 null을 반환해 404가 나는 문제를 피하기 위함.
 async function getPostBySlugForEditUncached(slug: string): Promise<Post | null> {
   return readPostFile(slug);
+}
+
+// 편집 화면이 실제로 보여준 파일의 지문. 저장 시 함께 보내 GitHub의 현재
+// 내용과 비교하면, 에디터를 연 뒤 다른 곳에서 바뀐 글을 덮어쓰는 걸 막을 수 있다.
+export function getPostFileShaForEdit(slug: string): string | null {
+  if (!/^[\w-]+$/.test(slug)) return null;
+  const fullPath = path.join(postsDirectory, `${slug}.md`);
+  if (!fs.existsSync(fullPath)) return null;
+  return gitBlobSha(fs.readFileSync(fullPath, 'utf8'));
 }
 
 export const getPostBySlugForEdit = cache(getPostBySlugForEditUncached);
