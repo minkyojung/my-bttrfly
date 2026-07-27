@@ -38,7 +38,8 @@ export async function PUT(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    const frontmatterData = buildFrontmatter(body);
+    // 기존 프론트매터를 넘겨 폼이 다루지 않는 필드가 보존되게 한다.
+    const frontmatterData = buildFrontmatter(body, matter(existing.content).data);
     const fileText = matter.stringify(content, frontmatterData);
     await putFile(
       `content/posts/${slug}.md`,

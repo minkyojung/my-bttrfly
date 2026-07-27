@@ -17,20 +17,44 @@ export interface PostBody {
   content?: unknown;
 }
 
-export function buildFrontmatter(body: PostBody): Record<string, unknown> {
-  const data: Record<string, unknown> = { title: body.title, date: body.date };
+// 폼이 관리하는 선택 필드는 "값이 있으면 설정, 비었으면 삭제"다. 단순 병합만
+// 하면 폼에서 지운 값이 기존 값으로 되살아난다.
+function setOrDelete(
+  data: Record<string, unknown>,
+  key: string,
+  value: unknown
+): void {
+  if (typeof value === "string" && value) data[key] = value;
+  else delete data[key];
+}
 
-  if (typeof body.category === "string" && body.category) data.category = body.category;
-  if (typeof body.summary === "string" && body.summary) data.summary = body.summary;
-  if (typeof body.cover === "string" && body.cover) data.cover = body.cover;
-  if (typeof body.external === "string" && body.external) data.external = body.external;
-  if (typeof body.canonical === "string" && body.canonical) data.canonical = body.canonical;
+/**
+ * @param existing 기존 파일의 프론트매터. 수정 시 넘기면 폼이 모르는 필드가
+ *   보존된다(생성 시에는 비워둔다). 이걸 넘기지 않고 새로 조립하면 폼에 없는
+ *   필드가 저장할 때마다 사라진다.
+ */
+export function buildFrontmatter(
+  body: PostBody,
+  existing: Record<string, unknown> = {}
+): Record<string, unknown> {
+  const data: Record<string, unknown> = { ...existing };
+
+  data.title = body.title;
+  data.date = body.date;
+
+  setOrDelete(data, "category", body.category);
+  setOrDelete(data, "summary", body.summary);
+  setOrDelete(data, "cover", body.cover);
+  setOrDelete(data, "external", body.external);
+  setOrDelete(data, "canonical", body.canonical);
 
   data.featured = body.featured === true;
   data.draft = body.draft === true;
 
   if (body.source === "disquiet" || body.source === "substack") {
     data.source = body.source;
+  } else {
+    delete data.source;
   }
 
   return data;
