@@ -2,39 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import matter from "gray-matter";
 import { getFile, putFile, GitHubWriteError } from "@/lib/github-write";
 import { SLUG_PATTERN } from "@/lib/slugify";
+import { buildFrontmatter, type PostBody } from "@/lib/post-frontmatter";
 
-interface CreatePostBody {
+interface CreatePostBody extends PostBody {
   slug?: unknown;
-  title?: unknown;
-  date?: unknown;
-  category?: unknown;
-  summary?: unknown;
-  cover?: unknown;
-  external?: unknown;
-  canonical?: unknown;
-  featured?: unknown;
-  draft?: unknown;
-  source?: unknown;
-  content?: unknown;
-}
-
-function buildFrontmatter(body: CreatePostBody) {
-  const data: Record<string, unknown> = { title: body.title, date: body.date };
-
-  if (typeof body.category === "string" && body.category) data.category = body.category;
-  if (typeof body.summary === "string" && body.summary) data.summary = body.summary;
-  if (typeof body.cover === "string" && body.cover) data.cover = body.cover;
-  if (typeof body.external === "string" && body.external) data.external = body.external;
-  if (typeof body.canonical === "string" && body.canonical) data.canonical = body.canonical;
-
-  data.featured = body.featured === true;
-  data.draft = body.draft === true;
-
-  if (body.source === "disquiet" || body.source === "substack") {
-    data.source = body.source;
-  }
-
-  return data;
 }
 
 export async function POST(request: NextRequest) {
