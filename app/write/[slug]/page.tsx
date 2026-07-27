@@ -16,6 +16,9 @@ export default async function EditPostPage({
       mode="edit"
       slug={slug}
       baseSha={getPostFileShaForEdit(slug) ?? undefined}
+      // 이미 계산돼 있는 값이라 프리뷰에 그대로 넘긴다. 없어도 표시는 정상이고,
+      // 있으면 로딩 중 화면이 밀리지 않는다.
+      imageMeta={post.imageMeta}
       initialValues={{
         title: post.title,
         date: post.date,

@@ -132,6 +132,16 @@ const config: Config = {
               "&:hover": { opacity: "0.6" },
             },
 
+            // 이미지. max-width(100%)라서 본문보다 크면 줄어들고 작으면 원본
+            // 크기를 지킨다 — width:100%로 두면 작은 스크린샷이 억지로 늘어나
+            // 흐려진다. 비율은 어떤 경우에도 브라우저가 알아서 지킨다.
+            img: {
+              display: "block",
+              maxWidth: "100%",
+              height: "auto",
+              borderRadius: "var(--radius-md)",
+            },
+
             // 표. 플러그인 기본값은 가로선만 긋는 신문 기사 스타일인데, 편집
             // 화면에서 보이는 격자 모양을 그대로 발행하도록 맞춘다.
             table: {

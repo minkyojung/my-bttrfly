@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { COLUMNS } from "@/lib/columns";
 import { slugify, SLUG_PATTERN } from "@/lib/slugify";
 import { PostBody } from "@/components/PostBody";
+import type { ImageMeta } from "@/lib/markdown";
 import {
   usePostEditor,
   EditorToolbar,
@@ -65,6 +66,8 @@ interface PostFormProps {
   slug?: string;
   // 편집 화면이 읽은 파일의 지문. 저장 시 함께 보내 동시 수정을 감지한다.
   baseSha?: string;
+  // 본문 이미지의 실제 크기. 프리뷰에서 로딩 중 화면이 밀리지 않게 한다.
+  imageMeta?: Record<string, ImageMeta>;
   initialValues?: PostFormValues;
 }
 
@@ -76,6 +79,7 @@ export function PostForm({
   mode,
   slug: initialSlug,
   baseSha,
+  imageMeta,
   initialValues,
 }: PostFormProps) {
   const router = useRouter();
@@ -503,7 +507,7 @@ export function PostForm({
         <div className="mt-8 border-t border-border pt-8">
           {showPreview ? (
             <div className="prose max-w-none">
-              <PostBody content={content} imageMeta={{}} />
+              <PostBody content={content} imageMeta={imageMeta ?? {}} />
             </div>
           ) : (
             editor && <EditorSurface editor={editor} />
