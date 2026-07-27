@@ -22,6 +22,7 @@ export default async function EditPostPage({
         summary: post.summary,
         cover: post.cover,
         external: post.external,
+        canonical: post.canonical,
         featured: post.featured,
         draft: post.draft,
         source: post.source,

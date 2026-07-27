@@ -52,6 +52,7 @@ interface PostFormValues {
   summary?: string;
   cover?: string;
   external?: string;
+  canonical?: string;
   featured: boolean;
   draft: boolean;
   source?: "disquiet" | "substack";
@@ -81,6 +82,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
   const [summary, setSummary] = useState(initialValues?.summary ?? "");
   const [cover, setCover] = useState(initialValues?.cover ?? "");
   const [external, setExternal] = useState(initialValues?.external ?? "");
+  const [canonical, setCanonical] = useState(initialValues?.canonical ?? "");
   const [featured, setFeatured] = useState(initialValues?.featured ?? false);
   const [draft, setDraft] = useState(initialValues?.draft ?? false);
   const [source, setSource] = useState<"" | "disquiet" | "substack">(
@@ -108,6 +110,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
     summary,
     cover,
     external,
+    canonical,
     featured,
     draft,
     source: source || undefined,
@@ -134,6 +137,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
     setSummary(v.summary ?? "");
     setCover(v.cover ?? "");
     setExternal(v.external ?? "");
+    setCanonical(v.canonical ?? "");
     setFeatured(v.featured);
     setDraft(v.draft);
     setSource(v.source ?? "");
@@ -252,6 +256,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
         summary: summary || undefined,
         cover: cover || undefined,
         external: external || undefined,
+        canonical: canonical || undefined,
         featured,
         draft,
         source: source || undefined,
@@ -538,6 +543,23 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
                   onChange={(e) => setExternal(e.target.value)}
                   className={inputClass}
                 />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs text-fg-muted">
+                  Canonical URL
+                </label>
+                <input
+                  type="text"
+                  value={canonical}
+                  onChange={(e) => setCanonical(e.target.value)}
+                  placeholder="https://…"
+                  className={inputClass}
+                />
+                <p className="mt-1 text-xs text-fg-subtle">
+                  타 매체에서 옮겨온 글의 원문 주소 (본문은 그대로 보여주고
+                  검색엔진에만 원문을 정본으로 알림)
+                </p>
               </div>
 
               <div>

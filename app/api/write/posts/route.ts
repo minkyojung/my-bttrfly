@@ -11,6 +11,7 @@ interface CreatePostBody {
   summary?: unknown;
   cover?: unknown;
   external?: unknown;
+  canonical?: unknown;
   featured?: unknown;
   draft?: unknown;
   source?: unknown;
@@ -24,6 +25,7 @@ function buildFrontmatter(body: CreatePostBody) {
   if (typeof body.summary === "string" && body.summary) data.summary = body.summary;
   if (typeof body.cover === "string" && body.cover) data.cover = body.cover;
   if (typeof body.external === "string" && body.external) data.external = body.external;
+  if (typeof body.canonical === "string" && body.canonical) data.canonical = body.canonical;
 
   data.featured = body.featured === true;
   data.draft = body.draft === true;
