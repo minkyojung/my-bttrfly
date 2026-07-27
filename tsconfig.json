@@ -36,9 +36,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".next-check/types/**/*.ts",
+    ".next-debug/types/**/*.ts",
+    ".next-tp-probe/types/**/*.ts",
     ".next/types/**/*.ts",
     "next-env.d.ts",
-    ".next-tp-probe/types/**/*.ts"
+    ".next-wp/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

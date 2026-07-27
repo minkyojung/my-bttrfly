@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 5, "column": 0}, "map": {"version":3,"sources":["file:///Users/williamjung/conductor/workspaces/my-bttrfly/thimphu/app/write/layout.tsx"],"sourcesContent":["export default function WriteLayout({\n  children,\n}: {\n  children: React.ReactNode;\n}) {\n  // 각 페이지(목록/로그인/에디터)가 자체 헤더를 가지므로 여기선 바탕만 제공한다.\n  return <div className=\"min-h-screen bg-bg text-fg\">{children}</div>;\n}\n"],"names":[],"mappings":";;;;;AAAe,SAAS,YAAY,EAClC,QAAQ,EAGT;IACC,+CAA+C;IAC/C,qBAAO,8OAAC;QAAI,WAAU;kBAA8B;;;;;;AACtD","debugId":null}}]
-}

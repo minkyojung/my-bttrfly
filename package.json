@@ -6,7 +6,7 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "op run --env-file=.env.local -- next dev --turbopack",
+    "dev": "op run --env-file=.env.local -- next dev",
     "build": "next build",
     "build:check": "NEXT_DIST_DIR=.next-check next build",
     "start": "next start",
