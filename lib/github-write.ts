@@ -29,6 +29,14 @@ function getToken(): string {
   return token;
 }
 
+// 저장은 기본적으로 main에 커밋한다(프로덕션이 배포하는 브랜치).
+// 기능 브랜치에서 개발할 때는 GITHUB_WRITE_BRANCH로 그 브랜치를 지정해야 한다.
+// 지정하지 않으면 화면에는 체크아웃한 브랜치의 글이 보이는데 저장은 main으로
+// 가므로, 브랜치에서 만든 글은 404가 나고 고친 글은 409(충돌)가 난다.
+function getBranch(): string {
+  return process.env.GITHUB_WRITE_BRANCH || "main";
+}
+
 async function githubFetch(path: string, init?: RequestInit): Promise<Response> {
   const { owner, name } = getRepo();
   return fetch(`${GITHUB_API}/repos/${owner}/${name}${path}`, {
@@ -49,7 +57,7 @@ export interface GitHubFile {
 }
 
 export async function getFile(path: string): Promise<GitHubFile | null> {
-  const res = await githubFetch(`/contents/${encodeURI(path)}?ref=main`);
+  const res = await githubFetch(`/contents/${encodeURI(path)}?ref=${encodeURIComponent(getBranch())}`);
   if (res.status === 404) return null;
   if (!res.ok) {
     throw new GitHubWriteError(await res.text(), res.status);
@@ -74,7 +82,7 @@ export async function putFile(
     body: JSON.stringify({
       message,
       content: Buffer.from(content, "utf8").toString("base64"),
-      branch: "main",
+      branch: getBranch(),
       ...(sha ? { sha } : {}),
     }),
   });
@@ -94,7 +102,7 @@ export async function deleteFile(
 ): Promise<void> {
   const res = await githubFetch(`/contents/${encodeURI(path)}`, {
     method: "DELETE",
-    body: JSON.stringify({ message, sha, branch: "main" }),
+    body: JSON.stringify({ message, sha, branch: getBranch() }),
   });
   if (!res.ok) {
     throw new GitHubWriteError(await res.text(), res.status);
@@ -111,7 +119,7 @@ export async function putBinaryFile(
     body: JSON.stringify({
       message,
       content: base64Content,
-      branch: "main",
+      branch: getBranch(),
     }),
   });
   if (!res.ok) {

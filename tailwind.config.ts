@@ -83,6 +83,10 @@ const config: Config = {
               fontStyle: "italic",
               marginBottom: "0.5rem",
             },
+            // 플러그인이 인용문 앞뒤에 따옴표를 자동으로 넣는다. 좌측 선과
+            // 기울임으로 이미 구분되므로 지운다(인라인 코드의 백틱과 같은 경우).
+            "blockquote p:first-of-type::before": { content: "none" },
+            "blockquote p:last-of-type::after": { content: "none" },
             ul: {
               listStyleType: "disc",
               paddingLeft: "1.25rem",
