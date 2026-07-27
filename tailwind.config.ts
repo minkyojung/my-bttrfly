@@ -95,11 +95,17 @@ const config: Config = {
             },
             // 위아래를 모두 지정한다. 한쪽만 지정하면 플러그인 기본값(marginTop
             // 0.5em)이 남아 실제 간격을 그쪽이 결정해 버린다.
-            li: { marginTop: "0.25rem", marginBottom: "0.25rem" },
+            li: { marginTop: "0.125rem", marginBottom: "0.125rem" },
             "li > ul, li > ol": {
-              marginTop: "0.25rem",
-              marginBottom: "0.25rem",
+              marginTop: "0.125rem",
+              marginBottom: "0.125rem",
             },
+            // 항목 사이에 빈 줄을 넣으면 마크다운이 각 항목을 <p>로 감싼다.
+            // 그대로 두면 같은 목록이 작성 방식에 따라 5배 다른 간격으로 보이므로,
+            // 감싸진 경우에도 위와 같은 간격이 되게 맞춘다.
+            "li p": { marginTop: "0.125rem", marginBottom: "0.125rem" },
+            "li > p:first-child": { marginTop: "0.125rem" },
+            "li > p:last-child": { marginBottom: "0.125rem" },
             hr: { marginTop: "2rem", marginBottom: "2rem" },
             code: {
               // 배경이 있어야 좌우 여백이 의미를 갖는다(예전엔 여백만 있고
