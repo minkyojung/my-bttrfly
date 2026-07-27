@@ -1,0 +1,7 @@
+{
+  "/api/write/auth/route": "app/api/write/auth/route.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/write/[slug]/page": "app/write/[slug]/page.js",
+  "/write/login/page": "app/write/login/page.js",
+  "/write/page": "app/write/page.js"
+}

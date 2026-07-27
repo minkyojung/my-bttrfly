@@ -1,0 +1,10 @@
+{
+  "app": {
+    "[project]/app/write/[slug]/page": [],
+    "[project]/app/write/login/page": [],
+    "[project]/app/write/page": []
+  },
+  "appUsingSizeAdjust": true,
+  "pages": {},
+  "pagesUsingSizeAdjust": false
+}
