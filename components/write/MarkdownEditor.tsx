@@ -73,7 +73,9 @@ export function usePostEditor(
     extensions: [
       StarterKit,
       Image,
-      Table.configure({ resizable: true }),
+      // 열 너비 조절은 끈다. 본문은 마크다운으로 저장되는데 표 문법에는 너비를
+      // 적을 자리가 없어, 드래그해서 맞춰도 다시 열면 그대로 사라진다.
+      Table.configure({ resizable: false }),
       TableRow,
       TableHeader,
       TableCell,
@@ -182,6 +184,46 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
         label={uploadingImage ? "…" : "Image"}
       />
       <Btn onClick={() => editor.chain().focus().setHorizontalRule().run()} active={false} label="―" />
+
+      {/* 표 편집은 커서가 표 안에 있을 때만 보여 평소 툴바를 어지럽히지 않는다.
+          셀 병합은 일부러 넣지 않았다 — 병합한 표는 마크다운으로 저장되지 못하고
+          raw HTML로 떨어지는데, 발행 페이지는 그 HTML을 렌더링하지 않는다. */}
+      {editor.isActive("table") && (
+        <>
+          <Divider />
+          <Btn
+            onClick={() => editor.chain().focus().addRowAfter().run()}
+            disabled={!editor.can().addRowAfter()}
+            active={false}
+            label="+Row"
+          />
+          <Btn
+            onClick={() => editor.chain().focus().deleteRow().run()}
+            disabled={!editor.can().deleteRow()}
+            active={false}
+            label="−Row"
+          />
+          <Btn
+            onClick={() => editor.chain().focus().addColumnAfter().run()}
+            disabled={!editor.can().addColumnAfter()}
+            active={false}
+            label="+Col"
+          />
+          <Btn
+            onClick={() => editor.chain().focus().deleteColumn().run()}
+            disabled={!editor.can().deleteColumn()}
+            active={false}
+            label="−Col"
+          />
+          <Btn
+            onClick={() => editor.chain().focus().deleteTable().run()}
+            disabled={!editor.can().deleteTable()}
+            active={false}
+            label="Delete table"
+          />
+        </>
+      )}
+
       <input
         ref={imageInputRef}
         type="file"
@@ -204,6 +246,7 @@ function Btn({
   bold,
   italic,
   strike,
+  disabled,
 }: {
   onClick: () => void;
   active: boolean;
@@ -211,17 +254,20 @@ function Btn({
   bold?: boolean;
   italic?: boolean;
   strike?: boolean;
+  disabled?: boolean;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={cn(
         "rounded-sm px-2 py-1 text-sm text-fg-muted hover:bg-surface hover:text-fg",
         active && "bg-surface text-fg",
         bold && "font-bold",
         italic && "italic",
-        strike && "line-through"
+        strike && "line-through",
+        disabled && "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-fg-muted"
       )}
     >
       {label}
