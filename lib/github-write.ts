@@ -81,6 +81,22 @@ export async function putFile(
   }
 }
 
+// 삭제도 커밋이므로 git 히스토리에 남는다(되돌릴 수 있음). sha는 필수 —
+// 삭제하려는 내용이 읽은 시점과 같은지 GitHub이 확인하는 근거다.
+export async function deleteFile(
+  path: string,
+  message: string,
+  sha: string
+): Promise<void> {
+  const res = await githubFetch(`/contents/${encodeURI(path)}`, {
+    method: "DELETE",
+    body: JSON.stringify({ message, sha, branch: "main" }),
+  });
+  if (!res.ok) {
+    throw new GitHubWriteError(await res.text(), res.status);
+  }
+}
+
 export async function putBinaryFile(
   path: string,
   base64Content: string,

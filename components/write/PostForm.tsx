@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { COLUMNS } from "@/lib/columns";
 import { slugify, SLUG_PATTERN } from "@/lib/slugify";
@@ -70,6 +71,7 @@ function todayDate() {
 }
 
 export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormProps) {
+  const router = useRouter();
   // slug는 저자가 직접 편집하는 필드다. 생성 시 제목에서 초안을 자동으로
   // 채우되(아직 저자가 손대지 않았을 때만), 발행 후에는 불변이므로 편집
   // 화면에서는 읽기 전용으로 보여준다.
@@ -97,6 +99,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -239,6 +242,44 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
       setError("Image upload failed");
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (mode !== "edit" || !initialSlug) return;
+    if (
+      !window.confirm(
+        `Delete "${title}"?\n\nThe post is removed from the site on the next deploy. ` +
+          `It stays in git history, so it can be restored.`
+      )
+    ) {
+      return;
+    }
+
+    setError(null);
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/write/posts/${initialSlug}`, {
+        method: "DELETE",
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error ?? "Delete failed");
+        return;
+      }
+      // 삭제 성공 → 이 글의 로컬 초안도 정리하고, 이탈 경고가 뜨지 않도록
+      // 기준선을 현재 값으로 맞춘 뒤 목록으로 돌아간다.
+      try {
+        localStorage.removeItem(draftKey);
+      } catch {
+        /* noop */
+      }
+      baselineRef.current = serialized;
+      router.push("/write");
+    } catch {
+      setError("Delete failed");
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -623,6 +664,20 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
                   Draft
                 </label>
               </div>
+
+              {/* 되돌리기 어려운 동작이므로 저장 액션과 떨어뜨려 맨 아래 둔다. */}
+              {mode === "edit" && (
+                <div className="mt-4 border-t border-border pt-4">
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                    className="text-sm text-red-500 hover:underline disabled:opacity-50"
+                  >
+                    {deleting ? "Deleting…" : "Delete this post"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </>

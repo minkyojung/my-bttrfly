@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import matter from "gray-matter";
-import { getFile, putFile, GitHubWriteError } from "@/lib/github-write";
+import { getFile, putFile, deleteFile, GitHubWriteError } from "@/lib/github-write";
 
 interface UpdatePostBody {
   title?: unknown;
@@ -134,6 +134,41 @@ export async function PATCH(
       return NextResponse.json({ error: err.message }, { status });
     }
     console.error("Failed to toggle draft", err);
+    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+  }
+}
+
+// 글 삭제. 파일만 지우고 본문에 딸린 업로드 이미지는 건드리지 않는다 —
+// 다른 글이 같은 이미지를 참조할 수 있고, 삭제는 커밋이라 되돌릴 수 있지만
+// 잘못 지운 이미지를 추적해 복원하는 건 훨씬 번거롭기 때문이다.
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+  if (!/^[\w-]+$/.test(slug)) {
+    return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
+  }
+
+  try {
+    const existing = await getFile(`content/posts/${slug}.md`);
+    if (!existing) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    await deleteFile(
+      `content/posts/${slug}.md`,
+      `content: delete ${slug}`,
+      existing.sha
+    );
+
+    return NextResponse.json({ slug }, { status: 200 });
+  } catch (err) {
+    if (err instanceof GitHubWriteError) {
+      const status = err.status && err.status >= 100 ? err.status : 502;
+      return NextResponse.json({ error: err.message }, { status });
+    }
+    console.error("Failed to delete post", err);
     return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
 }
