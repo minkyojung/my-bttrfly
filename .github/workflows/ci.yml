@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 테스트는 Node의 네이티브 TypeScript 실행에 의존하므로 24 이상이어야 한다.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run typecheck
+
+      - run: npm run lint
+
+      - run: npm test
+
+  # 빌드는 Keystatic이 GitHub 앱 자격증명을 요구해 실제 값 없이는 실패한다.
+  # 여기서는 컴파일이 깨지지 않는지만 보면 되므로 더미 값을 넣는다.
+  # (배포 빌드는 Vercel이 실제 값으로 수행한다.)
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          KEYSTATIC_GITHUB_CLIENT_ID: dummy
+          KEYSTATIC_GITHUB_CLIENT_SECRET: dummy
+          KEYSTATIC_SECRET: dummydummydummydummydummydummydummy
