@@ -21,6 +21,9 @@ export interface Post {
   content: string;
   imageMeta: Record<string, ImageMeta>;
   external?: string;
+  // 원문 URL. external과 달리 리다이렉트하지 않고 본문을 그대로 보여주되,
+  // <link rel="canonical">만 원문으로 가리켜 중복 콘텐츠를 피한다(타 매체에서 옮겨온 글).
+  canonical?: string;
   cover?: string;
   coverMeta?: ImageMeta;
   category?: string;
@@ -86,6 +89,7 @@ function parseFile(slug: string, fileContents: string): Post {
     content,
     imageMeta: collectImageMeta(content),
     external: optionalString(data.external),
+    canonical: optionalString(data.canonical),
     cover,
     coverMeta: cover ? readLocalImageMeta(cover) : undefined,
     category: optionalString(data.category),

@@ -41,7 +41,7 @@ export async function generateMetadata({
   if (!post) return { title: "Not found" };
 
   const description = post.summary ?? post.preview;
-  const canonical = post.external ?? postUrl(post.slug);
+  const canonical = post.external ?? post.canonical ?? postUrl(post.slug);
 
   return {
     title: post.title,
