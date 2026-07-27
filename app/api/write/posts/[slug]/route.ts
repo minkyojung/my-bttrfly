@@ -87,3 +87,53 @@ export async function PUT(
     return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
   }
 }
+
+// 발행/초안 전환 전용. 목록에서 토글할 때 본문을 왕복시키지 않기 위해 PUT과
+// 분리했다. 기존 파일을 읽어 draft만 바꾸므로 나머지 프론트매터와 본문은
+// 그대로 보존된다.
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+  if (!/^[\w-]+$/.test(slug)) {
+    return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
+  }
+
+  let body: { draft?: unknown };
+  try {
+    body = (await request.json()) as { draft?: unknown };
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+
+  if (typeof body.draft !== "boolean") {
+    return NextResponse.json({ error: "draft must be a boolean" }, { status: 400 });
+  }
+  const draft = body.draft;
+
+  try {
+    const existing = await getFile(`content/posts/${slug}.md`);
+    if (!existing) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 });
+    }
+
+    const parsed = matter(existing.content);
+    const fileText = matter.stringify(parsed.content, { ...parsed.data, draft });
+    await putFile(
+      `content/posts/${slug}.md`,
+      fileText,
+      `content: ${draft ? "unpublish" : "publish"} ${slug}`,
+      existing.sha
+    );
+
+    return NextResponse.json({ slug, draft }, { status: 200 });
+  } catch (err) {
+    if (err instanceof GitHubWriteError) {
+      const status = err.status && err.status >= 100 ? err.status : 502;
+      return NextResponse.json({ error: err.message }, { status });
+    }
+    console.error("Failed to toggle draft", err);
+    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+  }
+}
