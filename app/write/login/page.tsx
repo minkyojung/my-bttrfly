@@ -20,6 +20,19 @@ export default function WriteLoginPage() {
         body: JSON.stringify({ password }),
       });
       if (res.ok) {
+        // 200은 비밀번호가 맞았다는 뜻일 뿐, 브라우저가 세션 쿠키를 받아들였다는
+        // 뜻은 아니다. 거부되면 미들웨어가 곧바로 로그인으로 되돌려보내는데,
+        // 화면에는 아무 이유도 안 뜬 채 폼만 비워져서 원인을 알 수 없다.
+        // 넘어가기 전에 세션이 실제로 붙었는지 확인한다.
+        const check = await fetch("/api/write/session", {
+          credentials: "same-origin",
+        });
+        if (!check.ok) {
+          setError(
+            "브라우저가 로그인 쿠키를 거부했습니다. HTTPS로 접속했는지 확인해 주세요."
+          );
+          return;
+        }
         router.push("/write");
         return;
       }
