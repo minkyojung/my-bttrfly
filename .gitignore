@@ -15,7 +15,8 @@
 
 # next.js
 /.next/
-/.next-check/
+# 검증 빌드(build:check)와 임시 진단 빌드가 쓰는 별도 dist 디렉터리
+/.next-*/
 /out/
 
 # production
