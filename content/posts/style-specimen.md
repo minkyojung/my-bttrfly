@@ -6,8 +6,7 @@ category: Essays
 draft: true
 featured: false
 ---
-
-이 글은 발행용이 아니라 **타이포그래피 확인용 견본**입니다. 본문에서 쓸 수 있는 요소를 전부 담았습니다. `tailwind.config.ts`의 `typography`를 고친 뒤 이 글을 열어 보면, 에디터와 발행 화면 양쪽에서 결과를 한 번에 확인할 수 있습니다.
+이 글은 발행용이 아니라 **타이포그래피 확인용 견본**입니다. 본문에서 쓸 수 있는 요소를 전부 담았습니다. `tailwind.config.ts`의 `typography`를 고친 뒤 이 글을 열어 보면, 에디터와 발행 화면 양쪽에서 결과를 한 번에 확인할 수 있습니다. 아자
 
 아래는 긴 문단이 어떻게 흐르는지 보기 위한 것입니다. 줄간격과 글자 크기가 편안한지, 한글과 영문이 섞였을 때 어색하지 않은지 살펴보세요. 좋은 본문은 읽는 사람이 활자를 의식하지 않게 만듭니다. The quick brown fox jumps over the lazy dog. 문장이 여러 줄로 넘어갈 때 줄과 줄 사이가 너무 붙거나 벌어지지 않는지가 특히 중요합니다.
 
@@ -95,9 +94,7 @@ export function slugify(title: string): string {
 
 ## 이미지
 
-![견본 이미지](/images/uploads/disquiet-non-developer-6.png)
-
-이미지 아래에 오는 문단입니다. 이미지와 글 사이 간격이 적절한지 봅니다.
+![견본 이미지](/images/uploads/disquiet-non-developer-6.png)이미지 아래에 오는 문단입니다. 이미지와 글 사이 간격이 적절한지 봅니다.
 
 ## 마지막
 
