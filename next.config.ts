@@ -5,12 +5,36 @@ import type { NextConfig } from "next";
 // 바꾸지 않고 그대로 둔다. 그 결과 목록이 있는 글을 에디터에서 열면
 // "ReferenceError: isSpace is not defined"가 난다(빈 글은 목록 파싱을 안 해서 멀쩡).
 // 같은 모듈을 webpack은 정상 변환한다 — 두 번들러의 출력을 직접 비교해 확인했다.
+// 업로드된 파일을 주소로 직접 열었을 때를 위한 방어. 본문에 <img>로 박힌 이미지는
+// 영향받지 않는다 — Content-Disposition은 최상위 내비게이션만 지배한다.
+// sandbox가 핵심이다. 응답을 불투명(opaque) 출처로 만들어서, 혹시 스크립트가 돌더라도
+// document.cookie를 못 읽고 /api/write/* 요청이 교차 출처가 되어 세션 쿠키가 안 붙는다.
+// GitHub이 사용자 업로드 파일에 쓰는 것과 같은 조합이고, next/image가
+// dangerouslyAllowSVG를 켰을 때 스스로 세우는 기본값이기도 하다.
+// nosniff는 SVG에는 무력하지만(선언된 타입이 실제로 맞으므로) 확장자만 png인
+// HTML 파일이 HTML로 해석되는 걸 막는다 — 지금 업로드 검사가 확장자만 보기 때문에 필요하다.
+const UPLOAD_SECURITY_HEADERS = [
+  {
+    key: "Content-Security-Policy",
+    value: "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+  },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Content-Disposition", value: "attachment" },
+];
+
 const nextConfig: NextConfig = {
   // 개발 서버가 도는 중에 빌드를 돌리면 같은 .next를 두 프로세스가 덮어써서
   // 개발 서버의 모듈 지도가 깨지고 런타임에 "X is not defined" 같은 엉뚱한
   // 에러가 난다.
   // 검증 빌드는 NEXT_DIST_DIR로 디렉터리를 분리해서 돌린다(npm run build:check).
   distDir: process.env.NEXT_DIST_DIR || ".next",
+
+  // headers는 파일시스템보다 먼저 검사되므로 public/ 아래 정적 파일에도 적용된다.
+  async headers() {
+    return [
+      { source: "/images/uploads/:path*", headers: UPLOAD_SECURITY_HEADERS },
+    ];
+  },
 };
 
 export default nextConfig;

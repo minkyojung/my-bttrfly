@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { putBinaryFile, GitHubWriteError } from "@/lib/github-write";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
-const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp", "svg"];
+// SVG는 뺀다. SVG는 스크립트를 품을 수 있고, 업로드된 파일은 블로그와 같은
+// 출처에서 서빙되므로 그 스크립트가 이 사이트의 권한으로 돈다. <img>로 삽입할
+// 때는 브라우저가 실행을 막지만 파일 주소로 직접 열면 실행된다 — next/image가
+// dangerouslyAllowSVG 없이는 SVG를 다루지 않는 것도 같은 이유다.
+const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp"];
 
 function sanitizeFilename(originalName: string, extension: string): string {
   const withoutExtension = originalName.slice(0, originalName.length - extension.length - 1);
