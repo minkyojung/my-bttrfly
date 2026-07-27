@@ -1,8 +1,17 @@
 import Link from "next/link";
 import { getAllPostsForEdit } from "@/lib/markdown";
+import { PostList } from "@/components/write/PostList";
 
 export default async function WriteListPage() {
   const posts = await getAllPostsForEdit();
+  // 목록에 필요한 필드만 추려 클라이언트로 넘긴다(본문까지 직렬화되지 않도록).
+  const items = posts.map((post) => ({
+    slug: post.slug,
+    title: post.title,
+    date: post.date,
+    category: post.category,
+    draft: post.draft,
+  }));
 
   return (
     <div className="mx-auto max-w-content px-6 py-10">
@@ -16,28 +25,7 @@ export default async function WriteListPage() {
         </Link>
       </div>
 
-      <div>
-        {posts.map((post) => (
-          <Link
-            key={post.slug}
-            href={`/write/${post.slug}`}
-            className="flex items-center justify-between gap-4 border-b border-border py-3"
-          >
-            <span className="font-medium">
-              {post.title}
-              {post.draft && (
-                <span className="ml-2 rounded-sm bg-accent-warm/20 px-1.5 py-0.5 text-xs font-bold text-accent-warm">
-                  Draft
-                </span>
-              )}
-            </span>
-            <span className="shrink-0 text-sm text-fg-muted">
-              {post.category ? `${post.category} · ` : ""}
-              {post.date}
-            </span>
-          </Link>
-        ))}
-      </div>
+      <PostList posts={items} />
     </div>
   );
 }
