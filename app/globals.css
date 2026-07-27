@@ -124,30 +124,14 @@
   pointer-events: none;
 }
 
-/* TipTap 표 — 셀 테두리/헤더 배경(없으면 그리드가 안 보임) */
-.ProseMirror table {
-  border-collapse: collapse;
-  /* 내용에 맞춰 열 너비가 정해지게 둔다(발행 페이지와 동일). fixed는 너비를
-     드래그로 조절하던 때 필요했던 설정인데, 지금은 모든 열을 똑같이 나눠
-     발행 결과와 다르게 보이게 만든다. */
-  table-layout: auto;
-  width: 100%;
-  margin: 1rem 0;
-  overflow: hidden;
-}
+/* TipTap 표 — 편집 중에만 필요한 것만 남긴다. 표의 생김새(격자·헤더 배경·여백)는
+   tailwind.config.ts의 typography에 있어 발행 화면과 공유한다. */
 .ProseMirror table td,
 .ProseMirror table th {
-  border: 1px solid var(--color-border-strong);
-  padding: 6px 10px;
-  vertical-align: top;
-  box-sizing: border-box;
+  /* 아래 선택 표시(::after)의 기준이 되고, 편집 중 셀이 너무 좁아지지 않게 한다 */
   position: relative;
   min-width: 3rem;
-}
-.ProseMirror table th {
-  font-weight: 700;
-  text-align: left;
-  background: var(--color-surface);
+  box-sizing: border-box;
 }
 .ProseMirror table .selectedCell::after {
   content: "";
@@ -155,7 +139,4 @@
   inset: 0;
   background: rgba(255, 255, 255, 0.06);
   pointer-events: none;
-}
-.ProseMirror table p {
-  margin: 0;
 }

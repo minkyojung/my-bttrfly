@@ -57,7 +57,7 @@ const config: Config = {
             // max-w-content로 제한). 플러그인 기본값 65ch가 끼어들지 않게 푼다.
             maxWidth: "none",
 
-            "h1, h2, h3, h4, h5, h6, th": { fontWeight: "900" },
+            "h1, h2, h3, h4, h5, h6": { fontWeight: "900" },
             h1: {
               fontSize: "1.875rem",
               lineHeight: "2.25rem",
@@ -131,6 +131,36 @@ const config: Config = {
               textDecorationLine: "underline",
               "&:hover": { opacity: "0.6" },
             },
+
+            // 표. 플러그인 기본값은 가로선만 긋는 신문 기사 스타일인데, 편집
+            // 화면에서 보이는 격자 모양을 그대로 발행하도록 맞춘다.
+            table: {
+              borderCollapse: "collapse",
+              tableLayout: "auto",
+              width: "100%",
+              marginTop: "1rem",
+              marginBottom: "1rem",
+            },
+            // 선택자를 'table th, table td'로 적는 이유: 'th, td'는 플러그인에도
+            // 있는 키라 병합되면서 그 자리(앞쪽)에 놓이고, 뒤에 오는 플러그인의
+            // 세부 규칙(tbody td, 양끝 셀 여백 0 등)에 덮인다. 플러그인에 없는
+            // 선택자를 쓰면 뒤에 출력되어 의도대로 적용된다.
+            "table th, table td": {
+              border: "1px solid var(--color-border-strong)",
+              padding: "6px 10px",
+              verticalAlign: "top",
+              textAlign: "left",
+            },
+            "table th": {
+              backgroundColor: "var(--color-surface)",
+              fontWeight: "700",
+            },
+            // 셀 안의 문단은 표 높이를 키우지 않도록 마진을 없앤다.
+            "table th p, table td p": { marginTop: "0", marginBottom: "0" },
+            // 아래는 플러그인의 기본 표 스타일을 무력화하는 것들이다. 그대로 두면
+            // 셀 격자 위에 가로선이 겹치고, 양끝 셀의 안쪽 여백이 0이 된다.
+            thead: { borderBottomWidth: "0" },
+            "tbody tr": { borderBottomWidth: "0" },
 
             // 강조(굵게·링크·코드·인용)는 본문과 같은 밝기로 둔다. 굵기·밑줄·
             // 배경이 이미 구분 역할을 하므로, 대비까지 낮추면 강조하려던 것이
