@@ -93,15 +93,29 @@ const config: Config = {
               paddingLeft: "1.25rem",
               marginBottom: "0.5rem",
             },
-            li: { marginBottom: "0.25rem" },
+            // 위아래를 모두 지정한다. 한쪽만 지정하면 플러그인 기본값(marginTop
+            // 0.5em)이 남아 실제 간격을 그쪽이 결정해 버린다.
+            li: { marginTop: "0.25rem", marginBottom: "0.25rem" },
+            "li > ul, li > ol": {
+              marginTop: "0.25rem",
+              marginBottom: "0.25rem",
+            },
             hr: { marginTop: "2rem", marginBottom: "2rem" },
             code: {
+              // 배경이 있어야 좌우 여백이 의미를 갖는다(예전엔 여백만 있고
+              // 배경이 없어 아무 구분도 되지 않았다).
+              backgroundColor: "var(--color-surface)",
               paddingLeft: "0.25rem",
               paddingRight: "0.25rem",
               borderRadius: "var(--radius-sm)",
-              fontSize: "0.875rem",
-              lineHeight: "1.25rem",
+              // em이라 주변 글자 크기를 따라간다. 고정 크기면 본문 18px 옆에서
+              // 유독 작아 보이고, 제목 안에 들어갈 때도 어긋난다.
+              fontSize: "0.9em",
             },
+            // 플러그인이 인라인 코드 앞뒤에 백틱 문자를 넣는다. 배경으로 이미
+            // 구분되므로 지운다.
+            "code::before": { content: "none" },
+            "code::after": { content: "none" },
             pre: {
               padding: "1rem",
               borderRadius: "var(--radius-md)",
@@ -112,15 +126,19 @@ const config: Config = {
               "&:hover": { opacity: "0.6" },
             },
 
+            // 강조(굵게·링크·코드·인용)는 본문과 같은 밝기로 둔다. 굵기·밑줄·
+            // 배경이 이미 구분 역할을 하므로, 대비까지 낮추면 강조하려던 것이
+            // 오히려 본문보다 흐려진다. fg-muted는 날짜·캡션처럼 덜 중요한 것에 쓴다.
             "--tw-prose-headings": "var(--color-fg)",
             "--tw-prose-body": "var(--color-fg)",
-            "--tw-prose-bold": "var(--color-fg-muted)",
-            "--tw-prose-quotes": "var(--color-fg-muted)",
+            "--tw-prose-bold": "var(--color-fg)",
+            "--tw-prose-quotes": "var(--color-fg)",
             "--tw-prose-quote-borders": "var(--color-fg)",
-            "--tw-prose-links": "var(--color-fg-muted)",
-            "--tw-prose-code": "var(--color-fg-muted)",
-            "--tw-prose-pre-code": "var(--color-fg-muted)",
-            "--tw-prose-pre-bg": "var(--color-bg)",
+            "--tw-prose-links": "var(--color-fg)",
+            "--tw-prose-code": "var(--color-fg)",
+            "--tw-prose-pre-code": "var(--color-fg)",
+            // 페이지 배경과 같은 색이면 블록이 전혀 구분되지 않는다.
+            "--tw-prose-pre-bg": "var(--color-surface)",
             "--tw-prose-borders": "var(--color-surface-elevated)",
             "--tw-prose-counters": "var(--color-fg)",
             "--tw-prose-bullets": "var(--color-fg)",
