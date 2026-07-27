@@ -188,6 +188,19 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirty]);
 
+  // ⌘S(⌃S)로 저장. 브라우저 기본 "페이지 저장"을 막고 폼 제출로 돌린다.
+  // requestSubmit()이라 버튼 클릭과 동일한 경로(검증 포함)를 탄다.
+  const formRef = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "s") return;
+      e.preventDefault();
+      if (!submitting) formRef.current?.requestSubmit();
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [submitting]);
+
   // 앱 내 링크(←, Back)는 App Router가 소프트 내비를 못 막으므로 직접 확인한다.
   function confirmLeave(e: React.MouseEvent) {
     if (dirty && !window.confirm("Unsaved changes will be lost. Leave anyway?")) {
@@ -298,7 +311,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
     "w-full rounded-sm border border-border bg-bg px-3 py-2 text-sm text-fg";
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form ref={formRef} onSubmit={handleSubmit}>
       {/* 상단 헤더: 액션 바 + 서식 툴바를 한 sticky 블록으로 묶는다
           (툴바를 제목 위 최상단에 두고, 픽셀 오프셋 없이 함께 고정된다) */}
       <div className="sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur">
@@ -336,6 +349,7 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
             <button
               type="submit"
               disabled={submitting}
+              title="⌘S"
               className="rounded-sm bg-accent-warm px-4 py-1.5 text-sm font-bold text-white disabled:opacity-50"
             >
               {submitting ? "Saving…" : mode === "create" ? "Publish" : "Save"}
