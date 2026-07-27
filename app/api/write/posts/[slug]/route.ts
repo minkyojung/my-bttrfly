@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import matter from "gray-matter";
 import { getFile, putFile, deleteFile, GitHubWriteError } from "@/lib/github-write";
-import { buildFrontmatter, type PostBody } from "@/lib/post-frontmatter";
+import {
+  buildFrontmatter,
+  validatePost,
+  type PostBody,
+} from "@/lib/post-frontmatter";
 
 interface UpdatePostBody extends PostBody {
   // 에디터가 읽은 시점의 파일 지문(git blob sha).
@@ -24,16 +28,11 @@ export async function PUT(
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { title, date, content } = body;
-  if (typeof title !== "string" || !title.trim()) {
-    return NextResponse.json({ error: "Title is required" }, { status: 400 });
+  const invalid = validatePost(body);
+  if (invalid) {
+    return NextResponse.json({ error: invalid }, { status: 400 });
   }
-  if (typeof date !== "string" || !date.trim()) {
-    return NextResponse.json({ error: "Date is required" }, { status: 400 });
-  }
-  if (typeof content !== "string" || !content.trim()) {
-    return NextResponse.json({ error: "Content is required" }, { status: 400 });
-  }
+  const content = typeof body.content === "string" ? body.content : "";
 
   try {
     const existing = await getFile(`content/posts/${slug}.md`);

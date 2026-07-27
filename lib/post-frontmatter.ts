@@ -17,6 +17,28 @@ export interface PostBody {
   content?: unknown;
 }
 
+function trimmed(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+/**
+ * 저장 가능한 글인지 검사한다. 문제가 있으면 사용자에게 보여줄 문장을, 없으면
+ * null을 돌려준다. 서버(거절의 근거)와 폼(제출 전 안내)이 같은 규칙을 써야
+ * "폼은 통과시켰는데 서버가 막는" 상태가 생기지 않는다.
+ *
+ * 본문은 필수지만 external이 있으면 예외다 — 공개 페이지가 원문으로 리다이렉트하므로
+ * 보여줄 본문이 애초에 없다. content/posts의 본문 없는 글 7편이 전부 이 경우이고,
+ * 그동안 이 글들은 /write에서 카테고리 하나 고치는 것도 불가능했다.
+ */
+export function validatePost(body: PostBody): string | null {
+  if (!trimmed(body.title)) return "Title is required";
+  if (!trimmed(body.date)) return "Date is required";
+  if (!trimmed(body.content) && !trimmed(body.external)) {
+    return "Body is required unless the post has an external URL";
+  }
+  return null;
+}
+
 // 폼이 관리하는 선택 필드는 "값이 있으면 설정, 비었으면 삭제"다. 단순 병합만
 // 하면 폼에서 지운 값이 기존 값으로 되살아난다.
 function setOrDelete(

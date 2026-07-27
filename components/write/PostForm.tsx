@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { COLUMNS } from "@/lib/columns";
 import { slugify, SLUG_PATTERN } from "@/lib/slugify";
+import { validatePost } from "@/lib/post-frontmatter";
 import { PostBody } from "@/components/PostBody";
 import type { ImageMeta } from "@/lib/markdown";
 import {
@@ -302,8 +303,11 @@ export function PostForm({
     setError(null);
     setSavedSlug(null);
 
-    if (!title.trim() || !date.trim() || !content.trim()) {
-      setError("Title, date, and body are required.");
+    // 서버가 거절할 규칙과 같은 함수를 쓴다. 드로어를 여는 이유는 문제가 되는
+    // 필드(external 포함)가 전부 그 안에 있기 때문이다.
+    const invalid = validatePost(snapshot);
+    if (invalid) {
+      setError(invalid);
       setShowSettings(true);
       return;
     }

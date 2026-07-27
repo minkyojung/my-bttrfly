@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildFrontmatter } from "../lib/post-frontmatter.ts";
+import fs from "node:fs";
+import path from "node:path";
+import matter from "gray-matter";
+import { buildFrontmatter, validatePost } from "../lib/post-frontmatter.ts";
 
 // 옮겨온 글의 전형적인 프론트매터 + 폼이 모르는 필드 하나.
 const existing = {
@@ -95,4 +98,68 @@ test("원본 객체를 변형하지 않는다", () => {
   const snapshot = JSON.stringify(existing);
   buildFrontmatter({ ...fullBody, canonical: "" }, existing);
   assert.equal(JSON.stringify(existing), snapshot);
+});
+
+// --- validatePost ---
+
+test("본문이 있으면 통과한다", () => {
+  assert.equal(validatePost({ title: "T", date: "2026-01-01", content: "본문" }), null);
+});
+
+test("external이 있으면 본문 없이도 통과한다", () => {
+  // 외부 발행 글은 공개 페이지가 원문으로 리다이렉트해서 보여줄 본문이 없다.
+  // 이걸 막으면 그 글들은 카테고리 하나 고치는 것도 불가능해진다.
+  assert.equal(
+    validatePost({ title: "T", date: "2026-01-01", external: "https://example.com" }),
+    null
+  );
+});
+
+test("external도 본문도 없으면 거절한다", () => {
+  const result = validatePost({ title: "T", date: "2026-01-01" });
+  assert.match(result ?? "", /Body is required/);
+});
+
+test("공백뿐인 본문은 본문이 없는 것으로 친다", () => {
+  const result = validatePost({ title: "T", date: "2026-01-01", content: "   \n  " });
+  assert.match(result ?? "", /Body is required/);
+});
+
+test("공백뿐인 external은 본문을 면제해주지 않는다", () => {
+  const result = validatePost({ title: "T", date: "2026-01-01", external: "  " });
+  assert.match(result ?? "", /Body is required/);
+});
+
+test("title과 date는 여전히 필수다", () => {
+  assert.match(validatePost({ date: "2026-01-01", content: "본문" }) ?? "", /Title/);
+  assert.match(validatePost({ title: "T", content: "본문" }) ?? "", /Date/);
+  // 문자열이 아닌 값도 없는 것으로 친다(신뢰할 수 없는 입력).
+  assert.match(validatePost({ title: 123, date: "2026-01-01", content: "본문" }) ?? "", /Title/);
+});
+
+test("실제 글은 전부 저장 가능해야 한다", () => {
+  // 회귀 방지: 본문 없는 글 7편이 /write에서 저장조차 안 되던 것이 이 규칙의 이유다.
+  // 어떤 글이든 열어서 그대로 다시 저장하는 건 언제나 성공해야 한다.
+  const dir = path.join(process.cwd(), "content/posts");
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
+  assert.ok(files.length > 0, "content/posts가 비어 있음 — 테스트가 무의미해짐");
+
+  const empty: string[] = [];
+  for (const file of files) {
+    const { data, content } = matter(fs.readFileSync(path.join(dir, file), "utf8"));
+    if (!content.trim()) empty.push(file);
+    const result = validatePost({
+      title: data.title,
+      // 프론트매터의 date는 gray-matter가 Date로 파싱하기도 한다. 폼은 항상
+      // 문자열을 보내므로 여기서만 맞춰준다.
+      date: data.date instanceof Date ? data.date.toISOString().slice(0, 10) : data.date,
+      external: data.external,
+      content,
+    });
+    assert.equal(result, null, `${file} 이 저장 불가로 판정됨: ${result}`);
+  }
+
+  // 빈 본문 글이 실제로 존재해야 위 단언이 의미가 있다. 0이 되면 이 테스트는
+  // 아무것도 지키지 않으므로, 그때는 테스트를 지우든 고치든 해야 한다.
+  assert.ok(empty.length > 0, "본문 없는 글이 하나도 없음 — 이 테스트는 더 이상 아무것도 검증하지 않는다");
 });
