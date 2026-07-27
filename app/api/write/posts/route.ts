@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import matter from "gray-matter";
 import { getFile, putFile, GitHubWriteError } from "@/lib/github-write";
-import { slugify } from "@/lib/slugify";
+import { SLUG_PATTERN } from "@/lib/slugify";
 
 interface CreatePostBody {
+  slug?: unknown;
   title?: unknown;
   date?: unknown;
   category?: unknown;
@@ -53,10 +54,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Content is required" }, { status: 400 });
   }
 
-  const slug = slugify(title);
-  if (!slug) {
+  // slug는 클라이언트가 제안하고 서버가 검증한다. 조용히 변형하지 않고,
+  // 라우팅이 받아주는 규칙(SLUG_PATTERN)에 맞지 않으면 거절한다 —
+  // 이래야 "커밋은 되는데 못 읽는 파일"이 애초에 안 만들어진다.
+  const slug = typeof body.slug === "string" ? body.slug.trim() : "";
+  if (!SLUG_PATTERN.test(slug)) {
     return NextResponse.json(
-      { error: "Title must contain at least one letter or number" },
+      { error: "Slug must be lowercase letters, numbers, and hyphens" },
       { status: 400 }
     );
   }
@@ -65,7 +69,7 @@ export async function POST(request: NextRequest) {
     const existing = await getFile(`content/posts/${slug}.md`);
     if (existing) {
       return NextResponse.json(
-        { error: "A post with this slug already exists — change the title" },
+        { error: "A post with this slug already exists — change the slug" },
         { status: 409 }
       );
     }

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { COLUMNS } from "@/lib/columns";
+import { slugify, SLUG_PATTERN } from "@/lib/slugify";
 import { PostBody } from "@/components/PostBody";
 import {
   usePostEditor,
@@ -44,6 +45,7 @@ function AutoTextarea({
 }
 
 interface PostFormValues {
+  slug?: string;
   title: string;
   date: string;
   category?: string;
@@ -66,7 +68,13 @@ function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function PostForm({ mode, slug, initialValues }: PostFormProps) {
+export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormProps) {
+  // slug는 저자가 직접 편집하는 필드다. 생성 시 제목에서 초안을 자동으로
+  // 채우되(아직 저자가 손대지 않았을 때만), 발행 후에는 불변이므로 편집
+  // 화면에서는 읽기 전용으로 보여준다.
+  const [slug, setSlug] = useState(initialSlug ?? "");
+  const slugTouched = useRef(mode === "edit");
+
   const [title, setTitle] = useState(initialValues?.title ?? "");
   const [date, setDate] = useState(initialValues?.date ?? todayDate());
   const [category, setCategory] = useState(initialValues?.category ?? "");
@@ -93,6 +101,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
   // --- 이탈/유실 방어 ---
   // 현재 폼 전체를 직렬화해 초기 상태와 비교하는 것으로 "변경됨(dirty)"을 판정한다.
   const snapshot: PostFormValues = {
+    slug,
     title,
     date,
     category,
@@ -108,11 +117,17 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
   // 최초 렌더 시점의 값을 기준선으로 고정(저장 성공 시 갱신).
   const baselineRef = useRef(serialized);
   const dirty = serialized !== baselineRef.current;
-  const draftKey = `write-draft:${slug ?? "new"}`;
+  const draftKey = `write-draft:${initialSlug ?? "new"}`;
 
   const [recoverable, setRecoverable] = useState<PostFormValues | null>(null);
 
   function applyValues(v: PostFormValues) {
+    // 복구한 초안이 커스텀 slug를 담고 있을 수 있으므로 이후 제목 편집이
+    // 덮어쓰지 않도록 touched로 표시한다.
+    if (v.slug !== undefined) {
+      setSlug(v.slug);
+      slugTouched.current = true;
+    }
     setTitle(v.title);
     setDate(v.date);
     setCategory(v.category ?? "");
@@ -176,6 +191,14 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
     }
   }
 
+  // 생성 모드에서 저자가 slug를 아직 직접 건드리지 않았다면 제목에서 자동 채운다.
+  function handleTitleChange(value: string) {
+    setTitle(value);
+    if (mode === "create" && !slugTouched.current) {
+      setSlug(slugify(value));
+    }
+  }
+
   async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -213,9 +236,16 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
       return;
     }
 
+    if (mode === "create" && !SLUG_PATTERN.test(slug.trim())) {
+      setError("Slug must be lowercase letters, numbers, and hyphens.");
+      setShowSettings(true);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const body = {
+        slug: slug.trim(),
         title,
         date,
         category: category || undefined,
@@ -229,7 +259,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
       };
 
       const res = await fetch(
-        mode === "create" ? "/api/write/posts" : `/api/write/posts/${slug}`,
+        mode === "create" ? "/api/write/posts" : `/api/write/posts/${initialSlug}`,
         {
           method: mode === "create" ? "POST" : "PUT",
           headers: { "Content-Type": "application/json" },
@@ -277,7 +307,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
               ←
             </Link>
             <span className="truncate text-fg-muted">
-              {mode === "edit" ? slug : "New post"}
+              {mode === "edit" ? initialSlug : slug || "New post"}
             </span>
             <span className="shrink-0 text-xs text-fg-subtle">
               {dirty ? "· Unsaved" : savedSlug ? "· Saved" : ""}
@@ -374,7 +404,7 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
       <div className="mx-auto max-w-[680px] px-6 py-12">
         <AutoTextarea
           value={title}
-          onChange={setTitle}
+          onChange={handleTitleChange}
           placeholder="Title"
           className="block w-full border-0 bg-transparent p-0 font-serif text-4xl font-bold leading-tight text-fg outline-none placeholder:text-fg-subtle"
         />
@@ -417,6 +447,39 @@ export function PostForm({ mode, slug, initialValues }: PostFormProps) {
             </div>
 
             <div className="flex flex-col gap-4">
+              <div>
+                <label className="mb-1 block text-xs text-fg-muted">Slug</label>
+                {mode === "create" ? (
+                  <>
+                    <input
+                      type="text"
+                      value={slug}
+                      onChange={(e) => {
+                        slugTouched.current = true;
+                        setSlug(e.target.value);
+                      }}
+                      placeholder="url-slug"
+                      className={inputClass}
+                    />
+                    <p className="mt-1 text-xs text-fg-subtle">
+                      /posts/{slug || "…"} · 소문자·숫자·하이픈만
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      value={initialSlug ?? ""}
+                      disabled
+                      className={cn(inputClass, "opacity-60")}
+                    />
+                    <p className="mt-1 text-xs text-fg-subtle">
+                      발행 후 고정 (링크 깨짐 방지)
+                    </p>
+                  </>
+                )}
+              </div>
+
               <div>
                 <label className="mb-1 block text-xs text-fg-muted">Date</label>
                 <input
