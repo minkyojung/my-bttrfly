@@ -83,8 +83,9 @@ export function usePostEditor(
     content: value,
     editorProps: {
       attributes: {
-        class:
-          "prose font-serif max-w-none min-h-[400px] text-[18px] leading-[1.7] text-fg focus:outline-none",
+        // 타이포그래피는 tailwind.config.ts의 typography가 담당한다(발행 페이지와
+        // 같은 정의). 여기서는 편집 영역으로서 필요한 것만 더한다.
+        class: "prose max-w-none min-h-[400px] focus:outline-none",
       },
       // 클립보드 이미지 붙여넣기: 이미지가 있으면 가로채 업로드 후 삽입.
       handlePaste: (_view, event) => {

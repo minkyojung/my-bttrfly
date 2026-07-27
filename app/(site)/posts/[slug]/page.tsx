@@ -10,21 +10,9 @@ import { JsonLd } from "@/components/JsonLd";
 import { blogPostingSchema, postUrl } from "@/lib/site-config";
 import type { Metadata } from "next";
 
-// 본문 prose 스타일. 이 페이지에서만 쓰이므로 JSX를 어지럽히지 않게 상수로 분리.
-const postProseClass = `prose prose-serif font-serif w-full max-w-content text-[18px] leading-[1.7] font-normal
-  prose-headings:font-black
-  prose-h1:text-3xl prose-h1:mb-6 prose-h1:mt-10
-  prose-h2:text-2xl prose-h2:mb-4 prose-h2:mt-8
-  prose-h3:text-xl prose-h3:mb-3 prose-h3:mt-6
-  prose-p:mb-2
-  prose-blockquote:border-l-2 prose-blockquote:pl-4 prose-blockquote:italic prose-blockquote:mb-2
-  prose-ul:mb-2 prose-ul:list-disc prose-ul:pl-5
-  prose-ol:mb-2 prose-ol:list-decimal prose-ol:pl-5
-  prose-li:mb-1
-  prose-hr:my-8
-  prose-code:px-1 prose-code:rounded-sm prose-code:text-sm
-  prose-pre:rounded-md prose-pre:p-4 prose-pre:mb-4
-  prose-a:underline hover:prose-a:opacity-60`;
+// 본문 타이포그래피는 tailwind.config.ts의 typography에 있다(에디터·미리보기와
+// 공유). 여기서는 이 페이지에서만 다른 '폭'만 지정한다.
+const postProseClass = "prose w-full max-w-content";
 
 export async function generateStaticParams() {
   const posts = await getAllPosts();
