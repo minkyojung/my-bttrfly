@@ -330,6 +330,18 @@ export function PostForm({ mode, slug: initialSlug, initialValues }: PostFormPro
             <span className="shrink-0 text-xs text-fg-subtle">
               {dirty ? "· Unsaved" : savedSlug ? "· Saved" : ""}
             </span>
+            {/* 초안은 공개 페이지에서 404이므로 발행된 글에만 노출한다.
+                편집 중 내용을 잃지 않도록 새 탭으로 연다. */}
+            {mode === "edit" && !draft && (
+              <a
+                href={`/posts/${initialSlug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="shrink-0 text-xs text-fg-muted underline hover:text-fg"
+              >
+                View ↗
+              </a>
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <button

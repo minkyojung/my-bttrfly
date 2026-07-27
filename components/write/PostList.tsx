@@ -148,6 +148,21 @@ export function PostList({ posts }: { posts: PostListItem[] }) {
                   {post.date}
                 </span>
 
+                {/* 초안은 공개 페이지에서 404이므로 발행된 글에만 노출한다. */}
+                <span className="w-8 shrink-0 text-right">
+                  {!draft && (
+                    <a
+                      href={`/posts/${post.slug}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      title="View live post"
+                      className="text-xs text-fg-muted hover:text-fg"
+                    >
+                      ↗
+                    </a>
+                  )}
+                </span>
+
                 <button
                   type="button"
                   onClick={() => toggleDraft(post)}
