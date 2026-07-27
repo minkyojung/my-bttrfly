@@ -7,6 +7,9 @@
       "esnext"
     ],
     "allowJs": true,
+    // 테스트(test/*.test.mts)는 Node가 직접 실행하며, Node의 타입 스트리핑은
+    // import에 명시적 .ts 확장자를 요구한다. noEmit이라 켜도 안전하다.
+    "allowImportingTsExtensions": true,
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
@@ -31,6 +34,7 @@
   "include": [
     "next-env.d.ts",
     "**/*.ts",
+    "**/*.mts",
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
