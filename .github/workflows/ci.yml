@@ -37,7 +37,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - run: npm run build:check
         env:
           KEYSTATIC_GITHUB_CLIENT_ID: dummy
           KEYSTATIC_GITHUB_CLIENT_SECRET: dummy
