@@ -2,7 +2,7 @@
 title: 스타일 견본
 date: '2026-07-27'
 summary: 본문에 쓰이는 모든 요소를 한자리에 모아둔 견본. 타이포그래피를 조정할 때 여기서 확인한다.
-category: Essays
+category: Retrospectives
 draft: true
 featured: false
 ---
