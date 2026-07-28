@@ -40,6 +40,10 @@ function getBranch(): string {
 async function githubFetch(path: string, init?: RequestInit): Promise<Response> {
   const { owner, name } = getRepo();
   return fetch(`${GITHUB_API}/repos/${owner}/${name}${path}`, {
+    // CMS 읽기는 절대 캐시하면 안 된다. 캐시된 sha로 충돌을 판정하면 검사가
+    // 거짓말을 하게 되고, 그게 이 파일이 고치려는 문제와 같은 종류의 버그다.
+    // init보다 앞에 둬서 호출부가 필요하면 덮어쓸 수 있게 한다.
+    cache: "no-store",
     ...init,
     headers: {
       Authorization: `Bearer ${getToken()}`,
