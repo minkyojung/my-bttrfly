@@ -5,9 +5,11 @@
  * 전용이며, `Buffer` 등 Node API를 쓰므로 미들웨어(Edge)에서 import하면 안 된다.
  */
 import "server-only";
+import { cache } from "react";
 import { GITHUB_REPO } from "@/lib/repo";
 
 const GITHUB_API = "https://api.github.com";
+const GITHUB_RAW = "https://raw.githubusercontent.com";
 
 export class GitHubWriteError extends Error {
   status: number;
@@ -70,6 +72,75 @@ export async function getFile(path: string): Promise<GitHubFile | null> {
   const content = Buffer.from(json.content, "base64").toString("utf8");
   return { content, sha: json.sha };
 }
+
+export interface RepoTextFile {
+  path: string;
+  content: string;
+}
+
+/**
+ * 디렉터리 하나를 통째로 읽는다.
+ *
+ * 파일마다 Contents API를 부르면 46번 왕복이라, 트리를 한 번 받아 경로를 모으고
+ * 내용은 raw에서 병렬로 가져온다. raw 주소는 트리가 알려준 커밋에 고정한다 —
+ * 읽는 도중에 브랜치가 움직여도 한 시점의 스냅샷을 보게 되고, 주소가 불변이라
+ * 캐시해도 안전하며, raw는 REST 요청 한도를 쓰지 않는다.
+ *
+ * cache()로 감싼 이유는 한 번의 렌더에서 여러 번 불려도 트리 요청이 한 번만
+ * 나가게 하기 위함이다(요청 사이에는 공유되지 않는다).
+ */
+export const listTextFiles = cache(
+  async (dir: string, extension = ".md"): Promise<RepoTextFile[]> => {
+    const branch = getBranch();
+    const res = await githubFetch(
+      `/git/trees/${encodeURIComponent(branch)}?recursive=1`
+    );
+    if (!res.ok) throw new GitHubWriteError(await res.text(), res.status);
+
+    const tree = (await res.json()) as {
+      sha: string;
+      truncated?: boolean;
+      tree: { path: string; type: string }[];
+    };
+    // 트리가 잘렸는데 그냥 넘어가면 글이 조용히 사라진 목록을 보여주게 된다.
+    // 지금은 한도(10만 항목)의 0.05% 수준이지만, 조용히 틀리느니 멈추는 게 낫다.
+    if (tree.truncated) {
+      throw new GitHubWriteError(
+        `Tree listing for ${branch} was truncated — too many files to list in one request`,
+        502
+      );
+    }
+
+    const prefix = dir.endsWith("/") ? dir : `${dir}/`;
+    const paths = tree.tree
+      .filter(
+        (e) =>
+          e.type === "blob" &&
+          e.path.startsWith(prefix) &&
+          e.path.endsWith(extension)
+      )
+      .map((e) => e.path);
+
+    const { owner, name } = getRepo();
+    return Promise.all(
+      paths.map(async (path) => {
+        const blob = await fetch(
+          `${GITHUB_RAW}/${owner}/${name}/${tree.sha}/${encodeURI(path)}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+              "User-Agent": "minkyojung.com write-ui",
+            },
+          }
+        );
+        if (!blob.ok) {
+          throw new GitHubWriteError(`Failed to read ${path}`, blob.status);
+        }
+        return { path, content: await blob.text() };
+      })
+    );
+  }
+);
 
 // 신규 생성이면 sha 없이, 기존 파일 수정이면 sha를 반드시 넘겨야 GitHub이
 // 받아준다. sha 불일치는 GitHub이 409/422로 알려주므로 별도 락 구현은 불필요.

@@ -139,13 +139,9 @@ async function getAllPostsUncached(): Promise<Post[]> {
 
 export const getAllPosts = cache(getAllPostsUncached);
 
-// draft를 포함해 전부 조회한다. 글쓰기 UI(/write) 목록 전용 —
-// 공개 목록/사이트맵/OG 등 사용자 대면 경로에는 절대 쓰지 않는다.
-async function getAllPostsForEditUncached(): Promise<Post[]> {
-  return readAllPosts();
-}
-
-export const getAllPostsForEdit = cache(getAllPostsForEditUncached);
+// /write는 목록도 편집 화면도 여기서 읽지 않는다. 이 파일이 보는 건 배포 시점에
+// 얼어붙은 스냅샷이라, 저장이 대조하는 GitHub의 현재 상태와 어긋난다.
+// 공개 사이트만 여기서 읽는다 — 그쪽은 배포된 것을 보여주는 게 맞다.
 
 function readPostFile(slug: string): Post | null {
   // URL 인코딩된 경로 탈출(%2F 등) 차단

@@ -20,8 +20,8 @@ export function PostList({ posts }: { posts: PostListItem[] }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
-  // 토글 결과는 GitHub 커밋 → 재배포 후에야 서버 목록에 반영된다. 그때까지
-  // 화면이 옛 상태로 보이지 않도록 낙관적으로 덮어쓴다.
+  // 토글은 커밋이 끝나야 서버 목록에 반영된다. 그 사이 버튼이 눌린 채로 아무
+  // 반응 없어 보이지 않도록 낙관적으로 덮어쓴다(새로고침하면 서버 값이 이긴다).
   const [overrides, setOverrides] = useState<Record<string, boolean>>({});
   const [pending, setPending] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
