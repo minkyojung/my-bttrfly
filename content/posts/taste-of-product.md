@@ -4,5 +4,4 @@ date: "2026-05-04"
 external: "https://williamjung0130.substack.com/p/taste-of-product"
 labelImage: "/badges/substack.png"
 category: "Essays"
-draft: true
 ---

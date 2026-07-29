@@ -4,5 +4,4 @@ date: "2024-01-16"
 external: "https://williamjung0130.substack.com/p/128"
 labelImage: "/badges/substack.png"
 category: "Essays"
-draft: true
 ---
