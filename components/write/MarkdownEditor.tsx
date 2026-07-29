@@ -2,11 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import Placeholder from "@tiptap/extension-placeholder";
-import Image from "@tiptap/extension-image";
-import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
-import { Markdown } from "tiptap-markdown";
+import { editorExtensions } from "@/lib/editor-extensions";
 import { cn } from "@/lib/utils";
 
 // 이미지 업로드(툴바·붙여넣기·드래그 공용). 성공 시 공개 경로, 실패 시 null.
@@ -70,18 +66,7 @@ export function usePostEditor(
 
   const editor = useEditor({
     immediatelyRender: false, // Next SSR 하이드레이션 미스매치 방지
-    extensions: [
-      StarterKit,
-      Image,
-      // 열 너비 조절은 끈다. 본문은 마크다운으로 저장되는데 표 문법에는 너비를
-      // 적을 자리가 없어, 드래그해서 맞춰도 다시 열면 그대로 사라진다.
-      Table.configure({ resizable: false }),
-      TableRow,
-      TableHeader,
-      TableCell,
-      Markdown,
-      Placeholder.configure({ placeholder: "Start writing…" }),
-    ],
+    extensions: editorExtensions,
     content: value,
     editorProps: {
       attributes: {
