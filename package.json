@@ -12,7 +12,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node --conditions=react-server --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts"
+    "test": "npm run test:unit && npm run test:editor",
+    "test:unit": "node --conditions=react-server --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
+    "test:editor": "node --import ./test/editor/dom-setup.mjs --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/editor/*.test.mts"
   },
   "dependencies": {
     "@keystatic/core": "^0.5.51",
