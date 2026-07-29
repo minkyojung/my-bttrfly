@@ -6,5 +6,4 @@ label: "D"
 labelColor: "#ffffff"
 labelTextColor: "#000000"
 category: "Interviews"
-draft: true
 ---

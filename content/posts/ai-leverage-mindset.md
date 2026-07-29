@@ -3,7 +3,6 @@ title: "오래 일하기 위한 마인드셋, 성장을 위해 AI를 레버리�
 date: "2024-05-18"
 labelImage: "/badges/substack.png"
 category: "Newsletter"
-draft: true
 ---
 
 2개월 만입니다. 그동안 많은 일이 있었는데요.

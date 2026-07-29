@@ -3,6 +3,7 @@ title: "프라이싱 페이지를 열두 번 고친 이유"
 date: "2026-07-01"
 category: "Essays"
 cover: "/images/samples/cover-06.png"
+draft: true
 ---
 프로덕트를 만드는 일은 결국 관점을 만드는 일이다. 같은 기능이라도 어떤 순서로, 어떤 언어로, 어떤 밀도로 전달하느냐에 따라 완전히 다른 경험이 된다.
 
