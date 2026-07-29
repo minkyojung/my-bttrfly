@@ -5,7 +5,6 @@ source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/zqsnzk'
 ---
-
 **만들면 안되는 AI UX 3가지**
 
 안녕하세요! 디스콰이엇 정민교입니다.
@@ -13,23 +12,20 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 최근 3주동안 20개 이상의 AI 제품에 온보딩했고, 이 제품들로 결과물을 만들면서 불편했던 UX가 많이 있었습니다. 그런데 마침 저의 컨텐츠를 읽은 분들께서 이런 피드백을 주셨어요.
 
 > "실제 AI 제품을 만들 때 참고할 수 있는 UX를 알려주세요"
-> 
+>
 > "저는 개발자라 UX에 대한 지식이 부족합니다. 어떤 레퍼런스를 참고해야할지 모르겠어요"
 
 사실 'AI SaaS가 따라야하는 필수 UX'는 많은 AI 팀들이 시행착오를 겪어가며 찾아가는 중인 것 같습니다. 하지만 제품을 사용하다보니 **사용성이 좋지 않은 UX**는 확실히 느껴졌어요.
 
 그래서 오늘은 AI 제품을 사용하면서 가장 불편했던 3가지 유형의 UX와 개선방안을 적어봤어요.
 
-*   AI 제품의 비용구조는 복잡할 수 있기 때문에 명확한 비용정보가 제공되어야 해요.
-    
-*   AI가 작업을 처리할 때, 그 과정과 방법에 대한 상세한 정보가 사용자에게 전달되어야 해요.
-    
-*   유저가 정보를 탐색하게 하지 말고, 선별된 정보를 검토할 수 있게 경험을 설계해보세요.
-    
+- AI 제품의 비용구조는 복잡할 수 있기 때문에 명확한 비용정보가 제공되어야 해요.
+- AI가 작업을 처리할 때, 그 과정과 방법에 대한 상세한 정보가 사용자에게 전달되어야 해요.
+- 유저가 정보를 탐색하게 하지 말고, 선별된 정보를 검토할 수 있게 경험을 설계해보세요.
 
-* * *
+---
 
-## 1\. 보험약관 유형 : 비용 구조를 친절하게 공개하지 않음
+## 1. 보험약관 유형 : 비용 구조를 친절하게 공개하지 않음
 
 ## 문제상황
 
@@ -37,20 +33,20 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 
 놀라울 정도로 제 아이디어에 대해 구체적으로 질문하고, 세부 개발 스펙까지 제안해주는 것이 인상깊었어요. 하지만 본격적으로 제품 개발을 시작하려고 할 때, 무료 토큰이 소진되어 Pro 플랜을 구독해야한다는 아래와 같은 모달이 떴어요.
 
-![Screenshot 2024-06-13 at 9.24.32 AM.png](/images/uploads/disquiet-bad-ai-ux-2.png "Screenshot 2024-06-13 at 9.24.32 AM.png")_// 무료 체험판이 끝났다_
+![Screenshot 2024-06-13 at 9.24.32 AM.png](/images/uploads/disquiet-bad-ai-ux-2.png "Screenshot 2024-06-13 at 9.24.32 AM.png")*// 무료 체험판이 끝났다*
 
 이때 CTA 버튼을 누르면 Pro 플랜을 구독할 수 있는 결제 모듈 링크가 메일로 전달되는데요. 전 별도의 구독료가 필요하지 않다는 것을 알고 있었기 때문에 의아함을 느끼고 구글링을 해봤어요.
 
 알고보니 무료 체험판이 끝났을 때, 자신의 OpenAI API 키로 API key를 바꿔주면 그대로 서비스를 활용할 수 있다는 것을 알게 되었어요. 저와 비슷하게 혼란을 겪는 사람들이 정보를 주고받는 모습도 볼 수 있었습니다.
 
-![2.png](/images/uploads/disquiet-bad-ai-ux-3.png "2.png")_// 비용에 대한 안내가 친절하지 않아 헷갈린다는 유저의 코멘트_
+![2.png](/images/uploads/disquiet-bad-ai-ux-3.png "2.png")*// 비용에 대한 안내가 친절하지 않아 헷갈린다는 유저의 코멘트*
 
 > 'Free trial ended'가 헷갈리네요.
-> 
+>
 > 사실 [.env 파일에서 당신의 OpenAI API 키로 수정](https://github.com/Pythagora-io/gpt-pilot/wiki/Using-Pythagora-with-your-own-OpenAI-key)만 하면 됩니다. 그럼 계속 제품을 사용할 수 있어요.  
-> 
+>
 > 만약 당신이 OpenAI API 키를 제공하지 않으면, 그들의 키를 사용하게 되고, 따라서 그들이 비용을 지불하게 됩니다. 이러한 비용은 기본적으로 당신에게 전가되지만, 이것이 잘 문서화되어 표시되어 있지 않았습니다.
-> 
+>
 > ...
 
 정리하면, 자신이 OpenAI API 키를 가지고 있다면 별도의 결제를 할 필요가 없습니다. 키가 없다면 결제하면 되고요.
@@ -66,10 +62,8 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 
 이러한 불편함이 생기는 이유에는 두 가지 이유가 있어요.
 
-*   **중요정보에 대한 접근성 낮음** : 비용은 제품 사용여부를 결정할 때 중요한 요소에요. 하지만 가격에 대한 정보를 알 수 있는 방법이 제한되어있어요. 또한 Pythagora를 구독하는 것과 자체 API 키를 사용하는 것의 차이에는 어떤 것이 있는지 안내되지 않아 유저에게 혼란을 줄 수 있습니다.
-    
-*   **가독성이 떨어지는 표기** : 사용자가 구독료를 지불하도록 유도하는 다크패턴의 일환으로, 중요한 정보를 작은 글씨로 배치한 경우에요.
-    
+- **중요정보에 대한 접근성 낮음** : 비용은 제품 사용여부를 결정할 때 중요한 요소에요. 하지만 가격에 대한 정보를 알 수 있는 방법이 제한되어있어요. 또한 Pythagora를 구독하는 것과 자체 API 키를 사용하는 것의 차이에는 어떤 것이 있는지 안내되지 않아 유저에게 혼란을 줄 수 있습니다.
+- **가독성이 떨어지는 표기** : 사용자가 구독료를 지불하도록 유도하는 다크패턴의 일환으로, 중요한 정보를 작은 글씨로 배치한 경우에요.
 
 ## 개선방법
 
@@ -79,13 +73,13 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 
 ![image.png](/images/uploads/disquiet-bad-ai-ux-4.png "image.png")이러한 형태의 대시보드는 유저가 얼만큼의 비용이 지불되는지 일일이 계산하거나 파악하지 않아도 되는 장점이 있어요. 특히 AI 제품의 경우 비용구조가 복잡할 수 있기 때문에 유저에게 명확한 비용산정 방식 또는 비용을 안내할 필요가 있습니다.
 
-## 2\. 나만 믿어 유형 : 프롬프트 처리 과정을 공유하지 않음
+## 2. 나만 믿어 유형 : 프롬프트 처리 과정을 공유하지 않음
 
 ## 문제상황
 
 이번에는 프롬프트를 입력했는데 그 처리 과정이 공유되지 않는 경우입니다. 먼저 문제가 되는 상황을 볼까요?
 
-![Frame 17.png](/images/uploads/disquiet-bad-ai-ux-5.png "Frame 17.png")_// 프롬프트로 디버깅을 요청했더니 everything is ok라고 답변. 하지만 여전히 버그가 고쳐지지 않음_
+![Frame 17.png](/images/uploads/disquiet-bad-ai-ux-5.png "Frame 17.png")*// 프롬프트로 디버깅을 요청했더니 everything is ok라고 답변. 하지만 여전히 버그가 고쳐지지 않음*
 
 지난 컨텐츠에서 '[프롬프트 하나로 풀스택 웹앱을 만들어주는 Marblism](https://disquiet.io/@williamjung/makerlog/%ED%94%84%EB%A1%AC%ED%94%84%ED%8A%B8-%ED%95%98%EB%82%98%EB%A1%9C-%ED%92%80%EC%8A%A4%ED%83%9D-%EC%9B%B9%EC%95%B1%EC%9D%84-%EB%A7%8C%EB%93%9C%EB%8A%94-marblism)'을 소개한 적이 있는데요. 이때 불편했던 UX가 바로 프롬프트로 디버깅을 하는 경험이었습니다.
 
@@ -103,9 +97,9 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 
 그래서 AI 제품은 AI가 어떤 근거로 작업물을 생성했는지에 대해 상세하게 정보를 전달할 필요가 있습니다.
 
-![ChatGPT Code Interpreter: What It Is, How It Works | 365 Data Science](/images/uploads/disquiet-bad-ai-ux-6.webp)_// 작업 처리를 위해 생성한 python 코드를 볼 수 있다_
+![ChatGPT Code Interpreter: What It Is, How It Works | 365 Data Science](/images/uploads/disquiet-bad-ai-ux-6.webp)*// 작업 처리를 위해 생성한 python 코드를 볼 수 있다*
 
-## 3\. TMI 유형 : 너무 많은 정보가 나열되어 있음
+## 3. TMI 유형 : 너무 많은 정보가 나열되어 있음
 
 ## 문제상황
 
@@ -121,7 +115,7 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 
 ## 해결방법
 
-사람이 인터넷에서 원하는 정보를 얻는 방식은 **'내가 정보를 찾아가는 방식'에서 '선별된 정보를 검토하는 방식'**으로 변하고 있어요.
+사람이 인터넷에서 원하는 정보를 얻는 방식은 \*\*'내가 정보를 찾아가는 방식'에서 '선별된 정보를 검토하는 방식'\*\*으로 변하고 있어요.
 
 > 검색하기 → 검색한 정보를 필터링하기 → 프롬프트를 작성해 선별된 정보를 받아 검토하기
 
@@ -129,9 +123,9 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 
 아래의 두 이미지를 비교하면서 어떻게 UI가 변경되었는지 확인해보세요 :)
 
-![image.png](/images/uploads/disquiet-bad-ai-ux-8.png "image.png")_// 이전의 Zapier 탐색 탭_
+![image.png](/images/uploads/disquiet-bad-ai-ux-8.png "image.png")*// 이전의 Zapier 탐색 탭*
 
-![image.png](/images/uploads/disquiet-bad-ai-ux-9.png "image.png")_// 현재 변경된 UX. 자연어로 유저가 원하는 자동화를 입력하면 자동화 템플릿을 생성해준다._
+![image.png](/images/uploads/disquiet-bad-ai-ux-9.png "image.png")*// 현재 변경된 UX. 자연어로 유저가 원하는 자동화를 입력하면 자동화 템플릿을 생성해준다.*
 
 ## 정리
 
@@ -139,15 +133,14 @@ canonical: 'https://disquiet.io/articles/zqsnzk'
 
 특히 AI 기술의 잠재성이 크다보니 지나치게 발산적인 사고를 하게되는 경우도 많다고 생각하는데요. 그래서 이것저것 창의적인 솔루션을 생각하며 기능개발에 많은 리소스를 쓰게 되는 것 같아요. 그래서 이럴 때일수록 더 유저의 문제에 집중해서 최대한 단순하게 문제를 정의하고 솔루션을 만드는 자세가 중요하게 느껴지네요!
 
-* * *
+---
 
 ## 혹시 대신 리뷰를 맡기고 싶은 제품이 있나요?
 
 매주 컨텐츠에 대한 피드백을 받고 있는데요, 특히 아래와 같은 피드백이 눈에 띄게 많아요.
 
 > AI 제품은 쏟아져 나오는데 일일이 사용해보기는 귀찮고, 직접 써보자니 우선순위에서 밀려 결국 사용해보지 못하고 넘어가는 경우가 많다.
-> 
->   
+>
 > 대신 프로덕트를 사용해서 리뷰 남겨주는 컨텐츠가 좋은 것 같다.
 
 그래서 여러분을 대신해서 프로덕트를 직접 사용해보고, 특징, 인상깊은 UX, 창업가의 스토리, GTM 전략 등을 큐레이션해보려 합니다.

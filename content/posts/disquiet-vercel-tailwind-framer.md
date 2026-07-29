@@ -5,29 +5,22 @@ source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/OQs9OZ'
 ---
-
 **Vercel, Tailwind, Framer 창업가도 사용하는 생산성 SaaS**
 
 ![sense of product og img.png](/images/uploads/disquiet-vercel-tailwind-framer-1.png "sense of product og img.png")Vercel, Framer, Tailwind CSS의 창업가들도 사용하는 생산성 SaaS가 있어요.
 
-키보드 커맨드를 편리하게 사용할 수 있도록 만들어진 Raycast 인데요. 이미 3~4년 전부터 개발자들 사이에서 편의성을 인정받아 사랑받고 있어요. 다만, 키보드 커맨드가 익숙하지 않다면 어떻게 활용해야할지 모를 수 있어요.
+키보드 커맨드를 편리하게 사용할 수 있도록 만들어진 Raycast 인데요. 이미 3\~4년 전부터 개발자들 사이에서 편의성을 인정받아 사랑받고 있어요. 다만, 키보드 커맨드가 익숙하지 않다면 어떻게 활용해야할지 모를 수 있어요.
 
 그래서 오늘은 생산성을 높이고 싶은 메이커를 위해 Raycast에서 사용하면 좋은 기능과 익스텐션에 대해 적어봤습니다. 이런 내용을 다룰 예정이에요.
 
-*   Snippet으로 반복해서 입력하는 텍스트 효율화하기
-    
-*   모든 웹/앱에 빠르게 접근하기
-    
-*   마우스 없이 창 크기/위치 조절하기
-    
-*   복사한 정보를 저장하고, 어디서든 활용하기
-    
-*   추천 익스텐션 10개
-    
-*   AI 기능 소개
-    
+- Snippet으로 반복해서 입력하는 텍스트 효율화하기
+- 모든 웹/앱에 빠르게 접근하기
+- 마우스 없이 창 크기/위치 조절하기
+- 복사한 정보를 저장하고, 어디서든 활용하기
+- 추천 익스텐션 10개
+- AI 기능 소개
 
-* * *
+---
 
 ![Screenshot 2024-08-16 at 12.23.18 PM 1.png](/images/uploads/disquiet-vercel-tailwind-framer-2.png "Screenshot 2024-08-16 at 12.23.18 PM 1.png")Raycast는 MacOS 환경에서 키보드 커맨드를 통해 다양한 작업을 빠르게 수행할 수 있도록 설계된 SaaS에요. `Command+K` 검색창을 로컬 환경에서 자유롭게 활용할 수 있는 것이죠. 유사하게 이전에는 Alfred, Spotlight이 있었지만, 이들은 단순히 파일 또는 특정 앱에 접근하는 것만 가능했었습니다.
 
@@ -35,28 +28,20 @@ Raycast는 조금 다릅니다. 초기부터 개발자들에게 집중해 커뮤
 
 그럼 Raycast를 어떻게 활용하는 기본적인 방법을 알아볼까요?
 
-## 1\. Snippet으로 반복해서 사용하는 텍스트 효율화하기
+## 1. Snippet으로 반복해서 사용하는 텍스트 효율화하기
 
 가장 먼저 소개할 기능은 Snippet(스니펫)입니다. 스니펫은 조건부로 특정 텍스트를 생성하는 기능인데요, Raycast의 스니펫은 한 번 설정해두면 이메일 클라이언트, 노트 앱 등 어떤 응용 프로그램에서도 사용할 수 있다는 장점이 있어요.
 
 제가 주로 사용하는 스니펫은 아래와 같아요.
 
-*   `!email` → [\[email protected\]](https://disquiet.io/cdn-cgi/l/email-protection#80f7e9ecece9e1edeaf5eee7c0e4e9f3f1f5e9e5f4aee9ef)
-    
-*   `!day` → Wednesday
-    
-*   `!td` Aug 14, 2024
-    
-*   `!dot` → ·
-    
-*   `!hi` → 안녕하세요, 디스콰이엇 정민교입니다.
-    
-*   `.cs` → \[디스콰이엇\] 문의주신 사항에 대해 답변드립니다.
-    
-*   `.rt` → 감사합니다. 정민교 드림
-    
-*   `!lorem` → Ut velit ea ea. Eu cupidatat ad labore do. Est sint laboris ullamco commodo magna sunt elit. Sit ut ipsum est laboris enim velit eu tempor fugiat anim consectetur sit. odo magna.
-    
+- `!email` → [\[email protected\]](https://disquiet.io/cdn-cgi/l/email-protection#80f7e9ecece9e1edeaf5eee7c0e4e9f3f1f5e9e5f4aee9ef)
+- `!day` → Wednesday
+- `!td` Aug 14, 2024
+- `!dot` → ·
+- `!hi` → 안녕하세요, 디스콰이엇 정민교입니다.
+- `.cs` → \[디스콰이엇\] 문의주신 사항에 대해 답변드립니다.
+- `.rt` → 감사합니다. 정민교 드림
+- `!lorem` → Ut velit ea ea. Eu cupidatat ad labore do. Est sint laboris ullamco commodo magna sunt elit. Sit ut ipsum est laboris enim velit eu tempor fugiat anim consectetur sit. odo magna.
 
 위에서 언급된 스니펫들은 실무에서 무의식적으로 반복 타이핑하는 것들이에요. 이렇게 사소한 텍스트를 효율적으로 작성하는 것도 가능하지만, 가끔은 여러 SaaS를 넘나들어야하는 상황도 있는데요. 예를 들면, [Cal.com](http://cal.com/) 에서 캘린더 링크를 복사해 누군가에게 공유해야한다고 가정해볼까요?
 
@@ -70,26 +55,18 @@ Raycast는 조금 다릅니다. 초기부터 개발자들에게 집중해 커뮤
 
 이렇게 워크플로우를 끊임없이 최적화해가면 불필요한 컨텍스트 스위칭을 줄이고, 일에 온전히 집중할 수 있어요. 개발자 분들은 자주 사용하는 코드를 스니펫으로 만들어 활용해볼 수도 있죠.
 
-## 2\. 모든 웹/앱에 빠르게 접근하기
+## 2. 모든 웹/앱에 빠르게 접근하기
 
 다음으로 Quicklink입니다. 기본적으로 빠르게 특정 링크로 이동하게 도와주지만, URL에 쿼리를 포함시킬 수 있어 더 다양한 기능을 가능하게 해요. 이때, Link에는 아래 8가지 변수를 넣을 수 있어요.
 
-*   커서로 드래그한 텍스트
-    
-*   복사한 텍스트
-    
-*   쿼리(인자)
-    
-*   UUID(중복되지 않는 식별자)
-    
-*   스니펫
-    
-*   날짜
-    
-*   시간
-    
-*   요일
-    
+- 커서로 드래그한 텍스트
+- 복사한 텍스트
+- 쿼리(인자)
+- UUID(중복되지 않는 식별자)
+- 스니펫
+- 날짜
+- 시간
+- 요일
 
 예를 들어, 아래와 같이 즉시 구글링할 수 있는 기능을 만들어볼 수 있어요.
 
@@ -99,20 +76,17 @@ Raycast는 조금 다릅니다. 초기부터 개발자들에게 집중해 커뮤
 
 ![Screenshot 2024-08-18 at 9.34.24 PM 1.png](/images/uploads/disquiet-vercel-tailwind-framer-4.png "Screenshot 2024-08-18 at 9.34.24 PM 1.png")이외에도 Quicklink를 활용하는 방법은 무궁무진해요.
 
-*   자주 메일을 보내야하는 사람을 `mailto:{email addr}`로 설정해 간편한 명령어로 메일 보내기
-    
-*   내 로컬 특정 폴더로 빠르게 접근하기
-    
-*   웹훅을 활용해 PR을 디스코드, Jira 등에 자동으로 보내기
-    
+- 자주 메일을 보내야하는 사람을 `mailto:{email addr}`로 설정해 간편한 명령어로 메일 보내기
+- 내 로컬 특정 폴더로 빠르게 접근하기
+- 웹훅을 활용해 PR을 디스코드, Jira 등에 자동으로 보내기
 
 혹시 Quicklink를 활용하는 나만의 팁이 있다면 댓글로 공유해주세요!
 
-## 3\. 마우스 없이 창 크기/위치 조절하기
+## 3. 마우스 없이 창 크기/위치 조절하기
 
 창 크기를 조절하는 것만큼 마우스를 많이 쓰게 되는 일이 없는데요. Raycast에서는 단축키를 설정해 편하게 창의 위치와 크기를 조절할 수 있습니다. 저는 `^⌘` + `방향키` 조합을 활용하고 있어요.
 
-## 4\. 복사했던 정보를 저장하고, 언제든지 활용하기
+## 4. 복사했던 정보를 저장하고, 언제든지 활용하기
 
 클립보드 히스토리는 유저가 복사한 텍스트, 이미지, 파일 등을 기록하는 기능인데요. 크게 두 가지 기능을 합니다.
 
@@ -124,32 +98,22 @@ Raycast는 조금 다릅니다. 초기부터 개발자들에게 집중해 커뮤
 
 ![Screenshot 2024-08-18 at 5.47.55 PM.png](/images/uploads/disquiet-vercel-tailwind-framer-7.png "Screenshot 2024-08-18 at 5.47.55 PM.png")클립보드에 복사된 정보를 활용해 다른 기능을 사용할 수도 있는데요. 예를 들어, 최근에 개인 웹사이트를 만들면서 이미지의 alt text를 만드는 일이 귀찮았어요. 그래서 특정 이미지를 복사한 다음, 위의 익스텐션을 실행시켜 ai로 빠르게 alt text를 만들었어요.
 
-## 5\. 추천 익스텐션 10개
+## 5. 추천 익스텐션 10개
 
 기본기능 외에 제가 오랫동안 사용해본 무료 익스텐션 10가지입니다. 아래 익스텐션을 활용하시면 마우스 한 번 사용하지 않고, 모든 응용프로그램에 접근할 수 있어요.
 
-*   **Ollama** — 로컬 LLM을 빠르고 편하게 이용하기
-    
-*   **Floating Note** — 항상 모든 창 위에 떠 있는 메모장
-    
-*   **Github** — PR, 이슈, 리포지토리 등을 생성하고 조회하기
-    
-*   **Spotify** — 음악을 검색/재생/관리하기
-    
-*   **Tawilwind CSS** — Tawilwind CSS의 색상값, 컴포넌트, 문서를 즉시 검색하기
-    
-*   **ChatGPT/Claude/Perplexity** — Raycast에서 바로 AI Chatbot 서비스를 사용하기
-    
-*   **Notion** — Raycast에서 바로 노션 문서를 조회/생성/작성하기
-    
-*   **1password** — 즉시 1password에서 비밀번호를 조회/생성하기
-    
-*   **Format JSON** — JSON 데이터를 가독성 있게 정리하기
-    
-*   **Hacker News** — Raycast에서 Hacker News를 즉시 조회하기
-    
+- **Ollama** — 로컬 LLM을 빠르고 편하게 이용하기
+- **Floating Note** — 항상 모든 창 위에 떠 있는 메모장
+- **Github** — PR, 이슈, 리포지토리 등을 생성하고 조회하기
+- **Spotify** — 음악을 검색/재생/관리하기
+- **Tawilwind CSS** — Tawilwind CSS의 색상값, 컴포넌트, 문서를 즉시 검색하기
+- **ChatGPT/Claude/Perplexity** — Raycast에서 바로 AI Chatbot 서비스를 사용하기
+- **Notion** — Raycast에서 바로 노션 문서를 조회/생성/작성하기
+- **1password** — 즉시 1password에서 비밀번호를 조회/생성하기
+- **Format JSON** — JSON 데이터를 가독성 있게 정리하기
+- **Hacker News** — Raycast에서 Hacker News를 즉시 조회하기
 
-## 6\. AI 기능 (유료)
+## 6. AI 기능 (유료)
 
 지금부터는 유료 기능인데요. 유료 유저의 입장에서 Raycast AI에 대한 솔직한 후기를 정리해봤습니다.
 
@@ -157,12 +121,9 @@ Raycast는 조금 다릅니다. 초기부터 개발자들에게 집중해 커뮤
 
 ![Screenshot 2024-08-16 at 5.43.08 PM 1.png](/images/uploads/disquiet-vercel-tailwind-framer-8.png "Screenshot 2024-08-16 at 5.43.08 PM 1.png")사실 상 GPT Wrapper라고 봐도 무방한데요. 굳이 더 나은 점을 찾자면 3가지가 있어요.
 
-*   웹을 열지 않아도 AI 기능을 사용할 수 있음
-    
-*   프롬프트나 명령어를 단축키로 설정할 수 있음
-    
-*   비교적 저렴한 가격($10)에 GPT, Claude, Llama, Mixtral 등을 제한적으로 사용할 수 있음
-    
+- 웹을 열지 않아도 AI 기능을 사용할 수 있음
+- 프롬프트나 명령어를 단축키로 설정할 수 있음
+- 비교적 저렴한 가격($10)에 GPT, Claude, Llama, Mixtral 등을 제한적으로 사용할 수 있음
 
 **하지만 애매하게 저렴한 가격에 애매한 제품을 쓰고 있다는 느낌을 지우기 어렵습니다.**
 
@@ -176,12 +137,9 @@ Raycast는 조금 다릅니다. 초기부터 개발자들에게 집중해 커뮤
 
 예를 들면, 이렇게 대체될 수 있어요.
 
-*   **텍스트 개선** : Notion AI, 기타 노트 앱에 적용된 AI 기능
-    
-*   **유튜브/웹 컨텐츠 요약정리** : Arc, Lilys 등
-    
-*   **톤앤매너 개선** : Spark AI, Superhuman AI 등
-    
+- **텍스트 개선** : Notion AI, 기타 노트 앱에 적용된 AI 기능
+- **유튜브/웹 컨텐츠 요약정리** : Arc, Lilys 등
+- **톤앤매너 개선** : Spark AI, Superhuman AI 등
 
 ## 결론 - 무료에서는 따라올 제품이 없음
 

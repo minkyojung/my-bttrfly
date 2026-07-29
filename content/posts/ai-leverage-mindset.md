@@ -4,7 +4,6 @@ date: "2024-05-18"
 source: substack
 category: "Newsletter"
 ---
-
 2개월 만입니다. 그동안 많은 일이 있었는데요.
 
 - 디스콰이엇 팀의 제품팀이 리빌딩 되었습니다.

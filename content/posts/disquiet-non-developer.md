@@ -5,7 +5,6 @@ source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/34s7Yl'
 ---
-
 **제품개발을 주저하는 비개발자를 위해**
 
 ![sense of product og img.png](/images/uploads/disquiet-non-developer-1.png "sense of product og img.png")
@@ -16,12 +15,9 @@ Cursor가 또 하나의 킬링피처, Composer를 공개했습니다. 기존에�
 
 이런 내용을 다룰 예정이에요.
 
-*   8살짜리 아이도 앱을 런칭할 수 있게 되었어요. 이제 제품개발의 유일한 허들은 코딩에 대한 막연한 두려움 뿐이에요.
-    
-*   제품개발의 난이도는 글쓰기와 비슷해지고 있어요. 좋은 글을 쓰기 위해서는 양질의 경험과 지식이 필요한 것처럼, 좋은 제품을 만들기 위해서는 세상에 존재하는 기술을 이해하고, 다양한 경험을 가지는 것이 중요해요.
-    
-*   유용한 프롬프트 팁을 소개합니다. 백지 상태에서 어떻게 시작해야할지 모르겠다면 참고해보세요.
-    
+- 8살짜리 아이도 앱을 런칭할 수 있게 되었어요. 이제 제품개발의 유일한 허들은 코딩에 대한 막연한 두려움 뿐이에요.
+- 제품개발의 난이도는 글쓰기와 비슷해지고 있어요. 좋은 글을 쓰기 위해서는 양질의 경험과 지식이 필요한 것처럼, 좋은 제품을 만들기 위해서는 세상에 존재하는 기술을 이해하고, 다양한 경험을 가지는 것이 중요해요.
+- 유용한 프롬프트 팁을 소개합니다. 백지 상태에서 어떻게 시작해야할지 모르겠다면 참고해보세요.
 
 ## 막연한 두려움
 
@@ -37,12 +33,9 @@ Composer가 공개되기 이전에도 이미 Cursor는 완성도가 높은 제�
 
 ## 사용할 것
 
-*   Cursor
-    
-*   Next.js / Tailwind CSS
-    
-*   Shadcn UI
-    
+- Cursor
+- Next.js / Tailwind CSS
+- Shadcn UI
 
 ## 인트로
 
@@ -50,11 +43,11 @@ Composer가 공개되기 이전에도 이미 Cursor는 완성도가 높은 제�
 
 아래의 순서로 시작해볼까요?
 
-## 1\. Cursor 다운로드
+## 1. Cursor 다운로드
 
 아래 링크를 들어가서 Cursor를 다운로드해주세요. Composer 기능을 이용하려면 유료 플랜을 결제해야합니다.
 
-## 2\. Next.js 앱을 생성
+## 2. Next.js 앱을 생성
 
 Cursor에서 터미널을 실행한 다음 아래의 명령어를 작성해주세요.
 
@@ -73,30 +66,26 @@ npx create-next-app@latest --typescript
 ? Would you like to customize the default import alias (@/*)? > No / Yes
 ```
 
-## 3\. 파일구조
+## 3. 파일구조
 
 ![Frame 4.png](/images/uploads/disquiet-non-developer-3.png "Frame 4.png")
 
 그럼 이런 파일들이 설치되어 있는데요, 자주 들여다볼 파일/폴더는 이렇습니다.
 
-*   src → 필요한 소스를 저장하는 곳입니다.
-    
-    *   **global.css** → 프로젝트 전체에 적용되는 스타일을 정의하빈다.
-        
-    *   **layout.tsx** → 헤더나 푸터같이 페이지에 공통적으로 적용되는 레이아웃을 설정합니다.
-        
-    *   **page.tsx** → 개발 페이지의 내용을 작성하는 곳이빈다. 여러 페이지를 만들고 싶다면 page.tsx를 여러 개 생성하면 됩니다. layout.tsx에서 정의한 레이아웃에 따라 구조화됩니다.
-        
+- src → 필요한 소스를 저장하는 곳입니다.
+  - **global.css** → 프로젝트 전체에 적용되는 스타일을 정의하빈다.
+  - **layout.tsx** → 헤더나 푸터같이 페이지에 공통적으로 적용되는 레이아웃을 설정합니다.
+  - **page.tsx** → 개발 페이지의 내용을 작성하는 곳이빈다. 여러 페이지를 만들고 싶다면 page.tsx를 여러 개 생성하면 됩니다. layout.tsx에서 정의한 레이아웃에 따라 구조화됩니다.
 
-## 4\. npm run dev
+## 4. npm run dev
 
-터미널 아래의 명령어를 실행합니다. 그럼 [localhost](http://localhost/)~로 시작하는 링크가 틀텐데요, 브라우저를 통해 해당 URL로 접속하면 여러분이 수정하는 코드의 결과물을 보실 수 있어요.
+터미널 아래의 명령어를 실행합니다. 그럼 [localhost](http://localhost/)\~로 시작하는 링크가 틀텐데요, 브라우저를 통해 해당 URL로 접속하면 여러분이 수정하는 코드의 결과물을 보실 수 있어요.
 
 ```
 npm run dev
 ```
 
-## 5\. Shadcn UI 설치
+## 5. Shadcn UI 설치
 
 ![Sep-04-2024 14-11-17.gif](/images/uploads/disquiet-non-developer-rescued-1.webp "Sep-04-2024 14-11-17.gif")예를 들어, 위의 UI를 자연어 프롬프트로 만드는 일은 굉장히 어렵고 복잡한데요. 그래서 미리 디자인된 컴포넌트들을 활용하면 제품개발 시간을 단축시킬 수 있어요. 뿐만 아니라 AI가 발산적인 결과물을 생성하지도 않죠.
 
@@ -126,7 +115,7 @@ npx shadcn@latest add
 
 그럼 component/ui라는 폴더가 생성되었고, 모든 컴포넌트가 설치된 것을 확인할 수 있습니다.
 
-## 6\. Composer 활성화
+## 6. Composer 활성화
 
 ![Screenshot 2024-09-04 at 2.17.11 PM.png](/images/uploads/disquiet-non-developer-7.png "Screenshot 2024-09-04 at 2.17.11 PM.png")
 
@@ -136,7 +125,7 @@ npx shadcn@latest add
 
 제품개발에 필요한 방향성, 컴포넌트가 준비되었어요. 이제부터는 코드보다 AI와 AI가 생성하는 결과물에 더 집중해야 하는데요. 이때 AI와 효과적으로 소통하는 방법 3가지를 정리해봤어요.
 
-## 1\. AI에게 구조화 맡기기
+## 1. AI에게 구조화 맡기기
 
 기본적으로 소프트웨어는 복잡도가 높아요. 그래서 필요한 기능과 컴포넌트를 일일이 명령하는 것이 귀찮고 기능이 복잡할수록 구조적이고 명료하게 전달하는 일도 어렵습니다.
 
@@ -184,7 +173,7 @@ npx shadcn@latest add
 
 미리 디자인된 UI를 사용한 덕에 30초도 안되서 이런 결과물을 뽑아낼 수 있었어요. 자세히보면 깨진 UI들이 있지만 이걸 고치는 작업은 비교적 쉽습니다.
 
-## 2\. 캡쳐하고 붙여넣기
+## 2. 캡쳐하고 붙여넣기
 
 그런데 만약 정말 사용하고 싶은 디자인의 UI가 있지만, 설치한 컴포넌트 내에서는 구현이 어려운 경우가 있어요. 그럼 만들고 싶은 디자인을 캡쳐한 다음, AI에게 맡길 수 있습니다. 에어비엔비에서 숙소 카드를 더 에어비엔비스럽게 바꿔볼까요?
 
@@ -196,7 +185,7 @@ npx shadcn@latest add
 
 ![Screenshot 2024-09-03 at 3.06.18 PM.png](/images/uploads/disquiet-non-developer-10.png "Screenshot 2024-09-03 at 3.06.18 PM.png")
 
-## 3\. AI의 주의력 활용하기
+## 3. AI의 주의력 활용하기
 
 마지막으로 특정 함수명, 파일명, 상황, 상태 등을 직접적으로 지정해 AI가 어떤 부분을 봐야하는지 지정해주면 같은 양의 토큰에서도 더 양질의 답변을 얻을 수 있습니다.
 
@@ -206,28 +195,26 @@ npx shadcn@latest add
 {컴포넌트}를 {액션}했을 때 {상태} 되었으면 좋겠어
 ```
 
-## 4\. Instruction 파일 업로드하기
+## 4. Instruction 파일 업로드하기
 
 AI 출력물의 일관성과 효율을 위해 마크다운 형식으로 instruction을 미리 만들어두는 방법도 있어요. 저는 prompt 폴더를 하나 만들고, 아래의 디렉토리에서 적합한 프롬프트를 마크다운(.md) 형식으로 저장해두었습니다. 덕분에 복잡한 지시사항을 간결하게 만들 수 있었고요.
 
 아래 링크는 위의 과정을 거쳐 3시간만에 만들어본 디스콰이엇 광고 소개 페이지입니다. 제가 코드를 직접 수정한 것은 아예 없고, 오로지 AI만 활용했어요!
 
-*   ![Sep-04-2024 15-06-25.gif](/images/uploads/disquiet-non-developer-rescued-3.webp "Sep-04-2024 15-06-25.gif")
-    
+- ![Sep-04-2024 15-06-25.gif](/images/uploads/disquiet-non-developer-rescued-3.webp "Sep-04-2024 15-06-25.gif")
 
 ## 그 외의 Composer 활용사례
 
-*   Composer로 2분만에 Supabase 연동하기
-    
+- Composer로 2분만에 Supabase 연동하기
 
-*   Composer로 3분만에 제품 기능 런칭하기
-    
+  
+- Composer로 3분만에 제품 기능 런칭하기
 
-*   Composer와 유사한 기능을 무료로 제공하는 Aider 사례
-    
+  
+- Composer와 유사한 기능을 무료로 제공하는 Aider 사례
 
-*   일레븐랩스의 디자인 헤드가 작성한 비개발자가 Composer와 일레븐랩스 API로 제품 개발하는 법
-    
+  
+- 일레븐랩스의 디자인 헤드가 작성한 비개발자가 Composer와 일레븐랩스 API로 제품 개발하는 법
 
 ## PMC S24 - 120명이 넘는 메이커와 제품 만들 기회
 
