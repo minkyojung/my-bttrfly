@@ -2,7 +2,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 import Image from "@tiptap/extension-image";
 import { Table, TableRow, TableCell, TableHeader } from "@tiptap/extension-table";
-import { Markdown } from "tiptap-markdown";
+import { Markdown } from "@tiptap/markdown";
 
 // 에디터가 이해하는 문서 구조의 단일 출처.
 //

@@ -161,7 +161,9 @@ export function PostForm({
     setSource(v.source ?? "");
     setContent(v.content);
     // WYSIWYG 에디터는 초기 content만 읽으므로, 복구 시 본문도 직접 반영.
-    editor?.commands.setContent(v.content);
+    // contentType은 빼먹으면 안 된다 — 없으면 마크다운을 HTML로 파싱하는 경로로
+    // 조용히 빠져서(에러도 경고도 없다) 복구한 초안이 평문으로 뭉개진다.
+    editor?.commands.setContent(v.content, { contentType: "markdown" });
   }
 
   // 마운트 시: 저장된 로컬 초안이 초기값과 다르면 복구 배너를 띄운다.

@@ -1,10 +1,5 @@
 import type { NextConfig } from "next";
 
-// dev에 --turbopack을 붙이지 말 것. Next 15.4.10의 Turbopack은 markdown-it의
-// lib/rules_block/list.mjs에서 import한 isSpace 호출 두 곳 중 하나를 네임스페이스로
-// 바꾸지 않고 그대로 둔다. 그 결과 목록이 있는 글을 에디터에서 열면
-// "ReferenceError: isSpace is not defined"가 난다(빈 글은 목록 파싱을 안 해서 멀쩡).
-// 같은 모듈을 webpack은 정상 변환한다 — 두 번들러의 출력을 직접 비교해 확인했다.
 // 업로드된 파일을 주소로 직접 열었을 때를 위한 방어. 본문에 <img>로 박힌 이미지는
 // 영향받지 않는다 — Content-Disposition은 최상위 내비게이션만 지배한다.
 // sandbox가 핵심이다. 응답을 불투명(opaque) 출처로 만들어서, 혹시 스크립트가 돌더라도

@@ -37,14 +37,16 @@ const { Editor } = await import("@tiptap/core");
 const { editorExtensions } = await import("../lib/editor-extensions.ts");
 
 // 마크다운 한 덩어리를 에디터에 넣었다가 그대로 뽑아낸다.
+// contentType은 실제 에디터(MarkdownEditor.tsx)와 반드시 같아야 한다. 빼먹으면
+// 마크다운이 HTML로 파싱되는 경로로 조용히 빠져서, 측정값이 통째로 거짓이 된다.
 function roundtrip(markdown) {
-  const editor = new Editor({ extensions: editorExtensions, content: markdown });
+  const editor = new Editor({
+    extensions: editorExtensions,
+    content: markdown,
+    contentType: "markdown",
+  });
   try {
-    const storage = editor.storage;
-    // 공식 확장은 editor.getMarkdown(), 구 tiptap-markdown은 storage 경유.
-    return typeof editor.getMarkdown === "function"
-      ? editor.getMarkdown()
-      : storage.markdown.getMarkdown();
+    return editor.getMarkdown();
   } finally {
     editor.destroy();
   }

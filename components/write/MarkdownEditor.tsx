@@ -26,9 +26,10 @@ function imageFilesFrom(list: FileList | null | undefined): File[] {
 }
 
 // 본문은 마크다운으로 저장된다(공개 사이트·Keystatic 모두 마크다운을 읽음).
-// TipTap 코어는 HTML 기반이라, tiptap-markdown 확장으로 초기 content를
-// 마크다운으로 파싱하고 getMarkdown()으로 다시 마크다운을 뽑아낸다.
-// StarterKit/Markdown 모두 공식/표준 확장이며 커스텀 직렬화 로직은 두지 않는다.
+// TipTap은 문서를 트리로 다루므로 @tiptap/markdown이 양방향 변환을 맡는다 —
+// contentType으로 초기 content를 마크다운으로 파싱하고, getMarkdown()으로 다시
+// 마크다운을 뽑는다. 커스텀 직렬화 로직은 두지 않는다.
+//
 // 에디터 인스턴스를 생성해 반환하는 훅. 툴바를 문서 최상단(제목 위)에 두려면
 // PostForm이 editor 인스턴스에 접근해야 하므로, 툴바/본문을 한 컴포넌트에
 // 묶지 않고 훅으로 분리한다.
@@ -68,6 +69,8 @@ export function usePostEditor(
     immediatelyRender: false, // Next SSR 하이드레이션 미스매치 방지
     extensions: editorExtensions,
     content: value,
+    // 없으면 value가 HTML로 파싱된다. 마크다운 문법이 전부 평문이 되어버린다.
+    contentType: "markdown",
     editorProps: {
       attributes: {
         // 타이포그래피는 tailwind.config.ts의 typography가 담당한다(발행 페이지와
@@ -95,14 +98,7 @@ export function usePostEditor(
         return true;
       },
     },
-    onUpdate: ({ editor }) => {
-      // tiptap-markdown이 editor.storage.markdown에 getMarkdown()을 붙이지만
-      // 타입 augmentation이 노출되지 않아 좁은 캐스트로 접근한다.
-      const storage = editor.storage as unknown as {
-        markdown: { getMarkdown: () => string };
-      };
-      onChange(storage.markdown.getMarkdown());
-    },
+    onUpdate: ({ editor }) => onChange(editor.getMarkdown()),
   });
 
   editorRef.current = editor;
