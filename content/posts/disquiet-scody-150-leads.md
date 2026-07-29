@@ -3,7 +3,6 @@ title: 스코디가 150개의 B2B 리드를 얻을 때까지 겪었던 시행착
 date: '2024-07-08'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/kmszGL'
 ---
 

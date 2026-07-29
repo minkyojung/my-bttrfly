@@ -3,7 +3,6 @@ title: 프롬프트 하나로 풀스택 웹앱을 만드는 Marblism
 date: '2024-05-29'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/2RsA1e'
 ---
 

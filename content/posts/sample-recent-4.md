@@ -3,6 +3,7 @@ title: "커뮤니티는 기능이 아니라 태도다"
 date: "2026-06-25"
 category: "Interviews"
 cover: "/images/samples/cover-08.png"
+draft: true
 ---
 프로덕트를 만드는 일은 결국 관점을 만드는 일이다. 같은 기능이라도 어떤 순서로, 어떤 언어로, 어떤 밀도로 전달하느냐에 따라 완전히 다른 경험이 된다.
 

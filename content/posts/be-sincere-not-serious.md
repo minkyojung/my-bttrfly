@@ -3,7 +3,6 @@ title: "Be Sincere—Not Serious"
 date: "2024-08-06"
 source: substack
 category: "Newsletter"
-draft: true
 ---
 
 좋은 아침입니다! 비가 많이 오네요.

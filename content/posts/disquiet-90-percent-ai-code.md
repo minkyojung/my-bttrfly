@@ -3,7 +3,6 @@ title: 앞으로 모든 코드의 90%는 AI가 작성할 수 있도록
 date: '2024-05-23'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/0Ls9Xp'
 ---
 

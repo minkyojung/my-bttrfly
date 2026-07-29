@@ -3,7 +3,6 @@ title: Claude로 코드리뷰 경험 개선하기
 date: '2024-07-01'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/Rpswrz'
 ---
 

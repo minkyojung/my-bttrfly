@@ -3,7 +3,6 @@ title: 클릭 한 번으로 이해하기 쉽게 AI가 데이터를 해석해주�
 date: '2024-06-05'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/p3szzv'
 ---
 

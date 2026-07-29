@@ -3,7 +3,6 @@ title: 제품개발을 주저하는 비개발자를 위해
 date: '2024-09-04'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/34s7Yl'
 ---
 

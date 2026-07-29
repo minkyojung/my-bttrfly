@@ -3,7 +3,6 @@ title: 리텐션 80%를 만든 A/B 테스트 팁
 date: '2024-02-26'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/p3smpG'
 ---
 

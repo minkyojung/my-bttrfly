@@ -3,7 +3,6 @@ title: 출시 3개월만에 60만 유저와 1억 개의 컨텐츠를 확보한 �
 date: '2024-08-04'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/9esZ9z'
 ---
 

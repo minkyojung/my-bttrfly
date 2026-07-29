@@ -4,5 +4,4 @@ date: "2023-11-26"
 external: "https://williamjung0130.substack.com/p/67b"
 source: substack
 category: "Essays"
-draft: true
 ---

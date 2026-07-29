@@ -3,7 +3,6 @@ title: 수민님이 Day 1부터 매출을 만들면서 SaaS 개발을 시작한 
 date: '2024-07-03'
 source: disquiet
 category: Interviews
-draft: true
 canonical: 'https://disquiet.io/articles/Ynszxq'
 ---
 
