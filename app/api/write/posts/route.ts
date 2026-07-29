@@ -48,9 +48,18 @@ export async function POST(request: NextRequest) {
 
     const frontmatterData = buildFrontmatter(body);
     const fileText = matter.stringify(content, frontmatterData);
-    await putFile(`content/posts/${slug}.md`, fileText, `content: create ${slug}`);
+    // 새 sha를 돌려줘야 폼이 곧바로 이어서 저장할 수 있다. 이게 없으면 폼은
+    // 지문 없이 다음 저장을 보내고, PUT의 충돌 검사가 조용히 건너뛰어진다.
+    const sha = await putFile(
+      `content/posts/${slug}.md`,
+      fileText,
+      `content: create ${slug}`
+    );
 
-    return NextResponse.json({ slug }, { status: 201 });
+    return NextResponse.json(
+      { slug, sha },
+      { status: 201, headers: { Location: `/write/${slug}` } }
+    );
   } catch (err) {
     if (err instanceof GitHubWriteError) {
       const status = err.status && err.status >= 100 ? err.status : 502;

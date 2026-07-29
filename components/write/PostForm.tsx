@@ -77,8 +77,8 @@ function todayDate() {
 }
 
 export function PostForm({
-  mode,
-  slug: initialSlug,
+  mode: initialMode,
+  slug: propSlug,
   baseSha,
   imageMeta,
   initialValues,
@@ -87,11 +87,21 @@ export function PostForm({
   // 저장에 성공하면 새 지문으로 갱신한다. 그러지 않으면 두 번째 저장이
   // 자기 자신의 변경을 "다른 곳의 수정"으로 오인해 409가 난다.
   const shaRef = useRef(baseSha);
+
+  // 글이 만들어지는 순간 이 폼은 "생성"에서 "편집"으로 바뀐다. 그 전환을
+  // 마운트된 채로 처리해야 한다 — 새 글은 방금 커밋됐을 뿐 배포 전이라
+  // /write/<slug>로 이동하면 아직 없는 글을 열게 되고, 무엇보다 쓰던 내용과
+  // 되돌리기 이력이 날아간다. 그래서 라우팅 대신 상태를 승격시킨다.
+  const [createdSlug, setCreatedSlug] = useState<string | null>(null);
+  const mode: "create" | "edit" =
+    initialMode === "edit" || createdSlug ? "edit" : "create";
+  const currentSlug = propSlug ?? createdSlug ?? undefined;
+
   // slug는 저자가 직접 편집하는 필드다. 생성 시 제목에서 초안을 자동으로
   // 채우되(아직 저자가 손대지 않았을 때만), 발행 후에는 불변이므로 편집
   // 화면에서는 읽기 전용으로 보여준다.
-  const [slug, setSlug] = useState(initialSlug ?? "");
-  const slugTouched = useRef(mode === "edit");
+  const [slug, setSlug] = useState(propSlug ?? "");
+  const slugTouched = useRef(initialMode === "edit");
 
   const [title, setTitle] = useState(initialValues?.title ?? "");
   const [date, setDate] = useState(initialValues?.date ?? todayDate());
@@ -138,7 +148,9 @@ export function PostForm({
   // 최초 렌더 시점의 값을 기준선으로 고정(저장 성공 시 갱신).
   const baselineRef = useRef(serialized);
   const dirty = serialized !== baselineRef.current;
-  const draftKey = `write-draft:${initialSlug ?? "new"}`;
+  // 생성 중에는 "new"를 쓰다가 글이 만들어지면 그 slug로 옮겨간다. 안 옮기면
+  // 새 글을 또 시작할 때 이전 글의 초안이 복구 후보로 떠오른다.
+  const draftKey = `write-draft:${currentSlug ?? "new"}`;
 
   const [recoverable, setRecoverable] = useState<PostFormValues | null>(null);
 
@@ -180,7 +192,8 @@ export function PostForm({
     } catch {
       /* 손상된 초안은 무시 */
     }
-    // draftKey는 마운트 시 고정이므로 1회만 실행
+    // 복구 제안은 화면을 열 때 한 번만 할 일이다. draftKey는 생성 직후 승격되면서
+    // 바뀌지만, 그때 다시 돌면 방금 저장한 글에 대고 "복구할까요?"를 묻게 된다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -263,7 +276,7 @@ export function PostForm({
   }
 
   async function handleDelete() {
-    if (mode !== "edit" || !initialSlug) return;
+    if (mode !== "edit" || !currentSlug) return;
     if (
       !window.confirm(
         `Delete "${title}"?\n\nThe post is removed from the site on the next deploy. ` +
@@ -276,7 +289,7 @@ export function PostForm({
     setError(null);
     setDeleting(true);
     try {
-      const res = await fetch(`/api/write/posts/${initialSlug}`, {
+      const res = await fetch(`/api/write/posts/${currentSlug}`, {
         method: "DELETE",
       });
       const data = await res.json().catch(() => ({}));
@@ -321,6 +334,10 @@ export function PostForm({
     }
 
     setSubmitting(true);
+    // 승격이 일어나면 draftKey가 바뀐다. 정리해야 할 것은 "지금 쓰고 있던" 키이므로
+    // 바뀌기 전 값을 붙잡아 둔다. 안 그러면 write-draft:new가 영영 남아서, 다음에
+    // 새 글을 시작할 때 지난 글의 초안이 복구 후보로 떠오른다.
+    const keyAtSubmit = draftKey;
     try {
       const body = {
         slug: slug.trim(),
@@ -339,7 +356,7 @@ export function PostForm({
       };
 
       const res = await fetch(
-        mode === "create" ? "/api/write/posts" : `/api/write/posts/${initialSlug}`,
+        mode === "create" ? "/api/write/posts" : `/api/write/posts/${currentSlug}`,
         {
           method: mode === "create" ? "POST" : "PUT",
           headers: { "Content-Type": "application/json" },
@@ -351,18 +368,24 @@ export function PostForm({
         setError(data.error ?? "Save failed");
         return;
       }
-      // 저장 = GitHub 커밋. Vercel 재배포 전까지 현재 파일시스템은 옛 내용을
-      // 읽으므로 방금 저장한 글로 자동 이동하지 않고 여기 머물며 안내만 한다.
       setSavedSlug(data.slug);
       if (typeof data.sha === "string") shaRef.current = data.sha;
       // 저장 성공 → 로컬 초안 제거 + 현재 값을 새 기준선으로(=더 이상 dirty 아님).
       try {
-        localStorage.removeItem(draftKey);
+        localStorage.removeItem(keyAtSubmit);
       } catch {
         /* noop */
       }
       baselineRef.current = serialized;
       setRecoverable(null);
+
+      if (mode === "create" && typeof data.slug === "string") {
+        // 글이 생겼으니 이제부터는 편집이다. 이동은 하지 않는다 — 방금 커밋됐을 뿐
+        // 아직 배포 전이라 /write/<slug>는 열리지 않고, 브라우저 주소만 맞춰둔다.
+        // (replace라 뒤로 가기가 /write/new로 돌아오지 않는다.)
+        setCreatedSlug(data.slug);
+        window.history.replaceState(null, "", `/write/${data.slug}`);
+      }
     } catch {
       setError("Save failed");
     } finally {
@@ -388,7 +411,7 @@ export function PostForm({
               ←
             </Link>
             <span className="truncate text-fg-muted">
-              {mode === "edit" ? initialSlug : slug || "New post"}
+              {mode === "edit" ? currentSlug : slug || "New post"}
             </span>
             <span className="shrink-0 text-xs text-fg-subtle">
               {dirty ? "· Unsaved" : savedSlug ? "· Saved" : ""}
@@ -397,7 +420,7 @@ export function PostForm({
                 편집 중 내용을 잃지 않도록 새 탭으로 연다. */}
             {mode === "edit" && !draft && (
               <a
-                href={`/posts/${initialSlug}`}
+                href={`/posts/${currentSlug}`}
                 target="_blank"
                 rel="noreferrer"
                 className="shrink-0 text-xs text-fg-muted underline hover:text-fg"
@@ -563,7 +586,7 @@ export function PostForm({
                   <>
                     <input
                       type="text"
-                      value={initialSlug ?? ""}
+                      value={currentSlug ?? ""}
                       disabled
                       className={cn(inputClass, "opacity-60")}
                     />
