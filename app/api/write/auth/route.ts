@@ -21,6 +21,13 @@ export async function POST(request: NextRequest) {
 
   const valid = await verifyPassword(password);
   if (!valid) {
+    // 시도 제한은 두지 않았다 — 서버리스에서 인스턴스별 카운터는 인스턴스가 늘면
+    // 무의미하고, 1인용 도구에 외부 저장소를 붙일 이유는 없다. 대신 실패를 로그로
+    // 남겨 무차별 시도가 배포 로그에 드러나게 한다. 실제 통제는 비밀번호 길이다
+    // (lib/write-auth.ts의 MIN_PASSWORD_LENGTH).
+    console.error("write login failed", {
+      ip: request.headers.get("x-forwarded-for") ?? "unknown",
+    });
     return NextResponse.json({ error: "Incorrect password" }, { status: 401 });
   }
 

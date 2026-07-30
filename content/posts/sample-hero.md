@@ -1,5 +1,5 @@
 ---
-title: 에이전트 시대의 프로덕트 빌딩 — 우리가 다시 배워야 하는 것들aaaa
+title: 에이전트 시대의 프로덕트 빌딩 — 우리가 다시 배워야 하는 것들
 date: '2026-07-15'
 category: Essays
 cover: /images/samples/cover-01.png

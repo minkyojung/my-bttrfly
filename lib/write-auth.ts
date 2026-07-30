@@ -8,9 +8,22 @@ export const WRITE_SESSION_COOKIE = "write_session";
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7일
 export const WRITE_SESSION_MAX_AGE_SECONDS = SESSION_TTL_MS / 1000;
 
-function requireEnv(name: "WRITE_SESSION_SECRET" | "WRITE_PASSWORD"): string {
+// WRITE_PASSWORD의 최소 길이. 이 엔드포인트에는 시도 제한이 없고(서버리스에서
+// 인스턴스별 카운터는 의미가 없다) 통과하면 저장소 커밋 권한이 7일간 열리므로,
+// 온라인 추측을 비현실적으로 만드는 실질 통제는 비밀번호 길이뿐이다.
+const MIN_PASSWORD_LENGTH = 20;
+
+function requireEnv(
+  name: "WRITE_SESSION_SECRET" | "WRITE_PASSWORD",
+  minLength = 0
+): string {
   const value = process.env[name];
   if (!value) throw new Error(`${name} is not set`);
+  if (value.length < minLength) {
+    throw new Error(
+      `${name} must be at least ${minLength} characters (see .env.example)`
+    );
+  }
   return value;
 }
 
@@ -89,8 +102,10 @@ export async function verifySession(
   }
 }
 
+// 길이 검증은 여기서만 한다. verifySession에서 하면 짧은 비밀번호가 설정된 순간
+// 이미 로그인해 둔 세션까지 조용히 무효화된다 — 로그인만 막히는 게 맞다.
 export async function verifyPassword(candidate: string): Promise<boolean> {
-  const actual = requireEnv("WRITE_PASSWORD");
+  const actual = requireEnv("WRITE_PASSWORD", MIN_PASSWORD_LENGTH);
   const key = await hmacKey(requireEnv("WRITE_SESSION_SECRET"));
   const [a, b] = await Promise.all([
     crypto.subtle.sign("HMAC", key, new TextEncoder().encode(candidate)),

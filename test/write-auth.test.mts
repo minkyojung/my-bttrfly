@@ -3,7 +3,9 @@ import assert from "node:assert/strict";
 
 // write-auth는 호출 시점에 env를 읽으므로 import 전에 심어둔다.
 process.env.WRITE_SESSION_SECRET = "test-secret-do-not-use-in-production";
-process.env.WRITE_PASSWORD = "correct-horse";
+// 20자 이상이어야 한다(MIN_PASSWORD_LENGTH). 짧으면 verifyPassword가 던진다.
+const PASSWORD = "correct-horse-battery-staple";
+process.env.WRITE_PASSWORD = PASSWORD;
 
 const { signSession, verifySession, verifyPassword } = await import(
   "../lib/write-auth.ts"
@@ -77,9 +79,38 @@ test("망가진 값들은 조용히 거부된다(예외를 던지지 않는다)"
 });
 
 test("올바른 비밀번호만 통과한다", async () => {
-  assert.equal(await verifyPassword("correct-horse"), true);
+  assert.equal(await verifyPassword(PASSWORD), true);
   assert.equal(await verifyPassword("wrong"), false);
   assert.equal(await verifyPassword(""), false);
-  assert.equal(await verifyPassword("correct-horse "), false); // 공백 하나 차이
-  assert.equal(await verifyPassword("CORRECT-HORSE"), false);  // 대소문자
+  assert.equal(await verifyPassword(`${PASSWORD} `), false); // 공백 하나 차이
+  assert.equal(await verifyPassword(PASSWORD.toUpperCase()), false); // 대소문자
+});
+
+test("짧은 WRITE_PASSWORD는 로그인을 막는다", async () => {
+  // 시도 제한이 없는 엔드포인트라 길이가 유일한 실질 통제다. 조용히 허용하면
+  // 약한 비밀번호가 배포에 그대로 남으므로, 로그인이 눈에 보이게 실패해야 한다.
+  const original = process.env.WRITE_PASSWORD;
+  process.env.WRITE_PASSWORD = "short";
+  try {
+    await assert.rejects(
+      () => verifyPassword("short"),
+      /at least 20 characters/,
+      "짧은 비밀번호가 통과했다"
+    );
+  } finally {
+    process.env.WRITE_PASSWORD = original;
+  }
+});
+
+test("세션 검증은 비밀번호 길이에 영향받지 않는다", async () => {
+  // 짧은 비밀번호가 설정돼도 이미 로그인해 둔 세션은 살아 있어야 한다.
+  // verifySession에서 길이를 검사하면 그 세션들이 조용히 무효화된다.
+  const token = await signSession();
+  const original = process.env.WRITE_PASSWORD;
+  process.env.WRITE_PASSWORD = "short";
+  try {
+    assert.equal(await verifySession(token), true);
+  } finally {
+    process.env.WRITE_PASSWORD = original;
+  }
 });
