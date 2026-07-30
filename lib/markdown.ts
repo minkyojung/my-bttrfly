@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { imageSize } from 'image-size';
+import { isValidPostDate } from './post-frontmatter';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 const publicDirectory = path.join(process.cwd(), 'public');
@@ -35,9 +36,16 @@ export interface Post {
 
 // 날짜가 없거나 형식이 깨진 글이 조용히 "오늘 날짜"로 1면 최상단에 올라가는
 // 사고를 막기 위해, 파싱 불가 시 빌드를 명시적으로 실패시킨다.
+//
+// 예전에는 비어있지 않은 문자열이면 무엇이든 통과시켜서 이 약속을 지키지 못했다.
+// 그렇게 통과한 값은 sitemap의 new Date()로 흘러가고, Invalid Date도 instanceof
+// Date이므로 Next의 sitemap 직렬화가 toISOString()에서 RangeError로 죽었다 —
+// 어느 파일이 문제인지 알려주지 않는 형태로. 여기서 파일명을 붙여 먼저 실패시킨다.
 function normalizeDate(value: unknown, slug: string): string {
-  if (value instanceof Date) return value.toISOString().split('T')[0];
-  if (typeof value === 'string' && value.length > 0) return value;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return value.toISOString().split('T')[0];
+  }
+  if (typeof value === 'string' && isValidPostDate(value)) return value;
   throw new Error(`Missing or invalid date in content/posts/${slug}.md`);
 }
 

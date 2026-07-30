@@ -20,6 +20,15 @@ export class GitHubWriteError extends Error {
   }
 }
 
+// 환경변수 누락. GitHub의 거절과는 성질이 다르다 — 저자가 배포 설정을 고쳐야 하는
+// 일인데, 예전에는 평범한 Error였어서 "Unexpected error" 500으로 뭉개졌다.
+export class WriteConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WriteConfigError";
+  }
+}
+
 function getRepo(): { owner: string; name: string } {
   const [owner, name] = GITHUB_REPO.split("/");
   return { owner, name };
@@ -27,7 +36,7 @@ function getRepo(): { owner: string; name: string } {
 
 function getToken(): string {
   const token = process.env.GITHUB_WRITE_TOKEN;
-  if (!token) throw new Error("GITHUB_WRITE_TOKEN is not set");
+  if (!token) throw new WriteConfigError("GITHUB_WRITE_TOKEN is not set");
   return token;
 }
 

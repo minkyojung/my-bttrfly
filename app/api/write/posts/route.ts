@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import matter from "gray-matter";
-import { getFile, putFile, GitHubWriteError } from "@/lib/github-write";
+import { getFile, putFile } from "@/lib/github-write";
+import { writeErrorResponse } from "@/lib/write-api";
 import { SLUG_PATTERN } from "@/lib/slugify";
 import {
   buildFrontmatter,
@@ -61,11 +62,6 @@ export async function POST(request: NextRequest) {
       { status: 201, headers: { Location: `/write/${slug}` } }
     );
   } catch (err) {
-    if (err instanceof GitHubWriteError) {
-      const status = err.status && err.status >= 100 ? err.status : 502;
-      return NextResponse.json({ error: err.message }, { status });
-    }
-    console.error("Failed to create post", err);
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return writeErrorResponse(err, "Failed to create post");
   }
 }

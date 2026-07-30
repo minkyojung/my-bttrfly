@@ -130,6 +130,44 @@ test("공백뿐인 external은 본문을 면제해주지 않는다", () => {
   assert.match(result ?? "", /Body is required/);
 });
 
+test("파싱 불가한 날짜는 거절된다", () => {
+  // 이 값은 프론트매터 → sitemap의 new Date()로 흘러가고, Invalid Date도
+  // instanceof Date이므로 Next의 sitemap 직렬화가 RangeError로 죽는다. 즉 하나가
+  // 커밋되면 그 뒤의 모든 배포가 실패하는데 API는 이미 200을 돌려준 상태다.
+  for (const bad of [
+    "nope",
+    "2024/01/01",
+    "24-01-01",
+    "2024-1-1",
+    // 형태는 맞지만 달력에 없는 날짜. Date.parse만으로는 조용히 굴러가서
+    // 각각 3월 2일·3월 1일로 통과하므로 구성요소를 되짚어 잡아야 한다.
+    "2024-02-31",
+    "2023-02-29",
+    "2024-13-01",
+    "2024-00-10",
+    "2024-01-01T00:00:00Z", // 시각까지 오면 Keystatic의 date 필드가 못 읽는다
+  ]) {
+    assert.match(
+      validatePost({ title: "T", date: bad, content: "본문" }) ?? "",
+      /Date/,
+      `통과해버린 입력: ${bad}`
+    );
+  }
+  assert.equal(
+    validatePost({ title: "T", date: "2024-02-29", content: "본문" }),
+    null,
+    "윤년은 통과해야 한다"
+  );
+});
+
+test("title과 date의 앞뒤 공백은 저장되지 않는다", () => {
+  // validatePost는 trim한 값으로 검사하므로 공백이 붙은 값도 통과한다.
+  // 그대로 저장하면 YAML에 공백이 남아 이후 비교·정렬이 어긋난다.
+  const result = buildFrontmatter({ title: "  T  ", date: "  2024-01-01  " });
+  assert.equal(result.title, "T");
+  assert.equal(result.date, "2024-01-01");
+});
+
 test("title과 date는 여전히 필수다", () => {
   assert.match(validatePost({ date: "2026-01-01", content: "본문" }) ?? "", /Title/);
   assert.match(validatePost({ title: "T", content: "본문" }) ?? "", /Date/);

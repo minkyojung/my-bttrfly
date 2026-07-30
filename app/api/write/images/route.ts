@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { putBinaryFile, GitHubWriteError } from "@/lib/github-write";
+import { putBinaryFile } from "@/lib/github-write";
+import { writeErrorResponse } from "@/lib/write-api";
 import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/upload-image";
 
 // SVG는 뺀다. SVG는 스크립트를 품을 수 있고, 업로드된 파일은 블로그와 같은
@@ -61,11 +62,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ path: `/images/uploads/${filename}` }, { status: 200 });
   } catch (err) {
-    if (err instanceof GitHubWriteError) {
-      const status = err.status && err.status >= 100 ? err.status : 502;
-      return NextResponse.json({ error: err.message }, { status });
-    }
-    console.error("Failed to upload image", err);
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return writeErrorResponse(err, "Failed to upload image");
   }
 }

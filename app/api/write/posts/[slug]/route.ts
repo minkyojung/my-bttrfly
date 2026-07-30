@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import matter from "gray-matter";
-import { getFile, putFile, deleteFile, GitHubWriteError } from "@/lib/github-write";
+import { getFile, putFile, deleteFile } from "@/lib/github-write";
+import { writeErrorResponse } from "@/lib/write-api";
 import {
   buildFrontmatter,
   validatePost,
@@ -65,12 +66,7 @@ export async function PUT(
 
     return NextResponse.json({ slug, sha: newSha }, { status: 200 });
   } catch (err) {
-    if (err instanceof GitHubWriteError) {
-      const status = err.status && err.status >= 100 ? err.status : 502;
-      return NextResponse.json({ error: err.message }, { status });
-    }
-    console.error("Failed to update post", err);
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return writeErrorResponse(err, "Failed to update post");
   }
 }
 
@@ -115,12 +111,7 @@ export async function PATCH(
 
     return NextResponse.json({ slug, draft }, { status: 200 });
   } catch (err) {
-    if (err instanceof GitHubWriteError) {
-      const status = err.status && err.status >= 100 ? err.status : 502;
-      return NextResponse.json({ error: err.message }, { status });
-    }
-    console.error("Failed to toggle draft", err);
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return writeErrorResponse(err, "Failed to toggle draft");
   }
 }
 
@@ -150,11 +141,6 @@ export async function DELETE(
 
     return NextResponse.json({ slug }, { status: 200 });
   } catch (err) {
-    if (err instanceof GitHubWriteError) {
-      const status = err.status && err.status >= 100 ? err.status : 502;
-      return NextResponse.json({ error: err.message }, { status });
-    }
-    console.error("Failed to delete post", err);
-    return NextResponse.json({ error: "Unexpected error" }, { status: 500 });
+    return writeErrorResponse(err, "Failed to delete post");
   }
 }
