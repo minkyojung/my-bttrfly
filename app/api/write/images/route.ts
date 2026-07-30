@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { putBinaryFile, GitHubWriteError } from "@/lib/github-write";
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from "@/lib/upload-image";
 
-const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 // SVG는 뺀다. SVG는 스크립트를 품을 수 있고, 업로드된 파일은 블로그와 같은
 // 출처에서 서빙되므로 그 스크립트가 이 사이트의 권한으로 돈다. <img>로 삽입할
 // 때는 브라우저가 실행을 막지만 파일 주소로 직접 열면 실행된다 — next/image가
@@ -32,8 +32,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "File is required" }, { status: 400 });
   }
 
-  if (file.size > MAX_SIZE_BYTES) {
-    return NextResponse.json({ error: "Image must be 5MB or smaller" }, { status: 400 });
+  // 상한은 lib/upload-image.ts와 공유한다. 예전에는 여기만 5MB였는데 Vercel 함수의
+  // 요청 본문 한도가 4.5MB라, 4.5~5MB 파일은 이 검사에 닿기도 전에 플랫폼이 413으로
+  // 끊어서 아래 친절한 메시지가 나올 기회 자체가 없었다.
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return NextResponse.json(
+      { error: `Image must be ${MAX_UPLOAD_LABEL} or smaller` },
+      { status: 400 }
+    );
   }
 
   const extensionMatch = /\.([a-zA-Z0-9]+)$/.exec(file.name);

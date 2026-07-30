@@ -1,25 +1,15 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useEditor, EditorContent, type Editor } from "@tiptap/react";
+import {
+  useEditor,
+  useEditorState,
+  EditorContent,
+  type Editor,
+} from "@tiptap/react";
 import { editorExtensions } from "@/lib/editor-extensions";
+import { uploadImage } from "@/lib/upload-image";
 import { cn } from "@/lib/utils";
-
-// 이미지 업로드(툴바·붙여넣기·드래그 공용). 성공 시 공개 경로, 실패 시 null.
-async function uploadImage(file: File): Promise<string | null> {
-  const formData = new FormData();
-  formData.append("file", file);
-  try {
-    const res = await fetch("/api/write/images", {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json().catch(() => ({}));
-    return res.ok && data.path ? (data.path as string) : null;
-  } catch {
-    return null;
-  }
-}
 
 function imageFilesFrom(list: FileList | null | undefined): File[] {
   return Array.from(list ?? []).filter((f) => f.type.startsWith("image/"));
@@ -42,27 +32,34 @@ export function usePostEditor(
   const editorRef = useRef<Editor | null>(null);
 
   async function insertImages(files: File[], pos?: number) {
+    // 업로드는 순차로 해야 한다 — 하나가 곧 커밋 하나이고, 같은 브랜치에 동시에
+    // 커밋하면 GitHub이 409로 거절한다.
+    //
+    // 반면 삽입은 전부 끝난 뒤 한 번에 한다. 예전에는 업로드마다 붙잡아둔 같은
+    // pos에 꽂았는데, 삽입할 때마다 문서가 밀리므로 나중 이미지가 앞 이미지보다
+    // 앞에 들어가 순서가 뒤집혔다(3장 드롭 → 3,2,1). 게다가 업로드가 커밋이라
+    // 수 초씩 걸리는 동안 위쪽 본문이 편집되면 그 pos가 문서 끝을 넘어가
+    // insertContentAt이 예외를 던지고, 남은 이미지가 조용히 사라졌다.
+    const nodes: { type: "image"; attrs: { src: string; alt: string } }[] = [];
     for (const file of files) {
-      const path = await uploadImage(file);
-      const ed = editorRef.current;
-      if (!path) {
-        window.alert("Image upload failed");
+      const result = await uploadImage(file);
+      if ("error" in result) {
+        window.alert(result.error);
         continue;
       }
-      if (!ed) continue;
-      if (pos != null) {
-        ed
-          .chain()
-          .focus()
-          .insertContentAt(pos, {
-            type: "image",
-            attrs: { src: path, alt: file.name },
-          })
-          .run();
-      } else {
-        ed.chain().focus().setImage({ src: path, alt: file.name }).run();
-      }
+      nodes.push({
+        type: "image",
+        attrs: { src: result.path, alt: file.name },
+      });
     }
+
+    const ed = editorRef.current;
+    if (!ed || nodes.length === 0) return;
+    const chain = ed.chain().focus();
+    if (pos == null) chain.insertContent(nodes);
+    // 문서가 줄어들었을 수 있으므로 끝을 넘지 않게 자른다.
+    else chain.insertContentAt(Math.min(pos, ed.state.doc.content.size), nodes);
+    chain.run();
   }
 
   const editor = useEditor({
@@ -115,6 +112,38 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
   const imageInputRef = useRef<HTMLInputElement>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
+  // 툴바의 on/off 표시와 표 편집 가능 여부는 커서만 움직여도 갱신돼야 한다.
+  // useEditor는 shouldRerenderOnTransaction이 기본으로 꺼져 있어서 툴바는
+  // PostForm이 다시 그려질 때만 갱신되고, PostForm은 onUpdate→setContent로
+  // 본문이 바뀔 때만 다시 그려진다 — 그래서 커서를 표 안으로 옮겨도 표 편집
+  // 버튼이 나타나지 않았고, 밖으로 나가도 사라지지 않은 채 눌러도 먹지 않았다.
+  // 그 플래그를 켜는 대신(legacy로 표시돼 있고 PostForm 전체를 커서 이동마다
+  // 다시 그린다) 여기서 구독해 리렌더 범위를 툴바로 좁힌다. useEditorState는
+  // 기본 비교가 깊은 동치라 아래 값이 실제로 뒤집힐 때만 다시 그린다.
+  const state = useEditorState({
+    editor,
+    selector: ({ editor: e }) => ({
+      bold: e.isActive("bold"),
+      italic: e.isActive("italic"),
+      strike: e.isActive("strike"),
+      code: e.isActive("code"),
+      h1: e.isActive("heading", { level: 1 }),
+      h2: e.isActive("heading", { level: 2 }),
+      h3: e.isActive("heading", { level: 3 }),
+      bulletList: e.isActive("bulletList"),
+      orderedList: e.isActive("orderedList"),
+      blockquote: e.isActive("blockquote"),
+      codeBlock: e.isActive("codeBlock"),
+      table: e.isActive("table"),
+      link: e.isActive("link"),
+      canAddRowAfter: e.can().addRowAfter(),
+      canDeleteRow: e.can().deleteRow(),
+      canAddColumnAfter: e.can().addColumnAfter(),
+      canDeleteColumn: e.can().deleteColumn(),
+      canDeleteTable: e.can().deleteTable(),
+    }),
+  });
+
   function promptLink() {
     const previous = editor.getAttributes("link").href as string | undefined;
     const url = window.prompt("Link URL", previous ?? "https://");
@@ -132,33 +161,33 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
     e.target.value = ""; // 같은 파일 재선택 허용
     if (!file) return;
     setUploadingImage(true);
-    const path = await uploadImage(file);
+    const result = await uploadImage(file);
     setUploadingImage(false);
-    if (path) {
-      editor.chain().focus().setImage({ src: path, alt: file.name }).run();
-    } else {
-      window.alert("Image upload failed");
+    if ("error" in result) {
+      window.alert(result.error);
+      return;
     }
+    editor.chain().focus().setImage({ src: result.path, alt: file.name }).run();
   }
 
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <Btn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} label="B" bold />
-      <Btn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive("italic")} label="I" italic />
-      <Btn onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive("strike")} label="S" strike />
-      <Btn onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive("code")} label="</>" />
+      <Btn onClick={() => editor.chain().focus().toggleBold().run()} active={state.bold} label="B" bold />
+      <Btn onClick={() => editor.chain().focus().toggleItalic().run()} active={state.italic} label="I" italic />
+      <Btn onClick={() => editor.chain().focus().toggleStrike().run()} active={state.strike} label="S" strike />
+      <Btn onClick={() => editor.chain().focus().toggleCode().run()} active={state.code} label="</>" />
       <Divider />
-      <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive("heading", { level: 1 })} label="H1" />
-      <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive("heading", { level: 2 })} label="H2" />
-      <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive("heading", { level: 3 })} label="H3" />
+      <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={state.h1} label="H1" />
+      <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={state.h2} label="H2" />
+      <Btn onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={state.h3} label="H3" />
       <Divider />
-      <Btn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive("bulletList")} label="• List" />
-      <Btn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive("orderedList")} label="1. List" />
-      <Btn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive("blockquote")} label="&ldquo;" />
-      <Btn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={editor.isActive("codeBlock")} label="Code" />
-      <Btn onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} active={editor.isActive("table")} label="Table" />
+      <Btn onClick={() => editor.chain().focus().toggleBulletList().run()} active={state.bulletList} label="• List" />
+      <Btn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={state.orderedList} label="1. List" />
+      <Btn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={state.blockquote} label="&ldquo;" />
+      <Btn onClick={() => editor.chain().focus().toggleCodeBlock().run()} active={state.codeBlock} label="Code" />
+      <Btn onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()} active={state.table} label="Table" />
       <Divider />
-      <Btn onClick={promptLink} active={editor.isActive("link")} label="Link" />
+      <Btn onClick={promptLink} active={state.link} label="Link" />
       <Btn
         onClick={() => imageInputRef.current?.click()}
         active={false}
@@ -169,36 +198,36 @@ export function EditorToolbar({ editor }: { editor: Editor }) {
       {/* 표 편집은 커서가 표 안에 있을 때만 보여 평소 툴바를 어지럽히지 않는다.
           셀 병합은 일부러 넣지 않았다 — 병합한 표는 마크다운으로 저장되지 못하고
           raw HTML로 떨어지는데, 발행 페이지는 그 HTML을 렌더링하지 않는다. */}
-      {editor.isActive("table") && (
+      {state.table && (
         <>
           <Divider />
           <Btn
             onClick={() => editor.chain().focus().addRowAfter().run()}
-            disabled={!editor.can().addRowAfter()}
+            disabled={!state.canAddRowAfter}
             active={false}
             label="+Row"
           />
           <Btn
             onClick={() => editor.chain().focus().deleteRow().run()}
-            disabled={!editor.can().deleteRow()}
+            disabled={!state.canDeleteRow}
             active={false}
             label="−Row"
           />
           <Btn
             onClick={() => editor.chain().focus().addColumnAfter().run()}
-            disabled={!editor.can().addColumnAfter()}
+            disabled={!state.canAddColumnAfter}
             active={false}
             label="+Col"
           />
           <Btn
             onClick={() => editor.chain().focus().deleteColumn().run()}
-            disabled={!editor.can().deleteColumn()}
+            disabled={!state.canDeleteColumn}
             active={false}
             label="−Col"
           />
           <Btn
             onClick={() => editor.chain().focus().deleteTable().run()}
-            disabled={!editor.can().deleteTable()}
+            disabled={!state.canDeleteTable}
             active={false}
             label="Delete table"
           />

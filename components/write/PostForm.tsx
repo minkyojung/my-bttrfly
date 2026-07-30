@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { COLUMNS } from "@/lib/columns";
 import { slugify, SLUG_PATTERN } from "@/lib/slugify";
 import { validatePost } from "@/lib/post-frontmatter";
+import { uploadImage } from "@/lib/upload-image";
 import { PostBody } from "@/components/PostBody";
 import type { ImageMeta } from "@/lib/markdown";
 import {
@@ -72,8 +73,12 @@ interface PostFormProps {
   initialValues?: PostFormValues;
 }
 
+// 새 글의 기본 날짜는 저자의 로컬 날짜다. toISOString()은 UTC를 주므로 KST(UTC+9)에서
+// 자정~오전 9시 사이에 글을 시작하면 전날 날짜가 찍혔고, 매번 손으로 고쳐야 했다.
 function todayDate() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }
 
 // 같은 브라우저에서 /write/new 를 두 탭 열면 아직 slug가 없어 초안 키가 겹치고,
@@ -277,28 +282,20 @@ export function PostForm({
 
   async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
+    // 비워야 같은 파일을 다시 고를 수 있다. change 이벤트는 값이 바뀔 때만 나므로,
+    // 리셋하지 않으면 업로드가 실패한 뒤 같은 파일로 재시도하는 것이 불가능하다.
+    e.target.value = "";
     if (!file) return;
     setUploading(true);
     setError(null);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/write/images", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.error ?? "Image upload failed");
-        return;
-      }
-      setCover(data.path);
-      setCoverFileName(file.name);
-    } catch {
-      setError("Image upload failed");
-    } finally {
-      setUploading(false);
+    const result = await uploadImage(file);
+    setUploading(false);
+    if ("error" in result) {
+      setError(result.error);
+      return;
     }
+    setCover(result.path);
+    setCoverFileName(file.name);
   }
 
   async function handleDelete() {
@@ -409,8 +406,19 @@ export function PostForm({
         // 글이 생겼으니 이제부터는 편집이다. 이동은 하지 않는다 — 방금 커밋됐을 뿐
         // 아직 배포 전이라 /write/<slug>는 열리지 않고, 브라우저 주소만 맞춰둔다.
         // (replace라 뒤로 가기가 /write/new로 돌아오지 않는다.)
+        //
+        // 첫 인자로 history.state를 그대로 넘겨야 한다. Next는 replaceState를
+        // 감싸면서 `data?.__NA`가 있으면 원본을 그대로 호출하고 빠져나가는데,
+        // null을 넘기면 그 분기를 타지 못해 ACTION_RESTORE가 디스패치된다. 그때
+        // URL만 /write/<slug>로 바뀌고 라우터 트리는 /write/new인 채로 남아,
+        // 어긋난 짝이 히스토리 항목에 저장된다(뒤로 가면 발행된 글 주소에서 빈
+        // "New post" 폼이 뜬다). state를 넘기면 주소만 바뀌고 트리는 보존된다.
         setCreatedSlug(data.slug);
-        window.history.replaceState(null, "", `/write/${data.slug}`);
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `/write/${data.slug}`
+        );
       }
     } catch {
       setError("Save failed");
