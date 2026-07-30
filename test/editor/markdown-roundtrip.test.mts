@@ -59,6 +59,32 @@ test("모든 글은 왕복해도 그대로다", () => {
   }
 });
 
+test("파일 본문과 에디터 출력은 끝 공백에서만 갈린다", () => {
+  // PostForm이 dirty를 판정할 때 content.trimEnd()로 비교하는 근거를 고정한다.
+  // 폼은 파일 본문으로 기준선을 잡고 이후 값은 에디터 출력으로 받는데, 둘의 끝
+  // 공백이 다르다 — 정규화하지 않으면 첫 편집에서 기준선이 어긋난 뒤 사용자가
+  // 되돌릴 방법이 없어져, 편집을 취소해도 영구히 "Unsaved"로 남고 내용이 같은
+  // 가짜 복구 초안이 쌓인다.
+  const posts = readBodies();
+  const differing = posts.filter(({ body }) => roundtrip(body) !== body);
+
+  // 정규화가 실제로 필요한지 확인한다. 끝 공백까지 일치한다면 PostForm의
+  // trimEnd는 죽은 코드이므로 이 테스트가 알려줘야 한다.
+  assert.ok(
+    differing.length > 0,
+    "끝 공백까지 일치한다 — PostForm의 content.trimEnd()가 더 이상 필요하지 않은지 확인할 것"
+  );
+
+  // 그리고 trimEnd로 남는 차이가 없어야 한다(= 정규화가 충분하다).
+  for (const { file, body } of posts) {
+    assert.equal(
+      roundtrip(body).trimEnd(),
+      body.trimEnd(),
+      `${file}: 끝 공백 말고도 차이가 있다 — trimEnd만으로는 기준선을 맞출 수 없다`
+    );
+  }
+});
+
 test("한 번 더 왕복해도 더 바뀌지 않는다", () => {
   // 고정점이 없으면 정규화 자체가 성립하지 않는다 — 아무리 정리해도 다음
   // 저장에서 또 diff가 난다. 구 직렬화기가 정확히 그 상태였다(7편 불안정).

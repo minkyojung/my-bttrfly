@@ -76,6 +76,23 @@ function todayDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+// 같은 브라우저에서 /write/new 를 두 탭 열면 아직 slug가 없어 초안 키가 겹치고,
+// 한쪽에서 복구를 누르면 다른 탭의 원고가 올라온다. sessionStorage는 탭마다
+// 다르고 새로고침에는 살아남아서(=복구가 요구하는 성질) 이 용도에 정확히 맞는다.
+function useTabId(): string {
+  const [id] = useState(() => {
+    if (typeof window === "undefined") return "";
+    const KEY = "write-tab-id";
+    let value = sessionStorage.getItem(KEY);
+    if (!value) {
+      value = Math.random().toString(36).slice(2);
+      sessionStorage.setItem(KEY, value);
+    }
+    return value;
+  });
+  return id;
+}
+
 export function PostForm({
   mode: initialMode,
   slug: propSlug,
@@ -129,6 +146,7 @@ export function PostForm({
   const [showPreview, setShowPreview] = useState(false);
 
   // --- 이탈/유실 방어 ---
+  const tabId = useTabId();
   // 현재 폼 전체를 직렬화해 초기 상태와 비교하는 것으로 "변경됨(dirty)"을 판정한다.
   const snapshot: PostFormValues = {
     slug,
@@ -142,15 +160,20 @@ export function PostForm({
     featured,
     draft,
     source: source || undefined,
-    content,
+    // 끝 개행은 파일을 쓰는 쪽(gray-matter)이 붙이는 것이고 에디터 출력에는 없다.
+    // 정규화하지 않으면 첫 편집에서 기준선이 한 바이트 어긋난 뒤 되돌릴 방법이
+    // 없어져, 편집을 되돌려도 영구히 "Unsaved"로 남고 가짜 복구 초안이 쌓인다.
+    content: content.trimEnd(),
   };
   const serialized = JSON.stringify(snapshot);
   // 최초 렌더 시점의 값을 기준선으로 고정(저장 성공 시 갱신).
   const baselineRef = useRef(serialized);
   const dirty = serialized !== baselineRef.current;
-  // 생성 중에는 "new"를 쓰다가 글이 만들어지면 그 slug로 옮겨간다. 안 옮기면
+  // 생성 중에는 탭별 키를 쓰다가 글이 만들어지면 그 slug로 옮겨간다. 안 옮기면
   // 새 글을 또 시작할 때 이전 글의 초안이 복구 후보로 떠오른다.
-  const draftKey = `write-draft:${currentSlug ?? "new"}`;
+  const draftKey = currentSlug
+    ? `write-draft:${currentSlug}`
+    : `write-draft:new:${tabId}`;
 
   const [recoverable, setRecoverable] = useState<PostFormValues | null>(null);
 
@@ -199,7 +222,10 @@ export function PostForm({
 
   // 변경 시 디바운스로 로컬에 초안 저장(서버 저장 = git 커밋이라 자주 못 함).
   useEffect(() => {
-    if (!dirty) return;
+    // 복구 제안이 떠 있는 동안은 쓰지 않는다. 저장된 초안이 곧 그 제안의 내용인데,
+    // 여기서 덮어쓰면 사용자가 Restore를 누르기도 전에 원고가 사라진다. 멈춰도
+    // 잃는 것은 없다 — 초안은 이미 그 키에 저장돼 있다.
+    if (!dirty || recoverable) return;
     const id = setTimeout(() => {
       try {
         localStorage.setItem(draftKey, serialized);
@@ -208,7 +234,7 @@ export function PostForm({
       }
     }, 800);
     return () => clearTimeout(id);
-  }, [dirty, serialized, draftKey]);
+  }, [dirty, serialized, draftKey, recoverable]);
 
   // 새로고침·탭닫기·URL이동 등 하드 내비게이션에 브라우저 기본 경고를 띄운다.
   useEffect(() => {
