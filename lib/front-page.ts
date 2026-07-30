@@ -5,6 +5,9 @@ export interface ColumnGroup {
   value: string;
   label: string;
   posts: Post[];
+  // 자르기 전의 전체 편수. 1면은 칼럼마다 몇 편만 보여주므로, 섹션 페이지로 가는
+  // 링크가 "여기 말고 더 있다"를 말해줄 수 있어야 한다.
+  total: number;
 }
 
 // 카테고리(칼럼)별로 글을 묶는다. 섹션 순서 = COLUMNS 배열 순서.
@@ -27,13 +30,19 @@ export function groupByColumn(posts: Post[], perColumn = 4): ColumnGroup[] {
       extras.set(cat, bucket);
     }
   }
-  const extraGroups: ColumnGroup[] = [...extras.entries()].map(
-    ([value, groupPosts]) => ({ value, label: value, posts: groupPosts })
-  );
+  const extraGroups = [...extras.entries()].map(([value, groupPosts]) => ({
+    value,
+    label: value,
+    posts: groupPosts,
+  }));
 
   return [...known, ...extraGroups]
     .filter((group) => group.posts.length > 0)
-    .map((group) => ({ ...group, posts: group.posts.slice(0, perColumn) }));
+    .map((group) => ({
+      ...group,
+      total: group.posts.length,
+      posts: group.posts.slice(0, perColumn),
+    }));
 }
 
 export interface FrontPageSlices {

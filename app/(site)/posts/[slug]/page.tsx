@@ -60,11 +60,14 @@ export default async function Post({
   // 이 경로로 들어오므로 원문으로 리다이렉트한다.
   if (post.external) redirect(post.external);
 
-  const morePosts = post.category
-    ? (await getAllPosts())
-        .filter((p) => p.category === post.category && p.slug !== post.slug)
-        .slice(0, 3)
+  // 같은 섹션의 다른 글. 앞 3편만 싣고, 그보다 많으면 ColumnSection이 섹션 페이지로
+  // 가는 링크를 띄운다(그래서 자른 편수도 함께 넘긴다).
+  const siblings = post.category
+    ? (await getAllPosts()).filter(
+        (p) => p.category === post.category && p.slug !== post.slug
+      )
     : [];
+  const morePosts = siblings.slice(0, 3);
 
   return (
     <main className="min-h-screen bg-bg">
@@ -127,6 +130,7 @@ export default async function Post({
               value: post.category!,
               label: `More in ${post.category}`,
               posts: morePosts,
+              total: siblings.length,
             }}
           />
         </div>
