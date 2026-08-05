@@ -48,3 +48,6 @@ next-env.d.ts
 .conductor/
 /my-bttrfly
 .claude/settings.local.json
+# 에이전트 작업 공간. 첨부 파일이 쌓이는 곳이라 저장소에 들어가면 안 된다.
+# .git/info/exclude에만 있으면 새로 clone했을 때 사라지므로 여기에 둔다.
+.context/
