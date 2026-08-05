@@ -10,8 +10,8 @@ import { JsonLd } from "@/components/JsonLd";
 import { blogPostingSchema, postUrl } from "@/lib/site-config";
 import type { Metadata } from "next";
 
-// 본문 타이포그래피는 tailwind.config.ts의 typography에 있다(에디터·미리보기와
-// 공유). 여기서는 이 페이지에서만 다른 '폭'만 지정한다.
+// 본문 타이포그래피는 tailwind.config.ts의 typography에 있다.
+// 여기서는 이 페이지에서만 다른 '폭'만 지정한다.
 const postProseClass = "prose w-full max-w-content";
 
 export async function generateStaticParams() {

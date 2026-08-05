@@ -1,13 +1,14 @@
 import type { NextConfig } from "next";
 
-// 업로드된 파일을 주소로 직접 열었을 때를 위한 방어. 본문에 <img>로 박힌 이미지는
-// 영향받지 않는다 — Content-Disposition은 최상위 내비게이션만 지배한다.
+// /images/uploads의 파일을 주소로 직접 열었을 때를 위한 방어. 본문에 <img>로 박힌
+// 이미지는 영향받지 않는다 — Content-Disposition은 최상위 내비게이션만 지배한다.
 // sandbox가 핵심이다. 응답을 불투명(opaque) 출처로 만들어서, 혹시 스크립트가 돌더라도
-// document.cookie를 못 읽고 /api/write/* 요청이 교차 출처가 되어 세션 쿠키가 안 붙는다.
-// GitHub이 사용자 업로드 파일에 쓰는 것과 같은 조합이고, next/image가
-// dangerouslyAllowSVG를 켰을 때 스스로 세우는 기본값이기도 하다.
+// document.cookie를 못 읽고 같은 출처로 요청을 보내지 못한다. GitHub이 사용자 업로드
+// 파일에 쓰는 것과 같은 조합이고, next/image가 dangerouslyAllowSVG를 켰을 때 스스로
+// 세우는 기본값이기도 하다.
 // nosniff는 SVG에는 무력하지만(선언된 타입이 실제로 맞으므로) 확장자만 png인
-// HTML 파일이 HTML로 해석되는 걸 막는다 — 지금 업로드 검사가 확장자만 보기 때문에 필요하다.
+// HTML 파일이 HTML로 해석되는 걸 막는다.
+// 업로드 엔드포인트는 사라졌지만 그때 들어온 파일 129장은 그대로 서빙되므로 유지한다.
 const UPLOAD_SECURITY_HEADERS = [
   {
     key: "Content-Security-Policy",

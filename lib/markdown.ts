@@ -112,10 +112,7 @@ function parseFile(slug: string, fileContents: string): Post {
 }
 
 // 파싱 실패 시 어느 파일이 문제인지 알 수 있게 파일명을 붙여 던진다
-// (frontmatter가 CMS와 손편집 양쪽에서 수정되므로 방어 필수).
-//
-// 내용을 어디서 가져왔든 쓸 수 있다 — 파일 텍스트만 받아 Post를 만든다.
-// 편집 화면은 이 파일이 아니라 GitHub에서 받은 문자열을 넘긴다.
+// (frontmatter를 손으로 고치므로 방어 필수).
 export function parseFileOrThrow(slug: string, fileContents: string): Post {
   try {
     return parseFile(slug, fileContents);
@@ -147,10 +144,6 @@ async function getAllPostsUncached(): Promise<Post[]> {
 
 export const getAllPosts = cache(getAllPostsUncached);
 
-// /write는 목록도 편집 화면도 여기서 읽지 않는다. 이 파일이 보는 건 배포 시점에
-// 얼어붙은 스냅샷이라, 저장이 대조하는 GitHub의 현재 상태와 어긋난다.
-// 공개 사이트만 여기서 읽는다 — 그쪽은 배포된 것을 보여주는 게 맞다.
-
 function readPostFile(slug: string): Post | null {
   // URL 인코딩된 경로 탈출(%2F 등) 차단
   if (!/^[\w-]+$/.test(slug)) return null;
@@ -166,7 +159,3 @@ async function getPostBySlugUncached(slug: string): Promise<Post | null> {
 }
 
 export const getPostBySlug = cache(getPostBySlugUncached);
-
-// 편집 화면은 여기서 글을 읽지 않는다. 배포된 파일시스템은 빌드 시점에 얼어붙어
-// 있어서, 저장이 대조하는 GitHub의 현재 상태와 어긋난다 — 그래서 /write/[slug]는
-// getFile()로 GitHub에서 직접 읽는다(내용과 sha를 같은 출처에서 함께 받는다).

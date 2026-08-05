@@ -41,10 +41,9 @@ const config: Config = {
       fontFamily: {
         serif: ["var(--font-serif)", "'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
       },
-      // 글 본문의 타이포그래피 단일 출처. 에디터(/write)·미리보기·발행 페이지가
-      // 모두 `prose` 하나만 붙이면 같은 모습이 되도록 여기에 모아둔다. 예전에는
-      // 크기·간격이 발행 페이지의 클래스 문자열에만 있어서, 글을 쓰는 화면과
-      // 실제 발행 결과가 서로 달랐다.
+      // 글 본문의 타이포그래피 단일 출처. 본문을 렌더하는 곳이 `prose` 하나만
+      // 붙이면 같은 모습이 되도록 여기에 모아둔다. 예전에는 크기·간격이 발행
+      // 페이지의 클래스 문자열에 흩어져 있어서 화면마다 결과가 달랐다.
       // 폭·최소높이 같은 '배치'는 위치마다 달라야 하므로 각 호출부에 남긴다.
       typography: (theme: (path: string) => string[]) => ({
         DEFAULT: {
@@ -53,8 +52,8 @@ const config: Config = {
             fontSize: "18px",
             lineHeight: "1.7",
             fontWeight: "400",
-            // 폭은 각 화면이 정한다(에디터는 편집 영역을 채우고, 발행 페이지는
-            // max-w-content로 제한). 플러그인 기본값 65ch가 끼어들지 않게 푼다.
+            // 폭은 각 화면이 정한다(발행 페이지는 max-w-content로 제한).
+            // 플러그인 기본값 65ch가 끼어들지 않게 푼다.
             maxWidth: "none",
 
             "h1, h2, h3, h4, h5, h6": { fontWeight: "900" },

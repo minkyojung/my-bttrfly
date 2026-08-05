@@ -114,29 +114,3 @@
     scrollbar-width: none;  /* Firefox */
   }
 }
-
-/* TipTap(/write 에디터) placeholder — Placeholder 확장이 요구하는 CSS */
-.ProseMirror p.is-editor-empty:first-child::before {
-  content: attr(data-placeholder);
-  color: var(--color-fg-subtle);
-  float: left;
-  height: 0;
-  pointer-events: none;
-}
-
-/* TipTap 표 — 편집 중에만 필요한 것만 남긴다. 표의 생김새(격자·헤더 배경·여백)는
-   tailwind.config.ts의 typography에 있어 발행 화면과 공유한다. */
-.ProseMirror table td,
-.ProseMirror table th {
-  /* 아래 선택 표시(::after)의 기준이 되고, 편집 중 셀이 너무 좁아지지 않게 한다 */
-  position: relative;
-  min-width: 3rem;
-  box-sizing: border-box;
-}
-.ProseMirror table .selectedCell::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.06);
-  pointer-events: none;
-}

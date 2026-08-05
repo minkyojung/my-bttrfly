@@ -6,24 +6,15 @@
     "node": ">=24"
   },
   "scripts": {
-    "dev": "op run --env-file=.env.local -- next dev",
+    "dev": "op run --env-file=.env.local -- next dev --turbopack",
     "build": "next build",
     "build:check": "NEXT_DIST_DIR=.next-check next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "npm run test:unit && npm run test:editor",
-    "test:unit": "node --conditions=react-server --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts",
-    "test:editor": "node --import ./test/editor/dom-setup.mjs --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/editor/*.test.mts"
+    "test": "node --conditions=react-server --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts"
   },
   "dependencies": {
-    "@tiptap/extension-image": "^3.29.2",
-    "@tiptap/extension-placeholder": "^3.29.2",
-    "@tiptap/extension-table": "^3.29.2",
-    "@tiptap/markdown": "^3.29.2",
-    "@tiptap/pm": "^3.29.2",
-    "@tiptap/react": "^3.29.2",
-    "@tiptap/starter-kit": "^3.29.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
@@ -41,20 +32,15 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@mozilla/readability": "^0.6.0",
     "@tailwindcss/typography": "^0.5.19",
-    "@tiptap/core": "^3.29.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
-    "jsdom": "^29.1.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
-    "turndown": "^7.2.4",
-    "turndown-plugin-gfm": "^1.0.2",
     "typescript": "^5"
   }
 }
