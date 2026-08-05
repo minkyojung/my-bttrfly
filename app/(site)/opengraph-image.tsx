@@ -1,65 +1,39 @@
-import { ImageResponse } from "next/og";
 import { siteConfig } from "@/lib/site-config";
-import { loadProfile, loadFont } from "@/lib/og";
+import {
+  loadProfile,
+  avatarStyle,
+  ogImage,
+  OG_SIZE,
+  OG_CONTENT_TYPE,
+  OG_ROOT_STYLE,
+} from "@/lib/og";
 
-export const size = { width: 1200, height: 630 };
-export const contentType = "image/png";
+export const size = OG_SIZE;
+export const contentType = OG_CONTENT_TYPE;
 export const alt = `${siteConfig.alternateName}`;
 
 export default async function OpengraphImage() {
-  const profile = loadProfile();
-  const fontData = loadFont();
-
-  return new ImageResponse(
-    (
+  return ogImage(
+    <div
+      style={{
+        ...OG_ROOT_STYLE,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 48,
+      }}
+    >
+      <img src={loadProfile()} alt="" style={avatarStyle(200)} />
       <div
         style={{
-          width: "100%",
-          height: "100%",
-          background: "#000000",
-          color: "#ffffff",
           display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 48,
-          fontFamily: "Pretendard",
+          fontSize: 84,
+          fontWeight: 700,
+          letterSpacing: "-0.04em",
         }}
       >
-        <img
-          src={profile}
-          alt=""
-          width={200}
-          height={200}
-          style={{
-            width: 200,
-            height: 200,
-            borderRadius: 9999,
-            objectFit: "cover",
-          }}
-        />
-        <div
-          style={{
-            display: "flex",
-            fontSize: 84,
-            fontWeight: 700,
-            letterSpacing: "-0.04em",
-          }}
-        >
-          {siteConfig.alternateName}
-        </div>
+        {siteConfig.alternateName}
       </div>
-    ),
-    {
-      ...size,
-      fonts: [
-        {
-          name: "Pretendard",
-          data: fontData,
-          weight: 700,
-          style: "normal",
-        },
-      ],
-    },
+    </div>
   );
 }

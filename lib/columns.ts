@@ -9,8 +9,6 @@ export const COLUMNS = [
   { value: "Retrospectives", label: "Retrospectives" },
 ] as const;
 
-export type ColumnValue = (typeof COLUMNS)[number]["value"];
-
 // 섹션 페이지 주소(/columns/<slug>)와 카테고리 값 사이의 변환. 프론트매터의
 // 카테고리는 "Essays"처럼 대문자로 시작하지만 URL은 소문자를 쓴다.
 export function columnSlug(value: string): string {

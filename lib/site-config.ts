@@ -5,7 +5,6 @@ export const siteConfig = {
   name: "William Jung",
   alternateName: "Minkyo Jung",
   role: "Operator × Engineer",
-  headline: "Operator × Engineer · Previously Operations at Disquiet (15K → 100K)",
   description:
     "Operator × engineer. Previously led operations at Disquiet, growing the community from 15,000 to 100,000 members. Now building independent products and writing about products & AI.",
   locale: "ko_KR",
@@ -24,9 +23,10 @@ export const siteConfig = {
   },
 } as const;
 
-export type SiteConfig = typeof siteConfig;
-
-export const postUrl = (slug: string) => `${siteConfig.url}/posts/${slug}`;
+// 글 주소는 여기서만 만든다. 목록·본문은 상대 경로(postPath), sitemap과
+// 구조화 데이터는 절대 URL(postUrl)이 필요하다 — lib/columns.ts와 같은 형태.
+export const postPath = (slug: string) => `/posts/${slug}`;
+export const postUrl = (slug: string) => `${siteConfig.url}${postPath(slug)}`;
 
 export function blogPostingSchema(input: {
   title: string;

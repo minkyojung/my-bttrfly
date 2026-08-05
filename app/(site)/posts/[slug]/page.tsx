@@ -1,7 +1,5 @@
 import { notFound, redirect } from "next/navigation";
-import Image from "next/image";
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
-import { cn } from "@/lib/utils";
 import { PostBody } from "@/components/PostBody";
 import { PageHeader } from "@/components/ui/page-header";
 import { Kicker } from "@/components/front-page/Kicker";
@@ -77,39 +75,10 @@ export default async function Post({
           slug: post.slug,
           date: post.date,
           description: post.summary ?? post.preview,
-          image: post.cover,
         })}
       />
-      {post.cover && (
-        <div className="p-[10px]">
-          <div
-            className="relative w-full overflow-hidden rounded-lg"
-            style={{
-              maxHeight: "70vh",
-              aspectRatio: post.coverMeta
-                ? `${post.coverMeta.width} / ${post.coverMeta.height}`
-                : "16 / 9",
-            }}
-          >
-            <Image
-              src={post.cover}
-              alt={post.title}
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover"
-              {...(post.coverMeta ? {} : { unoptimized: true })}
-            />
-          </div>
-        </div>
-      )}
 
-      <div
-        className={cn(
-          "max-w-3xl mx-auto px-6 py-12",
-          post.cover ? "pt-12" : "pt-16"
-        )}
-      >
+      <div className="max-w-3xl mx-auto px-6 py-12 pt-16">
         <article className="flex flex-col items-center">
           <PageHeader
             title={post.title}

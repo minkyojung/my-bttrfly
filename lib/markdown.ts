@@ -26,8 +26,6 @@ export interface Post {
   // 원문 URL. external과 달리 리다이렉트하지 않고 본문을 그대로 보여주되,
   // <link rel="canonical">만 원문으로 가리켜 중복 콘텐츠를 피한다(타 매체에서 옮겨온 글).
   canonical?: string;
-  cover?: string;
-  coverMeta?: ImageMeta;
   category?: string;
   featured: boolean;
   draft: boolean;
@@ -49,7 +47,7 @@ function normalizeDate(value: unknown, slug: string): string {
   throw new Error(`Missing or invalid date in content/posts/${slug}.md`);
 }
 
-// CMS가 빈 문자열로 저장한 optional 필드를 undefined로 정규화한다.
+// 빈 문자열로 남은 optional 필드를 undefined로 정규화한다.
 function optionalString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
 }
@@ -88,7 +86,6 @@ function buildPreview(content: string): string {
 
 function parseFile(slug: string, fileContents: string): Post {
   const { data, content } = matter(fileContents);
-  const cover = optionalString(data.cover);
   return {
     slug,
     title: data.title || slug.replace(/-/g, ' '),
@@ -99,8 +96,6 @@ function parseFile(slug: string, fileContents: string): Post {
     imageMeta: collectImageMeta(content),
     external: optionalString(data.external),
     canonical: optionalString(data.canonical),
-    cover,
-    coverMeta: cover ? readLocalImageMeta(cover) : undefined,
     category: optionalString(data.category),
     featured: data.featured === true,
     draft: data.draft === true,
@@ -113,7 +108,7 @@ function parseFile(slug: string, fileContents: string): Post {
 
 // 파싱 실패 시 어느 파일이 문제인지 알 수 있게 파일명을 붙여 던진다
 // (frontmatter를 손으로 고치므로 방어 필수).
-export function parseFileOrThrow(slug: string, fileContents: string): Post {
+function parseFileOrThrow(slug: string, fileContents: string): Post {
   try {
     return parseFile(slug, fileContents);
   } catch (cause) {

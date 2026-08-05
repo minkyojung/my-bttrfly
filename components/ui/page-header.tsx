@@ -1,15 +1,12 @@
-import { cn } from "@/lib/utils";
-
 interface PageHeaderProps {
   title: string;
   eyebrow?: React.ReactNode;
   dek?: React.ReactNode;
-  className?: string;
 }
 
-export function PageHeader({ title, eyebrow, dek, className }: PageHeaderProps) {
+export function PageHeader({ title, eyebrow, dek }: PageHeaderProps) {
   return (
-    <header className={cn("w-full max-w-content mb-12 text-center", className)}>
+    <header className="w-full max-w-content mb-12 text-center">
       {eyebrow && (
         <div className="flex items-center justify-center gap-1.5 mb-4">
           {eyebrow}

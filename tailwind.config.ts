@@ -22,10 +22,8 @@ const config: Config = {
         border: {
           DEFAULT: "var(--color-border)",
           strong: "var(--color-border-strong)",
-          subtle: "var(--color-border-subtle)",
         },
         accent: {
-          DEFAULT: "var(--color-accent)",
           warm: "var(--color-accent-warm)",
         },
       },
@@ -145,8 +143,8 @@ const config: Config = {
               borderRadius: "var(--radius-md)",
             },
 
-            // 표. 플러그인 기본값은 가로선만 긋는 신문 기사 스타일인데, 편집
-            // 화면에서 보이는 격자 모양을 그대로 발행하도록 맞춘다.
+            // 표. 플러그인 기본값은 가로선만 긋는 신문 기사 스타일인데,
+            // 셀 경계가 보이는 격자 모양을 쓴다(remark-gfm이 표를 켜둔다).
             table: {
               borderCollapse: "collapse",
               tableLayout: "auto",

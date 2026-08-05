@@ -2,6 +2,7 @@ import type { Post } from "@/lib/markdown";
 import { SmartLink } from "@/components/ui/link";
 import { cn } from "@/lib/utils";
 import { SourceBadge } from "@/components/ui/source-badge";
+import { postPath } from "@/lib/site-config";
 import { CoverSlot } from "./CoverSlot";
 import { Kicker } from "./Kicker";
 
@@ -15,19 +16,14 @@ interface StoryCardProps {
 export function StoryCard({ post, variant = "list" }: StoryCardProps) {
   return (
     <SmartLink
-      href={post.external ?? `/posts/${post.slug}`}
+      href={post.external ?? postPath(post.slug)}
       className={cn(
         "block group",
         variant === "list" &&
           "py-5 first:pt-0 border-b border-border last:border-b-0"
       )}
     >
-      <CoverSlot
-        src={post.cover}
-        alt={post.title}
-        aspect="card"
-        sizes="(min-width: 1024px) 25vw, 100vw"
-      />
+      <CoverSlot />
       <div className="mt-3">
         <div className="flex items-center gap-1.5">
           <SourceBadge source={post.source} />

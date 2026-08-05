@@ -11,32 +11,17 @@ export interface ColumnGroup {
 }
 
 // 카테고리(칼럼)별로 글을 묶는다. 섹션 순서 = COLUMNS 배열 순서.
-// COLUMNS에 없는 카테고리(레거시/오타)는 뒤에 자체 이름으로 배치해 누락되지 않게 한다.
 // posts는 getAllPosts()에서 날짜 내림차순으로 들어오므로 각 그룹도 최신순.
+//
+// COLUMNS 밖의 카테고리는 여기서 버려진다 — 예전에는 뒤에 따로 붙여 살렸지만,
+// 그 글은 어차피 /columns/<slug>가 없어 링크될 곳이 없었다. 지금은
+// test/published-posts.test.mts가 발행 전에 막으므로 런타임 방어가 필요 없다.
 export function groupByColumn(posts: Post[], perColumn = 4): ColumnGroup[] {
-  const known = COLUMNS.map((c) => ({
+  return COLUMNS.map((c) => ({
     value: c.value as string,
     label: c.label as string,
     posts: posts.filter((p) => p.category === c.value),
-  }));
-
-  const knownValues = new Set<string>(COLUMNS.map((c) => c.value));
-  const extras = new Map<string, Post[]>();
-  for (const post of posts) {
-    const cat = post.category;
-    if (cat && !knownValues.has(cat)) {
-      const bucket = extras.get(cat) ?? [];
-      bucket.push(post);
-      extras.set(cat, bucket);
-    }
-  }
-  const extraGroups = [...extras.entries()].map(([value, groupPosts]) => ({
-    value,
-    label: value,
-    posts: groupPosts,
-  }));
-
-  return [...known, ...extraGroups]
+  }))
     .filter((group) => group.posts.length > 0)
     .map((group) => ({
       ...group,

@@ -1,5 +1,4 @@
 import NextLink from "next/link";
-import { cn } from "@/lib/utils";
 
 interface SmartLinkProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {
@@ -19,7 +18,7 @@ export function SmartLink({ href, className, children, ...props }: SmartLinkProp
         href={href}
         target="_blank"
         rel="noopener noreferrer"
-        className={cn(className)}
+        className={className}
         {...props}
       >
         {children}
@@ -27,7 +26,7 @@ export function SmartLink({ href, className, children, ...props }: SmartLinkProp
     );
   }
   return (
-    <NextLink href={href} className={cn(className)} {...props}>
+    <NextLink href={href} className={className} {...props}>
       {children}
     </NextLink>
   );
