@@ -1,23 +1,22 @@
 import type { Post } from "@/lib/markdown";
 import { SmartLink } from "@/components/ui/link";
+import { SourceBadge } from "@/components/ui/source-badge";
+import { postPath } from "@/lib/site-config";
 import { CoverSlot } from "./CoverSlot";
 import { Kicker } from "./Kicker";
 
 export function HeroStory({ post }: { post: Post }) {
   return (
     <SmartLink
-      href={post.external ?? `/posts/${post.slug}`}
+      href={post.external ?? postPath(post.slug)}
       className="block group"
     >
-      <CoverSlot
-        src={post.cover}
-        alt={post.title}
-        aspect="hero"
-        priority
-        sizes="(min-width: 1024px) 50vw, 100vw"
-      />
+      <CoverSlot />
       <div className="mt-6">
-        <Kicker category={post.category} date={post.date} />
+        <div className="flex items-center gap-1.5">
+          <SourceBadge source={post.source} />
+          <Kicker category={post.category} date={post.date} />
+        </div>
         <h2 className="font-serif text-fg text-3xl md:text-4xl font-bold leading-snug tracking-[-0.01em] mt-3 group-hover:opacity-60 transition-opacity">
           {post.title}
           {post.external && (

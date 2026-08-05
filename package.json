@@ -2,17 +2,19 @@
   "name": "my-bttrfly",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
-    "dev": "next dev",
+    "dev": "op run --env-file=.env.local -- next dev --turbopack",
     "build": "next build",
+    "build:check": "NEXT_DIST_DIR=.next-check next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "node --conditions=react-server --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/*.test.mts"
   },
   "dependencies": {
-    "@keystatic/core": "^0.5.51",
-    "@keystatic/next": "^5.0.4",
-    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "gray-matter": "^4.0.3",
     "image-size": "^2.0.2",
@@ -24,6 +26,7 @@
     "react-tooltip": "^5.30.0",
     "remark-breaks": "^4.0.0",
     "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {

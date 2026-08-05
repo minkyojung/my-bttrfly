@@ -1,10 +1,9 @@
 ---
 title: "오래 일하기 위한 마인드셋, 성장을 위해 AI를 레버리지하는 방법, AI가 사진과 영상을 전부 대체할까?"
 date: "2024-05-18"
-labelImage: "/badges/substack.png"
+source: substack
 category: "Newsletter"
 ---
-
 2개월 만입니다. 그동안 많은 일이 있었는데요.
 
 - 디스콰이엇 팀의 제품팀이 리빌딩 되었습니다.

@@ -5,7 +5,6 @@ import { ActivityCalendar } from "react-activity-calendar";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
 import type { GitHubData } from "@/lib/github";
-import styles from "./GitHubContributions.module.css";
 
 interface GitHubContributionsProps {
   data: GitHubData | null;
@@ -15,7 +14,7 @@ export function GitHubContributions({ data }: GitHubContributionsProps) {
   if (!data || data.days.length === 0) return null;
 
   return (
-    <div className={styles.container}>
+    <div className="w-full max-w-content py-6 border-t border-border overflow-x-auto scrollbar-hide max-[640px]:py-4">
       <style>{`
         .react-activity-calendar__footer { color: rgba(255,255,255,0.25) !important; }
         .react-activity-calendar__legend-colors + span,

@@ -1,10 +1,9 @@
 ---
 title: "Claude Code팀은 Linear, Slack, Notion을 안 씀, 해적과 건축가, 실험과 느낀 점"
 date: "2026-04-26"
-labelImage: "/badges/substack.png"
+source: substack
 category: "Newsletter"
 ---
-
 (이번 주에 재밌는 에피소드가 갑자기 많이 나와서 급하게 적느라 음악은 없습니다 ㅎㅎ)
 
 흥미로운 점만 짧게 정리하면,
@@ -76,7 +75,7 @@ Reliability가 너무너무 중요.
 
 - 하네싱은 유저의 AI Subscription을 소화하며 동작하기 때문에, Outcome 중심의 Pricing, 또는 가상의 직원이라는 프레이밍으로 Pricing 프레임을 잡는 방법이 있음
 - 멀티 하네싱 레이어는 생각보다 큰 자산임 (Anthropic은 Gemini랑 Codex 쓸 수 없음)
-- Prompt Engineering > Context Engineering > Harnessing > 그 다음은 Intent Orchestration이라고 생각. AI의 의도와 나의 의도가 완전히 일치하고 방향성 설계마저 일부 위임할 수 있는 형태
+- Prompt Engineering &gt; Context Engineering &gt; Harnessing &gt; 그 다음은 Intent Orchestration이라고 생각. AI의 의도와 나의 의도가 완전히 일치하고 방향성 설계마저 일부 위임할 수 있는 형태
 - 내가 아는 것에 의존하지 말고, 내가 아무것도 모른다고 가정하고 접근해야 진실에 가까웠던 적이 훨씬 많았음. 당연히 AI는 나보다 많은 것을 알고 있기에 내 지식으로 판단하지 말고, 그 검정도 AI한테 맡기는 편이 나옴. 무지에 의존해야하는 아이러니
 
 ## 전역까지 80일

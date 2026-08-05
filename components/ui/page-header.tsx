@@ -1,23 +1,24 @@
-import { cn } from "@/lib/utils";
-
 interface PageHeaderProps {
   title: string;
-  meta?: React.ReactNode;
-  className?: string;
+  eyebrow?: React.ReactNode;
+  dek?: React.ReactNode;
 }
 
-export function PageHeader({ title, meta, className }: PageHeaderProps) {
+export function PageHeader({ title, eyebrow, dek }: PageHeaderProps) {
   return (
-    <header
-      className={cn("w-full max-w-content mb-12", className)}
-    >
-      <h1 className="text-center text-fg font-bold text-[60px] leading-[1.2] tracking-[-0.05em] mb-4">
+    <header className="w-full max-w-content mb-12 text-center">
+      {eyebrow && (
+        <div className="flex items-center justify-center gap-1.5 mb-4">
+          {eyebrow}
+        </div>
+      )}
+      <h1 className="font-serif text-fg font-bold text-[60px] leading-[1.2] tracking-[-0.05em]">
         {title}
       </h1>
-      {meta && (
-        <div className="flex items-center justify-center text-sm text-fg-muted">
-          {meta}
-        </div>
+      {dek && (
+        <p className="font-serif text-fg-muted text-lg leading-relaxed mt-5 max-w-xl mx-auto">
+          {dek}
+        </p>
       )}
     </header>
   );
