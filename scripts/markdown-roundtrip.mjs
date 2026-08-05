@@ -117,8 +117,8 @@ for (const file of files) {
     }
     // 본문만 갈아끼우고 프론트매터 블록은 원문 그대로 둔다. matter.stringify로
     // 다시 쓰면 따옴표 스타일이 흔들리고, 따옴표 없는 날짜는 Date로 파싱됐다가
-    // 2025-12-31T00:00:00.000Z 같은 값으로 되돌아온다(Keystatic의 date 필드가
-    // YYYY-MM-DD 문자열을 기대하므로 실제로 깨진다).
+    // 2025-12-31T00:00:00.000Z 같은 값으로 되돌아온다(isValidPostDate가
+    // YYYY-MM-DD 문자열만 받으므로 실제로 깨진다).
     if (body !== content) {
       const m = raw.match(/^(---\r?\n[\s\S]*?\r?\n---\r?\n)([\s\S]*)$/);
       if (!m) {

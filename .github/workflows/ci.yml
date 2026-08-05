@@ -25,9 +25,8 @@ jobs:
 
       - run: npm test
 
-  # 빌드는 Keystatic이 GitHub 앱 자격증명을 요구해 실제 값 없이는 실패한다.
-  # 여기서는 컴파일이 깨지지 않는지만 보면 되므로 더미 값을 넣는다.
-  # (배포 빌드는 Vercel이 실제 값으로 수행한다.)
+  # 컴파일과 정적 생성이 깨지지 않는지만 확인한다.
+  # (배포 빌드는 Vercel이 실제 환경변수로 수행한다.)
   build:
     runs-on: ubuntu-latest
     steps:
@@ -38,7 +37,3 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build:check
-        env:
-          KEYSTATIC_GITHUB_CLIENT_ID: dummy
-          KEYSTATIC_GITHUB_CLIENT_SECRET: dummy
-          KEYSTATIC_SECRET: dummydummydummydummydummydummydummy

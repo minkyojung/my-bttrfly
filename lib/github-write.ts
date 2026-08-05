@@ -1,12 +1,14 @@
 /**
  * GitHub Contents API를 통한 콘텐츠 커밋. Vercel 서버리스 파일시스템은
- * ephemeral/read-only라 저장은 반드시 git 커밋으로 해야 한다 — Keystatic의
- * GitHub 모드가 내부적으로 하는 것과 동일한 방식. Route Handler(Node 런타임)
- * 전용이며, `Buffer` 등 Node API를 쓰므로 미들웨어(Edge)에서 import하면 안 된다.
+ * ephemeral/read-only라 저장은 반드시 git 커밋으로 해야 한다.
+ * Route Handler(Node 런타임) 전용이며, `Buffer` 등 Node API를 쓰므로
+ * 미들웨어(Edge)에서 import하면 안 된다.
  */
 import "server-only";
 import { cache } from "react";
-import { GITHUB_REPO } from "@/lib/repo";
+
+// 저장 대상 저장소 "owner/name".
+const GITHUB_REPO = "minkyojung/my-bttrfly";
 
 const GITHUB_API = "https://api.github.com";
 const GITHUB_RAW = "https://raw.githubusercontent.com";

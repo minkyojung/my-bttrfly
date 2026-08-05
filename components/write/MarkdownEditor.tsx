@@ -15,7 +15,7 @@ function imageFilesFrom(list: FileList | null | undefined): File[] {
   return Array.from(list ?? []).filter((f) => f.type.startsWith("image/"));
 }
 
-// 본문은 마크다운으로 저장된다(공개 사이트·Keystatic 모두 마크다운을 읽음).
+// 본문은 마크다운으로 저장된다(공개 사이트가 읽는 것과 같은 파일).
 // TipTap은 문서를 트리로 다루므로 @tiptap/markdown이 양방향 변환을 맡는다 —
 // contentType으로 초기 content를 마크다운으로 파싱하고, getMarkdown()으로 다시
 // 마크다운을 뽑는다. 커스텀 직렬화 로직은 두지 않는다.

@@ -17,8 +17,6 @@
     "test:editor": "node --import ./test/editor/dom-setup.mjs --disable-warning=ExperimentalWarning --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test test/editor/*.test.mts"
   },
   "dependencies": {
-    "@keystatic/core": "^0.5.51",
-    "@keystatic/next": "^5.0.4",
     "@tiptap/extension-image": "^3.29.2",
     "@tiptap/extension-placeholder": "^3.29.2",
     "@tiptap/extension-table": "^3.29.2",

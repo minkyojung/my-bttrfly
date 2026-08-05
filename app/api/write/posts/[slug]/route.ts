@@ -41,7 +41,7 @@ export async function PUT(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    // 에디터가 읽은 이후 다른 경로(목록의 발행 토글, Keystatic, 다른 탭)에서
+    // 에디터가 읽은 이후 다른 경로(목록의 발행 토글, 손편집 커밋, 다른 탭)에서
     // 파일이 바뀌었으면 덮어쓰지 않고 거절한다. 저장 직전에 sha를 새로 읽어
     // 쓰기만 하면 GitHub의 충돌 검사가 무력화되어 남의 변경이 조용히 사라진다.
     if (typeof body.baseSha === "string" && body.baseSha !== existing.sha) {
