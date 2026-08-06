@@ -1,22 +1,7 @@
-import Link from "next/link";
+import { NotFoundContent } from "@/components/NotFoundContent";
 
+// 페이지가 notFound()를 불렀을 때(예: /posts/<없는 글>). 주소 자체가 어디에도
+// 걸리지 않은 경우는 app/global-not-found.tsx가 받는다.
 export default function NotFound() {
-  return (
-    <main className="bg-[#0a0a0a] min-h-screen flex items-center justify-center text-white">
-      <div className="text-center">
-        <h1 className="text-[72px] font-bold mb-4 tracking-[-0.05em]">
-          404
-        </h1>
-        <p className="text-[18px] text-[#7B7B7B] mb-8">
-          페이지를 찾을 수 없습니다
-        </p>
-        <Link
-          href="/"
-          className="text-accent-warm no-underline text-base font-semibold"
-        >
-          홈으로 돌아가기
-        </Link>
-      </div>
-    </main>
-  );
+  return <NotFoundContent />;
 }

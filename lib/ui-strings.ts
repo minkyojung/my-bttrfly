@@ -18,6 +18,7 @@ interface Strings {
   };
   // 아직 내용을 쓰지 않은 상세 페이지의 자리 문구.
   comingSoon: string;
+  notFound: string;
   about: {
     heading: string;
     background: string;
@@ -47,6 +48,7 @@ const ko: Strings = {
     backHome: "← 처음으로",
   },
   comingSoon: "아직 쓰는 중입니다.",
+  notFound: "페이지를 찾을 수 없습니다.",
   about: {
     heading: "소개",
     background: "경력",
@@ -79,6 +81,7 @@ const en: Strings = {
     backHome: "← Back home",
   },
   comingSoon: "Still writing this one.",
+  notFound: "This page doesn't exist.",
   about: {
     heading: "About",
     background: "Background",
