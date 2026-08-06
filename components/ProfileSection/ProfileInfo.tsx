@@ -4,7 +4,7 @@ export function ProfileInfo() {
   return (
     <div className="w-full max-w-content pb-3 -mt-1 max-[640px]:py-4">
       <h1 className="text-2xl font-bold text-fg mb-2.5 max-[640px]:text-xl">William Jung</h1>
-      <p className="text-[0.9375rem] font-normal text-[#a0a0a0] leading-[1.6] max-[640px]:text-[0.8125rem]">
+      <p className="text-[0.9375rem] font-normal text-fg-muted leading-[1.6] max-[640px]:text-[0.8125rem]">
         Operator × Engineer · Previously Operations at{' '}
         <a
           href="https://disquiet.io/@williamjung"
@@ -21,7 +21,7 @@ export function ProfileInfo() {
           href="https://x.com/imwilliamjung"
           target="_blank"
           rel="me noopener noreferrer"
-          className="inline-flex items-center gap-[0.3rem] px-3 py-0.5 bg-surface rounded-xl text-[#a0a0a0] text-[0.8125rem] font-normal no-underline transition-all duration-200 hover:bg-surface-elevated hover:text-fg"
+          className="inline-flex items-center gap-[0.3rem] px-3 py-0.5 bg-surface rounded-xl text-fg-muted text-[0.8125rem] font-normal no-underline transition-all duration-200 hover:bg-surface-elevated hover:text-fg"
         >
           <svg
             viewBox="0 0 24 24"
@@ -38,7 +38,7 @@ export function ProfileInfo() {
           href="https://github.com/minkyojung"
           target="_blank"
           rel="me noopener noreferrer"
-          className="inline-flex items-center gap-[0.3rem] px-3 py-0.5 bg-surface rounded-xl text-[#a0a0a0] text-[0.8125rem] font-normal no-underline transition-all duration-200 hover:bg-surface-elevated hover:text-fg"
+          className="inline-flex items-center gap-[0.3rem] px-3 py-0.5 bg-surface rounded-xl text-fg-muted text-[0.8125rem] font-normal no-underline transition-all duration-200 hover:bg-surface-elevated hover:text-fg"
         >
           <svg
             viewBox="0 0 24 24"
@@ -54,7 +54,7 @@ export function ProfileInfo() {
         <a
           href="mailto:williamjung0130@gmail.com"
           rel="me"
-          className="inline-flex items-center gap-[0.3rem] px-3 py-0.5 bg-surface rounded-xl text-[#a0a0a0] text-[0.8125rem] font-normal no-underline transition-all duration-200 hover:bg-surface-elevated hover:text-fg"
+          className="inline-flex items-center gap-[0.3rem] px-3 py-0.5 bg-surface rounded-xl text-fg-muted text-[0.8125rem] font-normal no-underline transition-all duration-200 hover:bg-surface-elevated hover:text-fg"
         >
           <svg
             viewBox="0 0 24 24"

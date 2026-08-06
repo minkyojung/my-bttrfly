@@ -1,4 +1,5 @@
 import { aboutContent } from "./about-content";
+import { DEFAULT_LOCALE, LOCALES, localePath, type Locale } from "./i18n";
 
 export const siteConfig = {
   url: "https://www.minkyojung.com",
@@ -27,6 +28,25 @@ export const siteConfig = {
 // 구조화 데이터는 절대 URL(postUrl)이 필요하다 — lib/columns.ts와 같은 형태.
 export const postPath = (slug: string) => `/posts/${slug}`;
 export const postUrl = (slug: string) => `${siteConfig.url}${postPath(slug)}`;
+
+// canonical + hreflang을 한 번에 만든다.
+//
+// 둘을 따로 두면 안 되는 이유: Next의 메타데이터는 최상위 키 단위로 덮어쓴다.
+// 하위 페이지가 alternates.canonical만 지정하면 부모의 alternates.languages가
+// 통째로 날아가 hreflang이 사라진다. 그래서 두 값을 항상 함께 만든다.
+export function alternatesFor(locale: Locale, path: string) {
+  const urlFor = (l: Locale) => `${siteConfig.url}${localePath(l, path)}`;
+
+  return {
+    canonical: urlFor(locale),
+    languages: {
+      ...Object.fromEntries(LOCALES.map((l) => [l, urlFor(l)])),
+      // 어느 언어에도 해당하지 않는 방문자에게 보여줄 판. 없으면 검색엔진이
+      // 임의로 고르고, 그 선택은 우리가 통제할 수 없다.
+      "x-default": urlFor(DEFAULT_LOCALE),
+    },
+  };
+}
 
 export function blogPostingSchema(input: {
   title: string;

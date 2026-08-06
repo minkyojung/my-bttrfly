@@ -3,17 +3,18 @@ import { SmartLink } from "@/components/ui/link";
 import { cn } from "@/lib/utils";
 import { SourceBadge } from "@/components/ui/source-badge";
 import { postPath } from "@/lib/site-config";
-import { CoverSlot } from "./CoverSlot";
+import type { Locale } from "@/lib/i18n";
 import { Kicker } from "./Kicker";
 
 interface StoryCardProps {
   post: Post;
-  // "list": 세로로 쌓이는 단일 컬럼(구분선 있음, 기존 히어로 블록 좌/우).
+  locale: Locale;
+  // "list": 세로로 쌓이는 단일 컬럼(구분선 있음).
   // "grid": 여러 열 그리드에 놓이는 카드(구분선 없음, 칼럼 섹션용).
   variant?: "list" | "grid";
 }
 
-export function StoryCard({ post, variant = "list" }: StoryCardProps) {
+export function StoryCard({ post, locale, variant = "list" }: StoryCardProps) {
   return (
     <SmartLink
       href={post.external ?? postPath(post.slug)}
@@ -23,11 +24,10 @@ export function StoryCard({ post, variant = "list" }: StoryCardProps) {
           "py-5 first:pt-0 border-b border-border last:border-b-0"
       )}
     >
-      <CoverSlot />
-      <div className="mt-3">
+      <div>
         <div className="flex items-center gap-1.5">
           <SourceBadge source={post.source} />
-          <Kicker category={post.category} date={post.date} />
+          <Kicker category={post.category} date={post.date} locale={locale} />
         </div>
         <h3 className="font-serif text-fg text-lg font-bold leading-snug line-clamp-3 mt-1.5 group-hover:opacity-60 transition-opacity">
           {post.title}

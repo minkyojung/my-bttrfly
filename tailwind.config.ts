@@ -30,11 +30,17 @@ const config: Config = {
       borderRadius: {
         sm: "var(--radius-sm)",
         md: "var(--radius-md)",
-        lg: "var(--radius-lg)",
+      },
+      boxShadow: {
+        popover: "var(--shadow-popover)",
+      },
+      zIndex: {
+        popover: "var(--z-popover)",
+        nav: "var(--z-nav)",
       },
       maxWidth: {
         content: "var(--content-width)",
-        wide: "var(--front-page-width)",
+        wide: "var(--width-wide)",
       },
       fontFamily: {
         serif: ["var(--font-serif)", "'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],

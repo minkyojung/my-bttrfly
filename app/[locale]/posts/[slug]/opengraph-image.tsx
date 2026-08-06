@@ -18,7 +18,7 @@ export const contentType = OG_CONTENT_TYPE;
 export default async function PostOpengraphImage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);

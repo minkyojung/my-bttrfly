@@ -2,10 +2,11 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllPosts } from "@/lib/markdown";
 import { COLUMNS, columnSlug, columnFromSlug } from "@/lib/columns";
-import { StoryCard } from "@/components/front-page/StoryCard";
-import { Masthead } from "@/components/front-page/Masthead";
+import { StoryCard } from "@/components/post/StoryCard";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/lib/site-config";
+import { getStrings } from "@/lib/ui-strings";
+import { DEFAULT_LOCALE } from "@/lib/i18n";
 
 // 섹션(칼럼) 목록 페이지. 1면은 칼럼마다 앞 몇 편만 싣기 때문에, 이 페이지가 없으면
 // 나머지 글은 sitemap 말고는 아무 데서도 링크되지 않는다 — 실제로 발행글 31편 중
@@ -26,14 +27,20 @@ async function resolveColumn(slug: string) {
     : null;
 }
 
+// 섹션 목록도 글과 같이 기본 로케일에만 존재한다.
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
-  return COLUMNS.map((c) => ({ column: columnSlug(c.value) }));
+  return COLUMNS.map((c) => ({
+    locale: DEFAULT_LOCALE,
+    column: columnSlug(c.value),
+  }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ column: string }>;
+  params: Promise<{ locale: string; column: string }>;
 }): Promise<Metadata> {
   const { column } = await params;
   const resolved = await resolveColumn(column);
@@ -53,7 +60,7 @@ export async function generateMetadata({
 export default async function ColumnPage({
   params,
 }: {
-  params: Promise<{ column: string }>;
+  params: Promise<{ locale: string; column: string }>;
 }) {
   const { column } = await params;
   const resolved = await resolveColumn(column);
@@ -68,20 +75,23 @@ export default async function ColumnPage({
   return (
     <main className="min-h-screen bg-bg pt-16 pb-24">
       <Container className="max-w-wide">
-        <Masthead />
-
-        <header className="mt-10 flex items-baseline justify-between border-b border-border pb-2">
+        <header className="flex items-baseline justify-between border-b border-border pb-2">
           <h1 className="text-fg text-[11px] font-semibold uppercase tracking-[0.12em]">
             {resolved.label}
           </h1>
           <span className="text-fg-subtle text-[11px] font-medium uppercase tracking-[0.12em]">
-            {posts.length}편
+            {getStrings(DEFAULT_LOCALE).column.count(posts.length)}
           </span>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-2">
           {posts.map((post) => (
-            <StoryCard key={post.slug} post={post} variant="grid" />
+            <StoryCard
+              key={post.slug}
+              post={post}
+              locale={DEFAULT_LOCALE}
+              variant="grid"
+            />
           ))}
         </div>
       </Container>

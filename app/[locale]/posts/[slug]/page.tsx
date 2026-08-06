@@ -2,25 +2,31 @@ import { notFound, redirect } from "next/navigation";
 import { getAllPosts, getPostBySlug } from "@/lib/markdown";
 import { PostBody } from "@/components/PostBody";
 import { PageHeader } from "@/components/ui/page-header";
-import { Kicker } from "@/components/front-page/Kicker";
-import { ColumnSection } from "@/components/front-page/ColumnSection";
+import { Kicker } from "@/components/post/Kicker";
+import { ColumnSection } from "@/components/post/ColumnSection";
 import { JsonLd } from "@/components/JsonLd";
 import { blogPostingSchema, postUrl } from "@/lib/site-config";
+import { getStrings } from "@/lib/ui-strings";
+import { DEFAULT_LOCALE } from "@/lib/i18n";
 import type { Metadata } from "next";
 
 // 본문 타이포그래피는 tailwind.config.ts의 typography에 있다.
 // 여기서는 이 페이지에서만 다른 '폭'만 지정한다.
 const postProseClass = "prose w-full max-w-content";
 
+// 글은 사실상 한국어 콘텐츠라 기본 로케일에만 존재한다. locale까지 직접 돌려주고
+// dynamicParams를 끄면 /en/posts/* 는 생성되지도, 요청 시 만들어지지도 않는다.
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   const posts = await getAllPosts();
-  return posts.map((post) => ({ slug: post.slug }));
+  return posts.map((post) => ({ locale: DEFAULT_LOCALE, slug: post.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
@@ -47,7 +53,7 @@ export async function generateMetadata({
 export default async function Post({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
@@ -82,7 +88,13 @@ export default async function Post({
         <article className="flex flex-col items-center">
           <PageHeader
             title={post.title}
-            eyebrow={<Kicker category={post.category} date={post.date} />}
+            eyebrow={
+              <Kicker
+                category={post.category}
+                date={post.date}
+                locale={DEFAULT_LOCALE}
+              />
+            }
             dek={post.summary}
           />
 
@@ -95,9 +107,10 @@ export default async function Post({
       {morePosts.length > 0 && (
         <div className="max-w-wide mx-auto px-6 pb-20 mt-8">
           <ColumnSection
+            locale={DEFAULT_LOCALE}
             group={{
               value: post.category!,
-              label: `More in ${post.category}`,
+              label: getStrings(DEFAULT_LOCALE).post.moreIn(post.category!),
               posts: morePosts,
               total: siblings.length,
             }}
