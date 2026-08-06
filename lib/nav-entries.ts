@@ -39,6 +39,7 @@ export const NAV_ENTRIES: NavEntry[] = [
       ko: { title: "책", body: "읽고 다시 읽는 책들." },
       en: { title: "Books", body: "What I read, and reread." },
     },
+    icon: "/images/entries/books.png",
   },
   {
     id: "bookclub",
