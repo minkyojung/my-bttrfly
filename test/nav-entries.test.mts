@@ -10,7 +10,8 @@ import { LOCALES } from "../lib/i18n.ts";
 //
 // test/published-posts.test.mts가 글에 대해 하는 일을 진입점에 대해 한다.
 
-const TOKEN = /\[([^\]]+)\]\((\w+)\)/g;
+// components/home/IntroParagraph.tsx와 같은 표기여야 한다.
+const TOKEN = /\[([^\]]+)\]\(([\w-]+)\)/g;
 
 function tokensIn(template: string): string[] {
   return [...template.matchAll(TOKEN)].map((m) => m[2]);

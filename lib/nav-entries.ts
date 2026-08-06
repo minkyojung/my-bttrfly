@@ -61,6 +61,33 @@ export const NAV_ENTRIES: NavEntry[] = [
     },
   },
   {
+    id: "how-i-work",
+    path: "/how-i-work",
+    label: { ko: "일하는 방식", en: "How I work" },
+    preview: {
+      ko: {
+        title: "일하는 방식",
+        body: "판단이 갈릴 때 무엇을 기준으로 삼는지.",
+      },
+      en: {
+        title: "How I work",
+        body: "What I fall back on when the call isn't obvious.",
+      },
+    },
+  },
+  {
+    id: "influences",
+    path: "/influences",
+    label: { ko: "영향받은 제품", en: "Influences" },
+    preview: {
+      ko: { title: "영향받은 제품", body: "많이 훔친 제품들, 그리고 무엇을 훔쳤는지." },
+      en: {
+        title: "Influences",
+        body: "Products I've stolen from, and exactly what I took.",
+      },
+    },
+  },
+  {
     id: "now",
     path: "/now",
     label: { ko: "지금 하는 생각", en: "What I'm thinking about" },
@@ -98,6 +125,7 @@ export const INTRO: Record<Locale, string> = {
 좋은 원서를 골라 [북클럽](bookclub)을 운영하다가,
 한국에서 가장 큰 스타트업 커뮤니티 [디스콰이엇](disquiet)에 합류했습니다.
 디스콰이엇에서 Ops를 맡아 1년 동안 광고 없이 콘텐츠만으로 MAU를 15K에서 100K까지 늘렸습니다.
+그러면서 [일하고 판단하는 방식](how-i-work)이 생겼고, 그 대부분은 [좋은 제품들](influences)에서 훔친 것입니다.
 이후 21개월간 사회복무요원 복무를 마치고,
 지금은 [이런 생각](now)을 하며 할 일을 찾는 중입니다.`,
 
@@ -106,6 +134,7 @@ I love to [write](writing), and I love [books](books).
 I ran a [book club](bookclub) around carefully chosen English titles,
 then joined [Disquiet](disquiet), Korea's largest startup community.
 As Ops there I grew MAU from 15K to 100K in a year — no ads, content only.
+Along the way I built [a way of working and deciding](how-i-work), most of it stolen from [products I admire](influences).
 After 21 months of alternative civilian service,
 I'm now [thinking about this](now) and looking for what's next.`,
 };
