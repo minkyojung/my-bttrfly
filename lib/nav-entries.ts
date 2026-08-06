@@ -12,6 +12,10 @@ export interface NavEntry {
   path: string;
   label: Record<Locale, string>;
   preview: Record<Locale, { title: string; body: string }>;
+  // 문단에 등장하지 않는 항목. 페이지는 살아 있고 주소로 열리지만 어디에서도
+  // 링크되지 않는다 — 문단이 유일한 네비게이션이므로 사실상 숨은 페이지다.
+  // 임시 상태로만 쓴다. 계속 이 상태면 지우거나 문단에 넣어야 한다.
+  unlisted?: boolean;
 }
 
 export const NAV_ENTRIES: NavEntry[] = [
@@ -74,6 +78,7 @@ export const NAV_ENTRIES: NavEntry[] = [
         body: "What I fall back on when the call isn't obvious.",
       },
     },
+    unlisted: true,
   },
   {
     id: "influences",
@@ -95,6 +100,7 @@ export const NAV_ENTRIES: NavEntry[] = [
       ko: { title: "지금", body: "요즘 붙들고 있는 질문들." },
       en: { title: "Now", body: "The questions I'm sitting with." },
     },
+    unlisted: true,
   },
 ];
 
@@ -122,19 +128,19 @@ export function getEntry(id: string): NavEntry {
 export const INTRO: Record<Locale, string> = {
   ko: `안녕하세요, 정민교입니다.
 [글 쓰는 것](writing)을 좋아하고, [책](books)을 좋아합니다.
+
 좋은 원서를 골라 [북클럽](bookclub)을 운영하다가,
-한국에서 가장 큰 스타트업 커뮤니티 [디스콰이엇](disquiet)에 합류했습니다.
-디스콰이엇에서 Ops를 맡아 1년 동안 광고 없이 콘텐츠만으로 MAU를 15K에서 100K까지 늘렸습니다.
-그러면서 [일하고 판단하는 방식](how-i-work)이 생겼고, 그 대부분은 [좋은 제품들](influences)에서 훔친 것입니다.
-이후 21개월간 사회복무요원 복무를 마치고,
-지금은 [이런 생각](now)을 하며 할 일을 찾는 중입니다.`,
+한국에서 가장 큰 스타트업 커뮤니티 [디스콰이엇](disquiet)에 합류하여
+1년 동안 MAU를 15K에서 100K까지 늘리는데 기여했습니다.
+
+올해 7월 전역 후, [이런 제품](influences)을 만드는데 관심이 많습니다.`,
 
   en: `Hi, I'm Minkyo Jung.
 I love to [write](writing), and I love [books](books).
+
 I ran a [book club](bookclub) around carefully chosen English titles,
-then joined [Disquiet](disquiet), Korea's largest startup community.
-As Ops there I grew MAU from 15K to 100K in a year — no ads, content only.
-Along the way I built [a way of working and deciding](how-i-work), most of it stolen from [products I admire](influences).
-After 21 months of alternative civilian service,
-I'm now [thinking about this](now) and looking for what's next.`,
+then joined [Disquiet](disquiet), Korea's largest startup community,
+where I helped grow MAU from 15K to 100K in a year.
+
+Discharged this July, I'm most interested in building [products like these](influences).`,
 };

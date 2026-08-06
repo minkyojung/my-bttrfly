@@ -30,13 +30,27 @@ test("문단이 가리키는 항목이 전부 실재한다", () => {
   }
 });
 
-test("모든 항목이 두 언어 문단에 빠짐없이 등장한다", () => {
+test("문단에 실리는 항목은 두 언어 모두에 등장한다", () => {
   // 한쪽 언어에서만 문구를 지우면 그 언어에서는 해당 페이지로 갈 길이 사라진다.
-  for (const entry of NAV_ENTRIES) {
+  // 사람 눈에는 잘 안 띈다 — 그 언어로 볼 일이 적기 때문이다.
+  for (const entry of NAV_ENTRIES.filter((e) => !e.unlisted)) {
     for (const locale of LOCALES) {
       assert.ok(
         tokensIn(INTRO[locale]).includes(entry.id),
         `${locale} 문단에 "${entry.id}" 진입점이 없다`
+      );
+    }
+  }
+});
+
+test("unlisted 항목은 어느 문단에도 없다", () => {
+  // 표시와 실제가 어긋나는 쪽도 막는다. 문단에 넣고 unlisted를 지우지 않으면
+  // 위 테스트가 그 항목을 검사하지 않게 되어, 한쪽 언어에서 빠져도 조용히 지나간다.
+  for (const entry of NAV_ENTRIES.filter((e) => e.unlisted)) {
+    for (const locale of LOCALES) {
+      assert.ok(
+        !tokensIn(INTRO[locale]).includes(entry.id),
+        `"${entry.id}"가 ${locale} 문단에 있는데 unlisted로 표시돼 있다`
       );
     }
   }
