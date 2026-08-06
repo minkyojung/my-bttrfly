@@ -1,11 +1,19 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { NavEntry } from "@/lib/nav-entries";
 import { localePath, type Locale } from "@/lib/i18n";
 
-// 문단 속 진입점. 문구와 동그라미가 하나의 링크이고, 어느 쪽에 커서를 올려도
-// 둘이 함께 강조된다 — 동그라미만 노리면 조준이 너무 정밀해진다.
-//
-// 아이콘은 지금 동그라미 플레이스홀더다.
+// 문장 안에 들어가므로 크기를 em으로 잡는다 — px로 박으면 본문 크기를 바꿀 때
+// 표시만 어긋난다.
+const MARK_BASE = "mx-[0.2em] inline-block";
+
+// 로고는 알아볼 수 있어야 해서 글자 높이만큼 쓴다. 동그라미는 문장 부호에 가까워
+// 그보다 훨씬 작아야 한다 — 같은 크기로 맞추면 커다란 O로 읽힌다.
+const ICON = `${MARK_BASE} h-[1.05em] w-[1.05em] align-[-0.18em] rounded-sm object-contain`;
+const DOT = `${MARK_BASE} h-[0.62em] w-[0.62em] align-baseline rounded-full border border-fg-muted transition-colors duration-200 group-hover:border-fg group-hover:bg-fg group-focus-visible:border-fg group-focus-visible:bg-fg`;
+
+// 문단 속 진입점. 문구와 표시가 하나의 링크이고, 어느 쪽에 커서를 올려도
+// 둘이 함께 강조된다 — 표시만 노리면 조준이 너무 정밀해진다.
 //
 // 프리뷰는 CSS만으로 연다(group-hover / group-focus-visible). 클라이언트 컴포넌트로
 // 만들면 문단 전체가 하이드레이션 대상이 되는데, 이건 그냥 읽는 문단이다.
@@ -31,13 +39,23 @@ export function EntryLink({
     >
       {phrase}
 
-      {/* 동그라미와 카드를 감싸는 앵커. 링크 전체는 줄바꿈으로 쪼개질 수 있어
+      {/* 표시와 카드를 감싸는 앵커. 링크 전체는 줄바꿈으로 쪼개질 수 있어
           위치 기준으로 쓸 수 없으므로, 쪼개지지 않는 이 span에 카드를 붙인다. */}
       <span className="relative inline-block">
-        <span
-          aria-hidden
-          className="mx-[0.18em] inline-block h-[0.62em] w-[0.62em] rounded-full border border-fg-muted align-baseline transition-colors duration-200 group-hover:border-fg group-hover:bg-fg group-focus-visible:border-fg group-focus-visible:bg-fg"
-        />
+        {entry.icon ? (
+          // 원본은 1000~2000px이지만 실제로는 20px 안팎으로 그려진다. 미리 128px로
+          // 줄여 저장소에 넣었고(셋 합쳐 16KB), 여기서는 크기를 em이 정한다.
+          <Image
+            src={entry.icon}
+            alt=""
+            aria-hidden
+            width={128}
+            height={128}
+            className={ICON}
+          />
+        ) : (
+          <span aria-hidden className={DOT} />
+        )}
 
         {/* 터치 기기에는 호버가 없다. 거기서는 탭이 곧 이동이므로 프리뷰를 띄우지
             않는다 — 화면도 좁아 카드가 잘린다. */}

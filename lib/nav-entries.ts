@@ -12,6 +12,8 @@ export interface NavEntry {
   path: string;
   label: Record<Locale, string>;
   preview: Record<Locale, { title: string; body: string }>;
+  // 문단에 박히는 아이콘. 없으면 동그라미 플레이스홀더가 그려진다.
+  icon?: string;
   // 문단에 등장하지 않는 항목. 페이지는 살아 있고 주소로 열리지만 어디에서도
   // 링크되지 않는다 — 문단이 유일한 네비게이션이므로 사실상 숨은 페이지다.
   // 임시 상태로만 쓴다. 계속 이 상태면 지우거나 문단에 넣어야 한다.
@@ -27,6 +29,7 @@ export const NAV_ENTRIES: NavEntry[] = [
       ko: { title: "글", body: "제품과 AI에 대해 쓴 글을 모아둡니다." },
       en: { title: "Writing", body: "Essays on products, AI, and building." },
     },
+    icon: "/images/entries/writing.png",
   },
   {
     id: "books",
@@ -48,6 +51,7 @@ export const NAV_ENTRIES: NavEntry[] = [
         body: "Reading carefully chosen English titles, together.",
       },
     },
+    icon: "/images/entries/bookclub.png",
   },
   {
     id: "disquiet",
@@ -63,6 +67,7 @@ export const NAV_ENTRIES: NavEntry[] = [
         body: "Led Ops — 15K to 100K MAU in a year.",
       },
     },
+    icon: "/images/entries/disquiet.png",
   },
   {
     id: "how-i-work",
