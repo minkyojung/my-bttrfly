@@ -19,6 +19,11 @@ const UPLOAD_SECURITY_HEADERS = [
 ];
 
 const nextConfig: NextConfig = {
+  // app/layout.tsx가 없어서(루트 레이아웃이 app/[locale]/layout.tsx다) 루트
+  // not-found를 둘 수 없다. global-not-found는 자기 문서를 직접 그려서 그 제약을
+  // 받지 않는다 — 이게 없으면 걸리지 않는 주소가 Next 기본 404로 나간다.
+  experimental: { globalNotFound: true },
+
   // 개발 서버가 도는 중에 빌드를 돌리면 같은 .next를 두 프로세스가 덮어써서
   // 개발 서버의 모듈 지도가 깨지고 런타임에 "X is not defined" 같은 엉뚱한
   // 에러가 난다.

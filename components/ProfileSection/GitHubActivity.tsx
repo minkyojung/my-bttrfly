@@ -1,26 +1,24 @@
 import type { GitHubData } from "@/lib/github";
+import { getStrings } from "@/lib/ui-strings";
+import { HTML_LANG, type Locale } from "@/lib/i18n";
 
 interface GitHubActivityProps {
   data: GitHubData | null;
+  locale: Locale;
 }
 
-function formatLanguageList(languages: GitHubData["topLanguages"]): string {
-  const top = languages.slice(0, 2).map((l) => l.name);
-  if (top.length === 0) return "";
-  if (top.length === 1) return top[0];
-  return `${top[0]} and ${top[1]}`;
-}
-
-export function GitHubActivity({ data }: GitHubActivityProps) {
+export function GitHubActivity({ data, locale }: GitHubActivityProps) {
   if (!data) return null;
 
-  const total = data.totalContributions.toLocaleString("en-US");
-  const languages = formatLanguageList(data.topLanguages);
+  const t = getStrings(locale);
+  const total = data.totalContributions.toLocaleString(HTML_LANG[locale]);
+  const languages = t.github.languageList(
+    data.topLanguages.slice(0, 2).map((l) => l.name)
+  );
 
   return (
     <p className="text-fg-muted text-[15px] font-normal leading-[1.6]">
-      {total} contributions in the last year
-      {languages && ` — primarily ${languages}.`}
+      {t.github.summary(total, languages)}
     </p>
   );
 }

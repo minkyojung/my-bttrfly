@@ -66,7 +66,8 @@ function readLocalImageMeta(src: string): ImageMeta | undefined {
   }
 }
 
-function collectImageMeta(markdown: string): Record<string, ImageMeta> {
+// 글 말고 일반 페이지(content/pages)도 본문에 이미지를 쓰므로 내보낸다.
+export function collectImageMeta(markdown: string): Record<string, ImageMeta> {
   const meta: Record<string, ImageMeta> = {};
   const regex = /!\[[^\]]*\]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
   let match: RegExpExecArray | null;
