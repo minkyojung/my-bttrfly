@@ -9,7 +9,9 @@ const MARK_BASE = "mx-[0.2em] inline-block";
 
 // 로고는 본문 글자 크기(1em)만큼 쓴다. 원본 셋 다 가장자리에 여백이 있어서
 // 박스를 1em으로 잡으면 정작 그림은 그보다 작게 읽힌다 — 그만큼 키워서 상쇄한다.
-const ICON = `${MARK_BASE} h-[1.35em] w-[1.35em] align-[-0.32em] rounded-md object-contain`;
+// 모서리도 em으로 잡는다. px로 박으면 본문 크기를 키웠을 때 아이콘만 각져 보인다.
+// 0.6em ≈ 박스의 44%.
+const ICON = `${MARK_BASE} h-[1.35em] w-[1.35em] align-[-0.32em] rounded-[0.6em] object-contain`;
 const DOT = `${MARK_BASE} h-[0.62em] w-[0.62em] align-baseline rounded-full border border-fg-muted transition-colors duration-200 group-hover:border-fg group-hover:bg-fg group-focus-visible:border-fg group-focus-visible:bg-fg`;
 
 // 문단 속 진입점. 문구와 표시가 하나의 링크이고, 어느 쪽에 커서를 올려도
