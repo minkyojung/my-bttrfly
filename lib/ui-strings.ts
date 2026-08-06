@@ -24,6 +24,7 @@ interface Strings {
     selectedWork: string;
     stack: string;
     exploring: string;
+    more: string;
   };
   post: {
     uncategorized: string;
@@ -52,6 +53,7 @@ const ko: Strings = {
     selectedWork: "만든 것",
     stack: "기술",
     exploring: "요즘 보는 것",
+    more: "더 보기",
   },
   post: {
     uncategorized: "글",
@@ -83,6 +85,7 @@ const en: Strings = {
     selectedWork: "Selected work",
     stack: "Stack",
     exploring: "Currently exploring",
+    more: "More",
   },
   post: {
     uncategorized: "Writing",
