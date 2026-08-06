@@ -27,7 +27,7 @@ export function ProfileSection({ githubData, locale }: ProfileSectionProps) {
         />
       </div>
 
-      <ProfileInfo />
+      <ProfileInfo locale={locale} />
 
       <GitHubContributions data={githubData} />
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { EntryPageShell } from "@/components/EntryPageShell";
-import { getEntry, entryMetadata } from "@/lib/nav-entries";
+import { getEntry } from "@/lib/nav-entries";
+import { entryMetadata } from "@/lib/site-config";
+import { getPageContent } from "@/lib/pages";
 import { DEFAULT_LOCALE, LOCALES, isLocale } from "@/lib/i18n";
 
 const ENTRY = getEntry("now");
@@ -25,6 +27,7 @@ export default async function NowPage({
 }) {
   const { locale: raw } = await params;
   const locale = isLocale(raw) ? raw : DEFAULT_LOCALE;
+  const page = await getPageContent(ENTRY.id, locale);
 
-  return <EntryPageShell entry={ENTRY} locale={locale} />;
+  return <EntryPageShell entry={ENTRY} locale={locale} page={page} />;
 }

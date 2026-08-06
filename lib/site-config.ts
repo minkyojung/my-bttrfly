@@ -1,4 +1,6 @@
-import { aboutContent } from "./about-content";
+import type { Metadata } from "next";
+import { aboutContent, MACHINE_LOCALE } from "./about-content";
+import type { NavEntry } from "./nav-entries";
 import { DEFAULT_LOCALE, LOCALES, localePath, type Locale } from "./i18n";
 
 export const siteConfig = {
@@ -82,9 +84,12 @@ export function personSchema() {
     name: siteConfig.name,
     alternateName: siteConfig.alternateName,
     url: siteConfig.url,
-    description: aboutContent.intro.join(" "),
+    description: aboutContent.intro[MACHINE_LOCALE].join(" "),
     email: `mailto:${siteConfig.email}`,
-    knowsAbout: [...aboutContent.stack, ...aboutContent.exploring],
+    knowsAbout: [
+      ...aboutContent.stack,
+      ...aboutContent.exploring[MACHINE_LOCALE],
+    ],
     sameAs: [
       siteConfig.social.twitter.url,
       siteConfig.social.github.url,
@@ -94,3 +99,17 @@ export function personSchema() {
   } as const;
 }
 
+
+// 상세 페이지 5개의 메타데이터는 형태가 같다 — 제목·설명·hreflang이 전부 항목에서
+// 나온다. lib/nav-entries.ts가 아니라 여기 있는 이유: 그쪽은 값 import가 없는 순수
+// 데이터여야 테스트가 Next 런타임 없이 그대로 읽을 수 있다.
+export function entryMetadata(entry: NavEntry, locale: Locale): Metadata {
+  const { title, body } = entry.preview[locale];
+
+  return {
+    title: entry.label[locale],
+    description: body,
+    alternates: alternatesFor(locale, entry.path),
+    openGraph: { title, description: body, url: entry.path },
+  };
+}

@@ -1,5 +1,7 @@
 import { aboutContent } from "@/lib/about-content";
 import { SmartLink } from "@/components/ui/link";
+import { getStrings } from "@/lib/ui-strings";
+import type { Locale } from "@/lib/i18n";
 
 const TEXT_CLASS = "text-fg-muted text-[15px] font-normal leading-[1.6]";
 
@@ -11,12 +13,14 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function AboutSection() {
+export function AboutSection({ locale }: { locale: Locale }) {
+  const t = getStrings(locale).about;
+
   return (
     <section className="flex flex-col gap-10">
       <div className="flex flex-col gap-4">
-        <SectionLabel>About</SectionLabel>
-        {aboutContent.intro.map((paragraph, i) => (
+        <SectionLabel>{t.heading}</SectionLabel>
+        {aboutContent.intro[locale].map((paragraph, i) => (
           <p key={i} className={TEXT_CLASS}>
             {paragraph}
           </p>
@@ -24,7 +28,7 @@ export function AboutSection() {
       </div>
 
       <div>
-        <SectionLabel>Background</SectionLabel>
+        <SectionLabel>{t.background}</SectionLabel>
         <ul className="flex flex-col gap-2">
           {aboutContent.background.map((item) => (
             <li
@@ -32,14 +36,14 @@ export function AboutSection() {
               className={`flex items-baseline gap-4 ${TEXT_CLASS}`}
             >
               <span className="tabular-nums w-24 shrink-0">{item.period}</span>
-              <span>{item.role}</span>
+              <span>{item.role[locale]}</span>
             </li>
           ))}
         </ul>
       </div>
 
       <div>
-        <SectionLabel>Selected work</SectionLabel>
+        <SectionLabel>{t.selectedWork}</SectionLabel>
         <ul className="flex flex-col gap-3">
           {aboutContent.selectedWork.map((item) => (
             <li key={item.name} className={TEXT_CLASS}>
@@ -49,20 +53,22 @@ export function AboutSection() {
               >
                 {item.name}
               </SmartLink>
-              <span> — {item.description}</span>
+              <span> — {item.description[locale]}</span>
             </li>
           ))}
         </ul>
       </div>
 
       <div>
-        <SectionLabel>Stack</SectionLabel>
+        <SectionLabel>{t.stack}</SectionLabel>
         <p className={TEXT_CLASS}>{aboutContent.stack.join(" · ")}</p>
       </div>
 
       <div>
-        <SectionLabel>Currently exploring</SectionLabel>
-        <p className={TEXT_CLASS}>{aboutContent.exploring.join(" · ")}</p>
+        <SectionLabel>{t.exploring}</SectionLabel>
+        <p className={TEXT_CLASS}>
+          {aboutContent.exploring[locale].join(" · ")}
+        </p>
       </div>
     </section>
   );

@@ -1,6 +1,6 @@
 import { getAllPosts } from "@/lib/markdown";
 import { siteConfig, postUrl } from "@/lib/site-config";
-import { aboutContent } from "@/lib/about-content";
+import { aboutContent, MACHINE_LOCALE } from "@/lib/about-content";
 
 export const dynamic = "force-static";
 
@@ -25,18 +25,20 @@ export async function GET() {
   sections.push("");
   sections.push(`> ${siteConfig.description}`);
   sections.push("");
-  sections.push(...aboutContent.intro);
+  sections.push(...aboutContent.intro[MACHINE_LOCALE]);
   sections.push("");
 
   sections.push("## Background");
   for (const item of aboutContent.background) {
-    sections.push(`- ${item.period}: ${item.role}`);
+    sections.push(`- ${item.period}: ${item.role[MACHINE_LOCALE]}`);
   }
   sections.push("");
 
   sections.push("## Selected work");
   for (const item of aboutContent.selectedWork) {
-    sections.push(`- [${item.name}](${item.url}): ${item.description}`);
+    sections.push(
+      `- [${item.name}](${item.url}): ${item.description[MACHINE_LOCALE]}`
+    );
   }
   sections.push("");
 
@@ -45,7 +47,7 @@ export async function GET() {
   sections.push("");
 
   sections.push("## Currently exploring");
-  sections.push(aboutContent.exploring.join(", "));
+  sections.push(aboutContent.exploring[MACHINE_LOCALE].join(", "));
   sections.push("");
 
   if (selfHosted.length > 0) {

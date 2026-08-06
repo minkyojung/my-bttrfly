@@ -1,6 +1,4 @@
-import type { Metadata } from "next";
 import type { Locale } from "./i18n";
-import { alternatesFor } from "./site-config";
 
 // 홈 문단 안에 박히는 진입점들의 단일 출처.
 //
@@ -83,19 +81,6 @@ export function getEntry(id: string): NavEntry {
   const entry = findEntry(id);
   if (!entry) throw new Error(`Unknown nav entry: ${id}`);
   return entry;
-}
-
-// 상세 페이지 5개의 메타데이터는 형태가 같다 — 제목·설명·hreflang이 전부 항목에서
-// 나온다. canonical과 languages는 반드시 함께 만들어야 하므로 alternatesFor를 쓴다.
-export function entryMetadata(entry: NavEntry, locale: Locale): Metadata {
-  const { title, body } = entry.preview[locale];
-
-  return {
-    title: entry.label[locale],
-    description: body,
-    alternates: alternatesFor(locale, entry.path),
-    openGraph: { title, description: body, url: entry.path },
-  };
 }
 
 // 자기소개 문단. `[문구](id)` 가 진입점이 된다 — 문구와 아이콘이 함께 하나의

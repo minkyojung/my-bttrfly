@@ -18,6 +18,13 @@ interface Strings {
   };
   // 아직 내용을 쓰지 않은 상세 페이지의 자리 문구.
   comingSoon: string;
+  about: {
+    heading: string;
+    background: string;
+    selectedWork: string;
+    stack: string;
+    exploring: string;
+  };
   post: {
     uncategorized: string;
     moreIn: (category: string) => string;
@@ -39,6 +46,13 @@ const ko: Strings = {
     backHome: "← 처음으로",
   },
   comingSoon: "아직 쓰는 중입니다.",
+  about: {
+    heading: "소개",
+    background: "경력",
+    selectedWork: "만든 것",
+    stack: "기술",
+    exploring: "요즘 보는 것",
+  },
   post: {
     uncategorized: "글",
     moreIn: (category) => `${category} 더 보기`,
@@ -63,6 +77,13 @@ const en: Strings = {
     backHome: "← Back home",
   },
   comingSoon: "Still writing this one.",
+  about: {
+    heading: "About",
+    background: "Background",
+    selectedWork: "Selected work",
+    stack: "Stack",
+    exploring: "Currently exploring",
+  },
   post: {
     uncategorized: "Writing",
     moreIn: (category) => `More in ${category}`,

@@ -45,7 +45,7 @@ export default async function AboutPage({
         <ProfileSection githubData={githubData} locale={locale} />
 
         <section className="mt-16">
-          <AboutSection />
+          <AboutSection locale={locale} />
         </section>
       </Container>
     </main>
