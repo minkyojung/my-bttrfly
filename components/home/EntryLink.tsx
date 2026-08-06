@@ -44,7 +44,7 @@ export function EntryLink({
         <span
           id={tooltipId}
           role="tooltip"
-          className="pointer-events-none absolute bottom-full left-1/2 z-popover mb-2 hidden w-56 -translate-x-1/2 rounded-md border border-border-strong bg-surface-elevated p-3 text-left opacity-0 shadow-popover transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:block"
+          className="pointer-events-none absolute top-full left-1/2 z-popover mt-2 hidden w-56 -translate-x-1/2 rounded-md border border-border-strong bg-surface-elevated p-3 text-left opacity-0 shadow-popover transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 sm:block"
         >
           <span className="block text-fg text-[13px] font-semibold leading-snug">
             {preview.title}
