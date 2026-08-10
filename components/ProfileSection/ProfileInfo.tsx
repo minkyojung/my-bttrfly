@@ -11,7 +11,7 @@ const ICON = "shrink-0 -mb-px";
 
 export function ProfileInfo({ locale }: { locale: Locale }) {
   return (
-    <div className="w-full max-w-content pb-3 -mt-1 max-[640px]:py-4">
+    <div className="w-full pb-3 -mt-1 max-[640px]:py-4">
       <h1 className="text-2xl font-bold text-fg mb-2.5 max-[640px]:text-xl">
         {siteConfig.name}
       </h1>

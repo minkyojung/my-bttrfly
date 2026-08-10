@@ -13,7 +13,9 @@ interface ProfileSectionProps {
 
 export function ProfileSection({ githubData, locale }: ProfileSectionProps) {
   return (
-    <header className="w-full max-w-content mx-auto max-[640px]:px-4">
+    // 좌우 여백과 폭은 감싸는 Container가 정한다 — 여기서 또 정하면 모바일에서
+    // 이 블록만 안쪽으로 밀려 다른 섹션과 왼쪽 정렬이 어긋난다.
+    <header className="w-full">
       {/* 예전엔 이 사진이 ASCII 캔버스 위로 겹쳐 올라가느라 grid + 음수 마진이
           필요했다. 캔버스가 사라졌으므로 그냥 위에 놓는다. */}
       <div className="w-28 h-28 mb-5 rounded-full border border-border-strong bg-surface-elevated overflow-hidden max-[640px]:w-20 max-[640px]:h-20">

@@ -10,11 +10,8 @@ import { NAV_ENTRIES } from "@/lib/nav-entries";
 //
 // 상세 페이지는 NAV_ENTRIES에서 끌어온다. 항목을 추가하면 sitemap이 따라온다 —
 // 목록을 두 곳에 적으면 반드시 한쪽을 잊는다.
-const LOCALIZED_PATHS = [
-  "/",
-  "/about",
-  ...NAV_ENTRIES.map((entry) => entry.path),
-];
+// /about은 홈으로 흡수되어 리다이렉트만 남았으므로 싣지 않는다.
+const LOCALIZED_PATHS = ["/", ...NAV_ENTRIES.map((entry) => entry.path)];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const all = await getAllPosts();

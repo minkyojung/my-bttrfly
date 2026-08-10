@@ -11,7 +11,6 @@ import type { Locale } from "./i18n";
 // 글 본문과 프론트매터는 여기 들어오지 않는다. 그건 콘텐츠지 UI가 아니다.
 interface Strings {
   nav: {
-    about: string;
     // 언어 토글이 가리키는 '반대편' 언어의 이름.
     switchTo: string;
     backHome: string;
@@ -20,12 +19,16 @@ interface Strings {
   comingSoon: string;
   notFound: string;
   about: {
-    heading: string;
     background: string;
     selectedWork: string;
     stack: string;
     exploring: string;
     more: string;
+  };
+  home: {
+    // 홈의 글 섹션 라벨. post.uncategorized와 글자가 겹칠 수 있지만 쓰임이 달라
+    // 따로 둔다 — 한쪽을 고칠 때 다른 쪽이 딸려가면 안 된다.
+    writing: string;
   };
   post: {
     uncategorized: string;
@@ -43,19 +46,20 @@ interface Strings {
 
 const ko: Strings = {
   nav: {
-    about: "소개",
     switchTo: "EN",
     backHome: "← 처음으로",
   },
   comingSoon: "아직 쓰는 중입니다.",
   notFound: "페이지를 찾을 수 없습니다.",
   about: {
-    heading: "소개",
     background: "경력",
     selectedWork: "만든 것",
     stack: "기술",
     exploring: "요즘 보는 것",
     more: "더 보기",
+  },
+  home: {
+    writing: "글",
   },
   post: {
     uncategorized: "글",
@@ -76,19 +80,20 @@ const ko: Strings = {
 
 const en: Strings = {
   nav: {
-    about: "About",
     switchTo: "KO",
     backHome: "← Back home",
   },
   comingSoon: "Still writing this one.",
   notFound: "This page doesn't exist.",
   about: {
-    heading: "About",
     background: "Background",
     selectedWork: "Selected work",
     stack: "Stack",
     exploring: "Currently exploring",
     more: "More",
+  },
+  home: {
+    writing: "Writing",
   },
   post: {
     uncategorized: "Writing",
