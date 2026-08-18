@@ -36,7 +36,7 @@ export default async function PostOpengraphImage({
       <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
         <img src={loadProfile()} alt="" style={avatarStyle(72)} />
         <div style={{ display: "flex", fontSize: 28, color: "#e5e5e5" }}>
-          {siteConfig.alternateName}
+          {siteConfig.name}
         </div>
       </div>
 

@@ -44,6 +44,17 @@ interface Strings {
   };
 }
 
+// GitHub 잔디 요약만은 한국어 화면에서도 영어로 둔다. 기여 수와 언어 이름이
+// 전부 영어라 한 문장 안에서 언어가 섞이는 것보다 통째로 영어인 편이 낫다.
+const github: Strings["github"] = {
+  languageList: (names) =>
+    names.length < 2 ? (names[0] ?? "") : `${names[0]} and ${names[1]}`,
+  summary: (total, languages) =>
+    languages
+      ? `${total} contributions in the last year — primarily ${languages}.`
+      : `${total} contributions in the last year`,
+};
+
 const ko: Strings = {
   nav: {
     switchTo: "EN",
@@ -53,9 +64,9 @@ const ko: Strings = {
   notFound: "페이지를 찾을 수 없습니다.",
   about: {
     background: "경력",
-    selectedWork: "만든 것",
+    selectedWork: "제품",
     stack: "기술",
-    exploring: "요즘 보는 것",
+    exploring: "가장 관심있는 것",
     more: "더 보기",
   },
   home: {
@@ -69,13 +80,7 @@ const ko: Strings = {
     count: (n) => `${n}편`,
     seeAll: (total) => `전체 ${total}편 →`,
   },
-  github: {
-    languageList: (names) => names.join(", "),
-    summary: (total, languages) =>
-      languages
-        ? `지난 1년간 ${total}회 기여 — 주로 ${languages}.`
-        : `지난 1년간 ${total}회 기여`,
-  },
+  github,
 };
 
 const en: Strings = {
@@ -103,14 +108,7 @@ const en: Strings = {
     count: (n) => `${n} posts`,
     seeAll: (total) => `All ${total} posts →`,
   },
-  github: {
-    languageList: (names) =>
-      names.length < 2 ? (names[0] ?? "") : `${names[0]} and ${names[1]}`,
-    summary: (total, languages) =>
-      languages
-        ? `${total} contributions in the last year — primarily ${languages}.`
-        : `${total} contributions in the last year`,
-  },
+  github,
 };
 
 const DICTIONARIES: Record<Locale, Strings> = { ko, en };

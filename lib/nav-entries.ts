@@ -14,6 +14,11 @@ export interface NavEntry {
   preview: Record<Locale, { title: string; body: string }>;
   // 문단에 박히는 아이콘. 없으면 동그라미 플레이스홀더가 그려진다.
   icon?: string;
+  // 여기 있으면 문단의 링크는 path 대신 이 주소로, 새 탭으로 나간다.
+  // path는 그대로 둔다 — 상세 페이지와 sitemap은 계속 그 경로에 있다.
+  externalUrl?: string;
+  // 프리뷰 카드 맨 위에 깔리는 사진. 없으면 글자만 있는 카드가 된다.
+  previewImage?: string;
   // 홈 문단에 싣지 않는 항목. 문단은 짧아야 해서 다 담을 수 없다.
   // 대신 /about 하단이 이들을 링크한다 — 문단이 유일한 네비게이션이라
   // 아무 데서도 안 걸면 그 페이지는 사이트에서 사라진다(글 31편이 그랬다).
@@ -53,6 +58,8 @@ export const NAV_ENTRIES: NavEntry[] = [
       },
     },
     icon: "/images/entries/bookclub.png",
+    externalUrl: "https://disquiet.io/groups/pizza",
+    previewImage: "/images/entries/bookclub-photo.jpg",
   },
   {
     id: "disquiet",

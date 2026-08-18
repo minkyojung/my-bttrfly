@@ -21,7 +21,7 @@ export async function GET() {
 
   const sections: string[] = [];
 
-  sections.push(`# ${siteConfig.alternateName}`);
+  sections.push(`# ${siteConfig.name}`);
   sections.push("");
   sections.push(`> ${siteConfig.description}`);
   sections.push("");

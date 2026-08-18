@@ -8,8 +8,8 @@ import type { Locale } from "./i18n";
 export const aboutContent = {
   // 프로필 사진 아래 한 줄. 디스콰이엇 이야기 전체는 /disquiet에 있다.
   tagline: {
-    ko: "운영 × 엔지니어 · 디스콰이엇 운영 (15K → 100K)",
-    en: "Operator × Engineer · Previously Operations at Disquiet (15K → 100K)",
+    ko: "글과 SaaS를 정말 좋아합니다.",
+    en: "I really love writing and SaaS.",
   },
 
   intro: {
@@ -25,8 +25,8 @@ export const aboutContent = {
     {
       period: "2024–2026",
       role: {
-        ko: "사회복무요원 · 개인 제품 개발",
-        en: "Alternative civilian service · independent building",
+        ko: "사회복무요원",
+        en: "Alternative civilian service",
       },
     },
     {
@@ -50,36 +50,18 @@ export const aboutContent = {
       name: "flowcap",
       url: "https://github.com/minkyojung/flowcap",
       description: {
-        ko: "작업 과정을 기록해 AI가 문서로 만들어주는 오픈소스 macOS 메뉴바 앱.",
-        en: "Open-source macOS menu-bar app that records workflows and turns them into AI-generated documentation.",
-      },
-    },
-    {
-      name: "Momo memory engine",
-      url: "https://usemomo.com",
-      description: {
-        ko: "AI 메모리 시스템의 초기 프로토타입.",
-        en: "Early prototype of an AI memory system.",
+        ko: "AI가 사람의 작업과정을 지켜보며, 에이전트가 이해할 수 있는 형태로 도구화합니다.",
+        en: "AI watches how a person works and turns it into something an agent can understand and use.",
       },
     },
   ],
 
   // 기술 이름은 번역하지 않는다.
-  stack: [
-    "TypeScript",
-    "Swift",
-    "Python",
-    "React",
-    "Next.js",
-    "SwiftUI",
-    "Cloudflare Workers",
-    "Postgres / pgvector",
-    "Claude / OpenAI / Gemini",
-  ],
+  stack: ["TypeScript", "Swift", "React", "Next.js"],
 
   exploring: {
-    ko: ["로컬 AI", "AI 오케스트레이션", "AI 클론"],
-    en: ["Local AI", "AI orchestration", "AI clones"],
+    ko: ["Local AI", "AI Clone"],
+    en: ["Local AI", "AI Clone"],
   },
 } as const;
 

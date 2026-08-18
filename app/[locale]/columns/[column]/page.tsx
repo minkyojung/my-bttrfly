@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getAllPosts } from "@/lib/markdown";
-import { COLUMNS, columnSlug, columnFromSlug } from "@/lib/columns";
+import { SECTIONS, sectionFromSlug } from "@/lib/columns";
 import { StoryCard } from "@/components/post/StoryCard";
 import { Container } from "@/components/ui/container";
 import { siteConfig } from "@/lib/site-config";
@@ -12,28 +12,20 @@ import { DEFAULT_LOCALE } from "@/lib/i18n";
 // 나머지 글은 sitemap 말고는 아무 데서도 링크되지 않는다 — 실제로 발행글 31편 중
 // 14편이 그 상태였다. 발행 사이트의 정보구조에서 섹션 랜딩 페이지가 맡는 역할이다.
 
-// 카테고리 값을 찾는다. COLUMNS에 있으면 그 label을, 없으면(손으로 커밋된 레거시
-// 카테고리) 실제 글에서 쓰인 값을 그대로 쓴다. 어느 쪽도 아니면 404.
-async function resolveColumn(slug: string) {
-  const known = columnFromSlug(slug);
-  if (known) return { value: known.value as string, label: known.label as string };
-
-  const posts = await getAllPosts();
-  const match = posts.find(
-    (post) => post.category && columnSlug(post.category) === slug
-  );
-  return match?.category
-    ? { value: match.category, label: match.category }
-    : null;
+// 슬러그를 섹션으로 푼다. SECTIONS 밖의 값이면(예전 카테고리 주소가 남아있어도)
+// 404 — /writing이 이제 이 두 섹션으로만 링크한다.
+function resolveColumn(slug: string) {
+  const section = sectionFromSlug(slug);
+  return section ? { categories: section.categories, label: section.label } : null;
 }
 
 // 섹션 목록도 글과 같이 기본 로케일에만 존재한다.
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  return COLUMNS.map((c) => ({
+  return SECTIONS.map((s) => ({
     locale: DEFAULT_LOCALE,
-    column: columnSlug(c.value),
+    column: s.key,
   }));
 }
 
@@ -43,7 +35,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; column: string }>;
 }): Promise<Metadata> {
   const { column } = await params;
-  const resolved = await resolveColumn(column);
+  const resolved = resolveColumn(column);
   if (!resolved) return { title: "Not found" };
 
   return {
@@ -63,12 +55,12 @@ export default async function ColumnPage({
   params: Promise<{ locale: string; column: string }>;
 }) {
   const { column } = await params;
-  const resolved = await resolveColumn(column);
+  const resolved = resolveColumn(column);
   if (!resolved) notFound();
 
   // getAllPosts()는 draft를 걸러 날짜 내림차순으로 준다.
   const posts = (await getAllPosts()).filter(
-    (post) => post.category === resolved.value
+    (post) => post.category && (resolved.categories as readonly string[]).includes(post.category)
   );
   if (posts.length === 0) notFound();
 

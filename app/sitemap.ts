@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getAllPosts } from "@/lib/markdown";
-import { groupByColumn, columnSlug } from "@/lib/columns";
+import { groupBySection, columnSlug } from "@/lib/columns";
 import { siteConfig, postUrl } from "@/lib/site-config";
 import { DEFAULT_LOCALE, LOCALES, localePath } from "@/lib/i18n";
 import { NAV_ENTRIES } from "@/lib/nav-entries";
@@ -18,8 +18,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = all.filter((p) => !p.external);
   const now = new Date();
 
-  // 글이 있는 섹션만 싣는다. groupByColumn이 빈 칼럼을 이미 걸러준다.
-  const columns = groupByColumn(all);
+  // 글이 있는 섹션만 싣는다. groupBySection이 빈 섹션을 이미 걸러준다.
+  const columns = groupBySection(all);
 
   const localized = LOCALIZED_PATHS.flatMap((path) =>
     LOCALES.map((locale) => ({

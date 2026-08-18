@@ -38,8 +38,8 @@ export async function generateMetadata({
   return {
     metadataBase: new URL(siteConfig.url),
     title: {
-      default: siteConfig.alternateName,
-      template: `%s — ${siteConfig.alternateName}`,
+      default: siteConfig.name,
+      template: `%s — ${siteConfig.name}`,
     },
     description: siteConfig.description,
     authors: [{ name: siteConfig.name, url: siteConfig.url }],

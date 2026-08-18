@@ -31,9 +31,15 @@ export function EntryLink({
   const preview = entry.preview[locale];
   const tooltipId = `entry-preview-${entry.id}`;
 
+  // 바깥으로 나가는 항목은 next/link를 쓸 이유가 없다 — 프리페치할 라우트가 없다.
+  const Wrapper = entry.externalUrl ? "a" : Link;
+  const linkProps = entry.externalUrl
+    ? { href: entry.externalUrl, target: "_blank", rel: "noopener noreferrer" }
+    : { href: localePath(locale, entry.path) };
+
   return (
-    <Link
-      href={localePath(locale, entry.path)}
+    <Wrapper
+      {...linkProps}
       aria-describedby={tooltipId}
       // box-decoration-clone: 문구가 줄 끝에서 넘어갈 때 배경이 두 줄 모두에
       // 제대로 그려지게 한다. 없으면 넘어간 쪽 모서리가 잘린 채로 남는다.
@@ -68,16 +74,31 @@ export function EntryLink({
         <span
           id={tooltipId}
           role="tooltip"
-          className="pointer-events-none absolute top-full left-1/2 z-popover mt-2 hidden w-56 -translate-x-1/2 rounded-md border border-border-strong bg-surface-elevated p-3 text-left opacity-0 shadow-popover transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 md:block"
+          className="pointer-events-none absolute top-full left-1/2 z-popover mt-2 hidden w-56 -translate-x-1/2 overflow-hidden rounded-md border border-border-strong bg-surface-elevated text-left opacity-0 shadow-popover transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100 md:block"
         >
-          <span className="block text-fg text-[13px] font-semibold leading-snug">
-            {preview.title}
-          </span>
-          <span className="mt-1 block text-fg-muted text-[13px] font-normal leading-[1.5]">
-            {preview.body}
+          {/* 사진은 카드 폭을 꽉 채운다 — 안쪽 여백은 아래 글 블록만 갖는다. */}
+          {entry.previewImage && (
+            <Image
+              src={entry.previewImage}
+              alt=""
+              aria-hidden
+              width={640}
+              height={426}
+              sizes="224px"
+              className="block h-auto w-full object-cover"
+            />
+          )}
+
+          <span className="block p-3">
+            <span className="block text-fg text-[13px] font-semibold leading-snug">
+              {preview.title}
+            </span>
+            <span className="mt-1 block text-fg-muted text-[13px] font-normal leading-[1.5]">
+              {preview.body}
+            </span>
           </span>
         </span>
       </span>
-    </Link>
+    </Wrapper>
   );
 }

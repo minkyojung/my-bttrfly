@@ -5,14 +5,14 @@ import { getEntry } from "@/lib/nav-entries";
 import { entryMetadata } from "@/lib/site-config";
 import { getPageContent } from "@/lib/pages";
 import { getAllPosts } from "@/lib/markdown";
-import { groupByColumn } from "@/lib/columns";
+import { groupBySection } from "@/lib/columns";
 import { PostBody } from "@/components/PostBody";
 import { DEFAULT_LOCALE, LOCALES, isLocale } from "@/lib/i18n";
 
 const ENTRY = getEntry("writing");
 
 // 한 섹션에 싣는 편수. 넘치는 만큼은 ColumnSection이 /columns/<slug> 링크로 넘긴다.
-const PER_COLUMN = 6;
+const PER_SECTION = 6;
 
 export function generateStaticParams() {
   return LOCALES.map((locale) => ({ locale }));
@@ -41,7 +41,7 @@ export default async function WritingPage({
   const locale = isLocale(raw) ? raw : DEFAULT_LOCALE;
 
   const intro = await getPageContent(ENTRY.id, locale);
-  const groups = groupByColumn(await getAllPosts(), PER_COLUMN);
+  const groups = groupBySection(await getAllPosts(), PER_SECTION);
 
   return (
     <EntryPageShell entry={ENTRY} locale={locale}>
