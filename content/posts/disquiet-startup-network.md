@@ -5,6 +5,7 @@ source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/7bszyN'
 featured: false
+draft: true
 ---
 > 폴그레이엄의 에세이는 좋은 출발점이었지만, 실제 교훈은 다른 창업가들의 생생하고 솔직한 이야기에서 나왔습니다. 대개 술자리에서요. 그런 다음에야 우리가 직접 레슨런을 적용할 수 있었습니다.
 >

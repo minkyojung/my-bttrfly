@@ -1,6 +1,6 @@
 import type { Post } from "@/lib/markdown";
 import { SmartLink } from "@/components/ui/link";
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { SourceBadge } from "@/components/ui/source-badge";
 import { postPath } from "@/lib/site-config";
 import type { Locale } from "@/lib/i18n";
@@ -15,15 +15,31 @@ interface StoryCardProps {
 }
 
 export function StoryCard({ post, locale, variant = "list" }: StoryCardProps) {
+  if (variant === "list") {
+    return (
+      <SmartLink
+        href={post.external ?? postPath(post.slug)}
+        className="group flex items-center gap-2 py-2.5 first:pt-0 border-b border-border last:border-b-0"
+      >
+        <SourceBadge source={post.source} />
+        <h3 className="min-w-0 flex-1 truncate font-serif text-fg text-[15px] font-medium group-hover:opacity-60 transition-opacity">
+          {post.title}
+          {post.external && (
+            <span className="text-fg-subtle text-sm align-super ml-1">↗</span>
+          )}
+        </h3>
+        <time
+          dateTime={post.date}
+          className="shrink-0 text-fg-subtle text-xs tabular-nums"
+        >
+          {formatDate(post.date)}
+        </time>
+      </SmartLink>
+    );
+  }
+
   return (
-    <SmartLink
-      href={post.external ?? postPath(post.slug)}
-      className={cn(
-        "block group",
-        variant === "list" &&
-          "py-5 first:pt-0 border-b border-border last:border-b-0"
-      )}
-    >
+    <SmartLink href={post.external ?? postPath(post.slug)} className="block group">
       <div>
         <div className="flex items-center gap-1.5">
           <SourceBadge source={post.source} />

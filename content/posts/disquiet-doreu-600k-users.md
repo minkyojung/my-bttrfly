@@ -4,6 +4,7 @@ date: '2024-08-04'
 source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/9esZ9z'
+draft: true
 ---
 
 출시 3개월만에 60만 유저와 1억 개의 컨텐츠를 확보한 팀이 있습니다. 게임 하이라이트를 공유하는 서비스, 도르를 만드는 도르코퍼레이션입니다. 특히 MVP 단계에서 매주 13%씩 성장시켜온 여정이 인상깊습니다. YC가 주간 5%의 성장을 강조했던 점을 감안하면 엄청난 성장세입니다.

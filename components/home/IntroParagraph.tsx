@@ -1,6 +1,8 @@
 import { Fragment } from "react";
 import { INTRO, findEntry } from "@/lib/nav-entries";
 import type { Locale } from "@/lib/i18n";
+import { getAllPosts, type Post } from "@/lib/markdown";
+import { groupBySection } from "@/lib/columns";
 import { EntryLink } from "./EntryLink";
 
 // `[문구](id)` — 마크다운 링크와 같은 표기.
@@ -9,7 +11,7 @@ const TOKEN = /\[([^\]]+)\]\(([\w-]+)\)/g;
 
 // 토큰 자리를 진입점 링크로 바꾼다. 알 수 없는 id는 문단에서 조용히 사라지지 않고
 // 원문 그대로 남는다 — 오타를 눈에 보이게 두는 편이 낫다.
-function render(template: string, locale: Locale) {
+function render(template: string, locale: Locale, disquietPosts: Post[]) {
   const nodes: React.ReactNode[] = [];
   let cursor = 0;
 
@@ -26,6 +28,7 @@ function render(template: string, locale: Locale) {
           entry={entry}
           phrase={phrase}
           locale={locale}
+          postLinks={id === "disquiet" ? disquietPosts : undefined}
         />
       ) : (
         raw
@@ -45,10 +48,14 @@ function render(template: string, locale: Locale) {
 //
 // whitespace-pre-line: 원문의 줄바꿈을 그대로 살린다. 문단의 호흡이 곧 레이아웃이라
 // 어디서 줄이 바뀌는지가 의미를 갖는다.
-export function IntroParagraph({ locale }: { locale: Locale }) {
+export async function IntroParagraph({ locale }: { locale: Locale }) {
+  const disquietPosts =
+    groupBySection(await getAllPosts(), 4).find((g) => g.value === "work")
+      ?.posts ?? [];
+
   return (
-    <p className="font-serif font-medium text-fg whitespace-pre-line text-[19px] leading-[1.9] tracking-[-0.01em]">
-      {render(INTRO[locale], locale)}
+    <p className="font-serif font-medium text-fg whitespace-pre-line text-[17px] leading-[1.85] tracking-[-0.01em]">
+      {render(INTRO[locale], locale, disquietPosts)}
     </p>
   );
 }

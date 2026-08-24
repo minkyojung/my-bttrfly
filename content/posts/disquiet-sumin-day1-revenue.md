@@ -4,6 +4,7 @@ date: '2024-07-03'
 source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/Ynszxq'
+draft: true
 ---
 평균적으로 B2B SaaS를 한 번 판매하기까지 평균 84일이 걸립니다. 하지만 초기 스타트업의 SaaS는 개발력과 신뢰도 모두 부족하기 때문에 더 많은 시간이 소요됩니다. 그래서 SEO 컨텐츠, 웨비나 등을 통해 초기 리드를 많이 확보하며 충분한 신뢰도를 확보하는 것에 집중합니다.
 

@@ -4,6 +4,7 @@ date: '2024-07-08'
 source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/kmszGL'
+draft: true
 ---
 
 단 2명으로 출시 3개월만에 150개 이상의 리드를 확보하고 시드투자까지 유치한 팀이 있습니다. 제로원리퍼블릭입니다. 현재 규리님과 용현님은 사용 중인 SaaS를 효율적으로 관리할 수 있도록 [스코디](https://disquiet.io/product/%EC%8A%A4%EC%BD%94%EB%94%94)를 만들고 있습니다. 그리고 지난 메이커 스프린트 1기에 참여해 **3주동안 36개의 B2B 리드**를 수집했습니다.

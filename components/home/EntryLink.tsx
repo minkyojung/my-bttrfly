@@ -2,6 +2,8 @@ import Link from "next/link";
 import Image from "next/image";
 import type { NavEntry } from "@/lib/nav-entries";
 import { localePath, type Locale } from "@/lib/i18n";
+import { postPath } from "@/lib/site-config";
+import type { Post } from "@/lib/markdown";
 
 // 문장 안에 들어가므로 크기를 em으로 잡는다 — px로 박으면 본문 크기를 바꿀 때
 // 표시만 어긋난다.
@@ -12,7 +14,7 @@ const MARK_BASE = "mx-[0.2em] inline-block";
 // 모서리도 em으로 잡는다. px로 박으면 본문 크기를 키웠을 때 아이콘만 각져 보인다.
 // 0.6em ≈ 박스의 44%.
 const ICON = `${MARK_BASE} h-[1.35em] w-[1.35em] align-[-0.32em] rounded-[0.6em] object-contain`;
-const DOT = `${MARK_BASE} h-[0.62em] w-[0.62em] align-baseline rounded-full border border-fg-muted transition-colors duration-200 group-hover:border-fg group-hover:bg-fg group-focus-visible:border-fg group-focus-visible:bg-fg`;
+const DOT = `${MARK_BASE} h-[0.62em] w-[0.62em] align-baseline rounded-full border border-fg-muted transition-colors duration-200 group-hover:border-fg group-hover:bg-fg group-focus-within:border-fg group-focus-within:bg-fg`;
 
 // 문단 속 진입점. 문구와 표시가 하나의 링크이고, 어느 쪽에 커서를 올려도
 // 둘이 함께 강조된다 — 표시만 노리면 조준이 너무 정밀해진다.
@@ -23,10 +25,13 @@ export function EntryLink({
   entry,
   phrase,
   locale,
+  postLinks,
 }: {
   entry: NavEntry;
   phrase: string;
   locale: Locale;
+  // 카드 안에 글 링크를 몇 개 추가로 걸고 싶을 때만 넘긴다(현재는 disquiet 항목).
+  postLinks?: Post[];
 }) {
   const preview = entry.preview[locale];
   const tooltipId = `entry-preview-${entry.id}`;
@@ -38,43 +43,56 @@ export function EntryLink({
     : { href: localePath(locale, entry.path) };
 
   return (
-    <Wrapper
-      {...linkProps}
-      aria-describedby={tooltipId}
-      // box-decoration-clone: 문구가 줄 끝에서 넘어갈 때 배경이 두 줄 모두에
-      // 제대로 그려지게 한다. 없으면 넘어간 쪽 모서리가 잘린 채로 남는다.
-      className="group box-decoration-clone rounded-sm px-[0.2em] no-underline transition-colors duration-200 hover:bg-surface-elevated focus-visible:bg-surface-elevated"
-    >
-      {phrase}
+    // 문구+아이콘 전체를 위치 기준점으로 삼는다 — 카드 왼쪽 모서리가 문구
+    // 시작점과 맞아야 하므로, 기준이 되는 이 span은 relative + inline-block이어야
+    // 한다(아이콘만 기준으로 삼으면 카드가 문구 길이만큼 오른쪽으로 밀려 보인다).
+    // inline-block이라 문구+아이콘은 이제 통짜로 움직인다 — 줄 끝에 걸리면
+    // 통째로 다음 줄로 넘어간다(문구 중간이 아니라). 여기 쓰이는 문구는 다
+    // 짧은 단어라 실제로 줄바꿈이 걸릴 일이 거의 없다.
+    //
+    // group-hover는 조상-자손 관계면 깊이 상관없이 적용되므로, 문구·아이콘·카드
+    // 어디를 호버해도 이 group의 :hover로 잡힌다.
+    <span className="group relative inline-block">
+      <Wrapper
+        {...linkProps}
+        aria-describedby={tooltipId}
+        // 카드를 이 안에 중첩하지 않는다 — <a> 안에 <a>는 유효하지 않은 HTML이라
+        // 브라우저가 임의로 닫아버린다.
+        className="rounded-sm px-[0.2em] no-underline transition-colors duration-200 hover:bg-surface-elevated focus-visible:bg-surface-elevated"
+      >
+        {phrase}
+      </Wrapper>
 
-      {/* 표시와 카드를 감싸는 앵커. 링크 전체는 줄바꿈으로 쪼개질 수 있어
-          위치 기준으로 쓸 수 없으므로, 쪼개지지 않는 이 span에 카드를 붙인다. */}
-      <span className="relative inline-block">
-        {entry.icon ? (
-          // 원본은 1000~2000px이지만 실제로는 20px 안팎으로 그려진다. 미리 128px로
-          // 줄여 저장소에 넣었고(셋 합쳐 16KB), 여기서는 크기를 em이 정한다.
-          <Image
-            src={entry.icon}
-            alt=""
-            aria-hidden
-            width={128}
-            height={128}
-            className={ICON}
-          />
-        ) : (
-          <span aria-hidden className={DOT} />
-        )}
+      {entry.icon ? (
+        // 원본은 1000~2000px이지만 실제로는 20px 안팎으로 그려진다. 미리 128px로
+        // 줄여 저장소에 넣었고(셋 합쳐 16KB), 여기서는 크기를 em이 정한다.
+        <Image
+          src={entry.icon}
+          alt=""
+          aria-hidden
+          width={128}
+          height={128}
+          className={ICON}
+        />
+      ) : (
+        <span aria-hidden className={DOT} />
+      )}
 
-        {/* 아이콘 중앙이 아니라 왼쪽에 맞춰 오른쪽으로만 펼친다 — 중앙 정렬이면 문장
-            맨 앞 항목의 카드 왼쪽 절반이 좁은 창에서 화면 밖으로 나간다(전에 실제로
-            그래서 768px 밑에서는 아예 숨겼었다). 오른쪽으로만 펼치면 그 경우가 없어져
-            아무 폭에서나 띄울 수 있다. max-w는 화면보다 좁은 창에서도 가로 스크롤이
-            생기지 않게 하는 안전장치일 뿐, 평소엔 w-56(224px)로 고정된다. */}
-        <span
-          id={tooltipId}
-          role="tooltip"
-          className="pointer-events-none absolute top-full left-0 z-popover mt-2 block w-80 max-w-[calc(100vw-3rem)] overflow-hidden rounded-md border border-border-strong bg-surface-elevated text-left opacity-0 shadow-popover transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
-        >
+      {/* 문구 시작점(왼쪽 모서리)에 맞춰 바로 아래에 띄운다. max-w는 화면보다
+          좁은 창에서도 가로 스크롤이 생기지 않게 하는 안전장치일 뿐, 평소엔
+          w-80(320px)로 고정된다. pointer-events는 평소 꺼둔다 — opacity-0인
+          채로도 카드가 아래 문단 내용을 클릭 못 하게 가로막는 사고를 막기
+          위해서다. 열렸을 때만 켠다. gap은 margin이 아니라 padding-top으로
+          준다 — margin은 커서가 지나가도 '호버 중'으로 잡히지 않는 빈 공간이라,
+          아이콘에서 카드로 마우스를 내리는 도중 그 틈에서 호버가 끊겨 카드가
+          열리기 전에 닫혀버렸다. padding은 이 span의 히트박스 안에 포함되므로
+          그 문제가 없다. */}
+      <span
+        id={tooltipId}
+        role="tooltip"
+        className="pointer-events-none absolute top-full left-0 z-popover block w-80 max-w-[calc(100vw-3rem)] pt-2 text-left opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+      >
+        <span className="block overflow-hidden rounded-md border border-border-strong bg-surface-elevated shadow-popover">
           {/* 사진은 카드 폭을 꽉 채운다 — 안쪽 여백은 아래 글 블록만 갖는다. */}
           {entry.previewImage && (
             <Image
@@ -96,8 +114,22 @@ export function EntryLink({
               {preview.body}
             </span>
           </span>
+
+          {postLinks && postLinks.length > 0 && (
+            <span className="block border-t border-border-strong">
+              {postLinks.map((post) => (
+                <Link
+                  key={post.slug}
+                  href={localePath(locale, postPath(post.slug))}
+                  className="block truncate px-3 py-1.5 text-fg-muted text-[12px] leading-tight no-underline transition-colors duration-150 hover:bg-surface hover:text-fg"
+                >
+                  {post.title}
+                </Link>
+              ))}
+            </span>
+          )}
         </span>
       </span>
-    </Wrapper>
+    </span>
   );
 }

@@ -4,6 +4,7 @@ date: '2024-05-23'
 source: disquiet
 category: Interviews
 canonical: 'https://disquiet.io/articles/0Ls9Xp'
+draft: true
 ---
 ![sense of product og img #1.png](/images/uploads/disquiet-90-percent-ai-code-1.png "sense of product og img #1.png")요즘 코딩을 독학하고 있습니다. HTML밖에 몰랐던 제가 2주 만에 Next.js로 [개인 블로그](https://williamjung.vercel.app/)를 만들었습니다. 영상을 보거나 과외를 받지도 않았습니다. 대신 특별한 코드 에디터를 사용했습니다. 바로 자연어로 개발할 수 있는 코드 에디터, Cursor입니다.
 
