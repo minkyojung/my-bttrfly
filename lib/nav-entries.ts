@@ -113,6 +113,7 @@ export const NAV_ENTRIES: NavEntry[] = [
         body: "Products I've stolen from, and exactly what I took.",
       },
     },
+    unlisted: true,
   },
   {
     id: "now",
@@ -166,5 +167,5 @@ I ran a [book club](bookclub) around carefully chosen English titles,
 then joined [Disquiet](disquiet), Korea's largest startup community,
 where I helped grow MAU from 15K to 130K in a year.
 
-Discharged this July, I'm most interested in building [products like these](influences).`,
+Discharged this July, I'm building Octave, an Agent-First Document Editor.`,
 };
