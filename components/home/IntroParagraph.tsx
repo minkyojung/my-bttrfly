@@ -47,7 +47,7 @@ function render(template: string, locale: Locale) {
 // 어디서 줄이 바뀌는지가 의미를 갖는다.
 export function IntroParagraph({ locale }: { locale: Locale }) {
   return (
-    <p className="font-serif text-fg whitespace-pre-line text-[19px] leading-[1.9] tracking-[-0.01em]">
+    <p className="font-serif font-medium text-fg whitespace-pre-line text-[19px] leading-[1.9] tracking-[-0.01em]">
       {render(INTRO[locale], locale)}
     </p>
   );

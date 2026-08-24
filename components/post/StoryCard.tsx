@@ -29,7 +29,7 @@ export function StoryCard({ post, locale, variant = "list" }: StoryCardProps) {
           <SourceBadge source={post.source} />
           <Kicker category={post.category} date={post.date} locale={locale} />
         </div>
-        <h3 className="font-serif text-fg text-lg font-bold leading-snug line-clamp-3 mt-1.5 group-hover:opacity-60 transition-opacity">
+        <h3 className="font-serif text-fg text-lg font-semibold leading-snug line-clamp-3 mt-1.5 group-hover:opacity-60 transition-opacity">
           {post.title}
           {post.external && (
             <span className="text-fg-subtle text-sm align-super ml-1">↗</span>

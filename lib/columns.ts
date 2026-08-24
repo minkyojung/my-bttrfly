@@ -54,11 +54,12 @@ export function groupByColumn(posts: Post[], perColumn = 4): ColumnGroup[] {
 
 // 내비게이션(글 목록·섹션 페이지·사이트맵)이 실제로 쓰는 상위 분류. 개별 글의
 // category(Essays/Interviews/...)는 Kicker 배지와 COLUMNS 유효성 검사에만 남고,
-// 사람이 오가는 경로는 이 둘로 접힌다 — Interviews(디스콰이엇에서 쓴 인터뷰)가
-// Work, 나머지 전부가 Personal이다.
+// 사람이 오가는 경로는 이 둘로 접힌다 — Interviews(디스콰이엇에서 쓴 인터뷰)와
+// 나머지 전부인 Personal이다. key는 URL(/columns/work)이라 그대로 두고 표시 이름만
+// Interviews로 부른다 — 카드마다 붙는 Kicker가 이미 그 이름을 쓰고 있다.
 export const SECTIONS = [
   { key: "personal", label: "Personal", categories: ["Essays", "Newsletter", "Retrospectives"] },
-  { key: "work", label: "Work", categories: ["Interviews"] },
+  { key: "work", label: "Interviews", categories: ["Interviews"] },
 ] as const;
 
 export function sectionFromSlug(slug: string) {

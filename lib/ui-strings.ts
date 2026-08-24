@@ -63,22 +63,22 @@ const ko: Strings = {
   comingSoon: "아직 쓰는 중입니다.",
   notFound: "페이지를 찾을 수 없습니다.",
   about: {
-    background: "경력",
-    selectedWork: "제품",
-    stack: "기술",
-    exploring: "가장 관심있는 것",
-    more: "더 보기",
+    background: "Work",
+    selectedWork: "Selected work",
+    stack: "Stack",
+    exploring: "Currently exploring",
+    more: "More",
   },
   home: {
-    writing: "글",
+    writing: "Writing",
   },
   post: {
-    uncategorized: "글",
-    moreIn: (category) => `${category} 더 보기`,
+    uncategorized: "Writing",
+    moreIn: (category) => `More in ${category}`,
   },
   column: {
-    count: (n) => `${n}편`,
-    seeAll: (total) => `전체 ${total}편 →`,
+    count: (n) => `${n} posts`,
+    seeAll: (total) => `All ${total} posts →`,
   },
   github,
 };
