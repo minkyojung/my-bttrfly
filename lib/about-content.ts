@@ -8,16 +8,16 @@ import type { Locale } from "./i18n";
 export const aboutContent = {
   // 프로필 사진 아래 한 줄. 디스콰이엇 이야기 전체는 /disquiet에 있다.
   tagline: {
-    ko: "운영 × 엔지니어 · 디스콰이엇 운영 (15K → 100K)",
-    en: "Operator × Engineer · Previously Operations at Disquiet (15K → 100K)",
+    ko: "글과 제품을 정말 좋아합니다.",
+    en: "I really love writing and SaaS.",
   },
 
   intro: {
     ko: [
-      "운영과 엔지니어링 사이에서 일합니다. 한국에서 가장 큰 스타트업 커뮤니티 디스콰이엇에서 운영을 맡아 12개월 동안 회원을 15,000명에서 100,000명까지 늘렸고, 이후 사회복무요원으로 복무하며 혼자 제품을 만들어 왔습니다.",
+      "운영과 엔지니어링 사이에서 일합니다. 한국에서 가장 큰 스타트업 커뮤니티 디스콰이엇에서 운영을 맡아 12개월 동안 회원을 15,000명에서 130,000명까지 늘렸고, 이후 사회복무요원으로 복무하며 혼자 제품을 만들어 왔습니다.",
     ],
     en: [
-      "I work between operations and engineering. After leading operations at Disquiet — Korea's largest startup community, growing from 15,000 to 100,000 members in twelve months — I've been building independent projects during my alternative civilian service.",
+      "I work between operations and engineering. After leading operations at Disquiet — Korea's largest startup community, growing from 15,000 to 130,000 members in twelve months — I've been building independent projects during my alternative civilian service.",
     ],
   },
 
@@ -25,21 +25,21 @@ export const aboutContent = {
     {
       period: "2024–2026",
       role: {
-        ko: "사회복무요원 · 개인 제품 개발",
-        en: "Alternative civilian service · independent building",
+        ko: "사회복무요원",
+        en: "Alternative civilian service",
       },
     },
     {
       period: "2023–2024",
       role: {
-        ko: "운영 · 디스콰이엇 (15K → 100K 회원)",
-        en: "Operations · Disquiet (15K → 100K members)",
+        ko: "Growth/Ops · 디스콰이엇 (MAU 15K → 130K)",
+        en: "Growth/Ops · Disquiet (MAU 15K → 130K)",
       },
     },
     {
       period: "2021–2023",
       role: {
-        ko: "경영학 학사 · 몬드라곤 대학교",
+        ko: "Business Administration · Mondragon University",
         en: "BBA · Mondragon University",
       },
     },
@@ -50,36 +50,18 @@ export const aboutContent = {
       name: "flowcap",
       url: "https://github.com/minkyojung/flowcap",
       description: {
-        ko: "작업 과정을 기록해 AI가 문서로 만들어주는 오픈소스 macOS 메뉴바 앱.",
-        en: "Open-source macOS menu-bar app that records workflows and turns them into AI-generated documentation.",
-      },
-    },
-    {
-      name: "Momo memory engine",
-      url: "https://usemomo.com",
-      description: {
-        ko: "AI 메모리 시스템의 초기 프로토타입.",
-        en: "Early prototype of an AI memory system.",
+        ko: "AI가 사람의 작업과정을 지켜보며, 에이전트가 이해할 수 있는 형태로 도구화합니다.",
+        en: "AI watches how a person works and turns it into something an agent can understand and use.",
       },
     },
   ],
 
   // 기술 이름은 번역하지 않는다.
-  stack: [
-    "TypeScript",
-    "Swift",
-    "Python",
-    "React",
-    "Next.js",
-    "SwiftUI",
-    "Cloudflare Workers",
-    "Postgres / pgvector",
-    "Claude / OpenAI / Gemini",
-  ],
+  stack: ["TypeScript", "Rust", "Swift", "React", "Next.js", "Postgres"],
 
   exploring: {
-    ko: ["로컬 AI", "AI 오케스트레이션", "AI 클론"],
-    en: ["Local AI", "AI orchestration", "AI clones"],
+    ko: ["Local AI", "AI Clone"],
+    en: ["Local AI", "AI Clone"],
   },
 } as const;
 

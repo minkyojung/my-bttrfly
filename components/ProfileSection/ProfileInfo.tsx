@@ -11,24 +11,27 @@ const ICON = "shrink-0 -mb-px";
 
 export function ProfileInfo({ locale }: { locale: Locale }) {
   return (
-    <div className="w-full max-w-content pb-3 -mt-1 max-[640px]:py-4">
-      <h1 className="text-2xl font-bold text-fg mb-2.5 max-[640px]:text-xl">
-        {siteConfig.name}
+    <div className="w-full pb-3 -mt-1 max-[640px]:py-4">
+      <h1 className="flex items-baseline gap-2 text-2xl font-bold text-fg mb-2.5 max-[640px]:text-xl">
+        {siteConfig.displayName[locale]}
+        <span className="text-[0.8125rem] font-normal text-fg-muted max-[640px]:text-[0.75rem]">
+          Ops · Dev
+        </span>
       </h1>
       <p className="text-[0.9375rem] font-normal text-fg-muted leading-[1.6] max-[640px]:text-[0.8125rem]">
         {aboutContent.tagline[locale]}
       </p>
       <div className="flex gap-2 mt-3">
         <a
-          href={siteConfig.social.twitter.url}
+          href="https://williamjung0130.substack.com/?utm_campaign=profile_chips"
           target="_blank"
           rel="me noopener noreferrer"
           className={CHIP}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" className={ICON}>
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z" />
           </svg>
-          {siteConfig.social.twitter.handle}
+          williamjung0130
         </a>
         <a
           href={siteConfig.social.github.url}

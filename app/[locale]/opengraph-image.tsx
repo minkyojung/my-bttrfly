@@ -11,7 +11,7 @@ import {
 
 export const size = OG_SIZE;
 export const contentType = OG_CONTENT_TYPE;
-export const alt = `${siteConfig.alternateName}`;
+export const alt = `${siteConfig.name}`;
 
 // 카드 그림에 로케일별 차이는 없지만, [locale] 아래 있으므로 조합을 선언해야
 // 정적으로 생성된다.
@@ -39,7 +39,7 @@ export default async function OpengraphImage() {
           letterSpacing: "-0.04em",
         }}
       >
-        {siteConfig.alternateName}
+        {siteConfig.name}
       </div>
     </div>
   );

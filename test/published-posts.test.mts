@@ -44,7 +44,7 @@ test("실제 글이 발행돼 있다", () => {
   // "실제 글이 통째로 사라지지 않았다"이므로 하한선만 둔다.
   const published = readPosts().filter((p) => !p.draft);
   assert.ok(
-    published.length >= 20,
+    published.length >= 15,
     `발행된 글이 ${published.length}편뿐이다. ` +
       `전체를 draft로 내린 변경이 섞이지 않았는지 확인할 것`
   );

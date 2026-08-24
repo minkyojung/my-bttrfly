@@ -1,9 +1,8 @@
-import Image from "next/image";
 import { ProfileInfo } from "./ProfileInfo";
 import { GitHubActivity } from "./GitHubActivity";
 import { GitHubContributions } from "./GitHubContributions";
+import { StackBadges } from "./StackBadges";
 import type { GitHubData } from "@/lib/github";
-import { siteConfig } from "@/lib/site-config";
 import type { Locale } from "@/lib/i18n";
 
 interface ProfileSectionProps {
@@ -13,20 +12,9 @@ interface ProfileSectionProps {
 
 export function ProfileSection({ githubData, locale }: ProfileSectionProps) {
   return (
-    <header className="w-full max-w-content mx-auto max-[640px]:px-4">
-      {/* 예전엔 이 사진이 ASCII 캔버스 위로 겹쳐 올라가느라 grid + 음수 마진이
-          필요했다. 캔버스가 사라졌으므로 그냥 위에 놓는다. */}
-      <div className="w-28 h-28 mb-5 rounded-full border border-border-strong bg-surface-elevated overflow-hidden max-[640px]:w-20 max-[640px]:h-20">
-        <Image
-          src="/images/profile.png"
-          alt={`${siteConfig.name} profile photo`}
-          width={112}
-          height={112}
-          priority
-          className="w-full h-full object-cover block"
-        />
-      </div>
-
+    // 좌우 여백과 폭은 감싸는 Container가 정한다 — 여기서 또 정하면 모바일에서
+    // 이 블록만 안쪽으로 밀려 다른 섹션과 왼쪽 정렬이 어긋난다.
+    <header className="w-full">
       <ProfileInfo locale={locale} />
 
       <GitHubContributions data={githubData} />
@@ -36,6 +24,11 @@ export function ProfileSection({ githubData, locale }: ProfileSectionProps) {
           <GitHubActivity data={githubData} locale={locale} />
         </div>
       )}
+
+      {/* 기술 스택은 잔디 바로 밑에 둔다 — 둘 다 "무엇으로 어떻게 일하는지"를
+          보여주는 같은 종류의 정보라 떨어뜨려 두면 안 된다. 라벨 없이 로고
+          배지만 늘어놓는다 — 잔디 바로 아래라는 위치가 이미 그 뜻을 말한다. */}
+      <StackBadges />
     </header>
   );
 }

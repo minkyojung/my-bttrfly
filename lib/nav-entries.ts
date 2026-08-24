@@ -14,6 +14,11 @@ export interface NavEntry {
   preview: Record<Locale, { title: string; body: string }>;
   // 문단에 박히는 아이콘. 없으면 동그라미 플레이스홀더가 그려진다.
   icon?: string;
+  // 여기 있으면 문단의 링크는 path 대신 이 주소로, 새 탭으로 나간다.
+  // path는 그대로 둔다 — 상세 페이지와 sitemap은 계속 그 경로에 있다.
+  externalUrl?: string;
+  // 프리뷰 카드 맨 위에 깔리는 사진. 없으면 글자만 있는 카드가 된다.
+  previewImage?: string;
   // 홈 문단에 싣지 않는 항목. 문단은 짧아야 해서 다 담을 수 없다.
   // 대신 /about 하단이 이들을 링크한다 — 문단이 유일한 네비게이션이라
   // 아무 데서도 안 걸면 그 페이지는 사이트에서 사라진다(글 31편이 그랬다).
@@ -26,10 +31,17 @@ export const NAV_ENTRIES: NavEntry[] = [
     path: "/writing",
     label: { ko: "글", en: "Writing" },
     preview: {
-      ko: { title: "글", body: "제품과 AI에 대해 쓴 글을 모아둡니다." },
-      en: { title: "Writing", body: "Essays on products, AI, and building." },
+      ko: {
+        title: "Cosmic Entropy · 150 subscribers",
+        body: "• 주로 솔직한 회고와 짧은 글을 번역합니다\n• 평균 오픈율은 약 42.3%입니다",
+      },
+      en: {
+        title: "Cosmic Entropy · 150 subscribers",
+        body: "• Mostly candid retrospectives, plus translations of short pieces\n• ~42.3% average open rate",
+      },
     },
     icon: "/images/entries/writing.png",
+    externalUrl: "https://williamjung0130.substack.com/",
   },
   {
     id: "books",
@@ -40,19 +52,22 @@ export const NAV_ENTRIES: NavEntry[] = [
       en: { title: "Books", body: "What I read, and reread." },
     },
     icon: "/images/entries/books.png",
+    externalUrl: "https://stripe.press",
   },
   {
     id: "bookclub",
     path: "/bookclub",
     label: { ko: "북클럽", en: "Book club" },
     preview: {
-      ko: { title: "북클럽", body: "좋은 원서를 골라 함께 읽던 모임." },
+      ko: { title: "북클럽", body: "라지피자북클럽 · 역삼" },
       en: {
         title: "Book club",
         body: "Reading carefully chosen English titles, together.",
       },
     },
     icon: "/images/entries/bookclub.png",
+    externalUrl: "https://disquiet.io/groups/pizza",
+    previewImage: "/images/entries/bookclub-photo.jpg",
   },
   {
     id: "disquiet",
@@ -60,15 +75,16 @@ export const NAV_ENTRIES: NavEntry[] = [
     label: { ko: "디스콰이엇", en: "Disquiet" },
     preview: {
       ko: {
-        title: "디스콰이엇",
-        body: "Ops를 맡아 1년 만에 MAU 15K → 100K.",
+        title: "디스콰이엇 · Ops",
+        body: "• 130K MAU with 40% M1 retention\n• 100+ team 이상 참여한 Product Maker's Club 운영\n• B2B 광고 운영(아산나눔재단, Altos Ventures 등)",
       },
       en: {
-        title: "Disquiet",
-        body: "Led Ops — 15K to 100K MAU in a year.",
+        title: "Disquiet · Ops",
+        body: "• 130K MAU with 40% M1 retention\n• Ran a Product Maker's Club with 100+ teams\n• Led B2B ad partnerships (Asan Nanum Foundation, Altos Ventures, etc.)",
       },
     },
     icon: "/images/entries/disquiet.png",
+    previewImage: "/images/entries/disquiet-photo.jpg",
   },
   {
     id: "how-i-work",
@@ -97,6 +113,7 @@ export const NAV_ENTRIES: NavEntry[] = [
         body: "Products I've stolen from, and exactly what I took.",
       },
     },
+    unlisted: true,
   },
   {
     id: "now",
@@ -133,20 +150,22 @@ export function getEntry(id: string): NavEntry {
 // 어느 문구가 어디로 가는지 소스에서 그대로 읽힌다.
 export const INTRO: Record<Locale, string> = {
   ko: `안녕하세요, 정민교입니다.
-[글 쓰는 것](writing)을 좋아하고, [책](books)을 좋아합니다.
+[글 쓰는 것](writing)과 [책](books)을 좋아합니다.
 
 좋은 원서를 골라 [북클럽](bookclub)을 운영하다가,
-한국에서 가장 큰 스타트업 커뮤니티 [디스콰이엇](disquiet)에 합류하여
-1년 동안 MAU를 15K에서 100K까지 늘리는데 기여했습니다.
 
-올해 7월 전역 후, [이런 제품](influences)을 만드는데 관심이 많습니다.`,
+한국의 스타트업 커뮤니티 [디스콰이엇](disquiet)에 합류해
+스타트업의 스토리를 발굴하고, 컨텐츠로 만드는 일을 했습니다.
+MAU를 15K → 130K까지 증가시키고, 이를 기반으로 매출을 만드는 과정을 기획/실행했습니다.
+
+올해 7월 전역 후, Agent-First Document Editor, Octave를 만들고 있습니다.`,
 
   en: `Hi, I'm Minkyo Jung.
 I love to [write](writing), and I love [books](books).
 
 I ran a [book club](bookclub) around carefully chosen English titles,
 then joined [Disquiet](disquiet), Korea's largest startup community,
-where I helped grow MAU from 15K to 100K in a year.
+where I helped grow MAU from 15K to 130K in a year.
 
-Discharged this July, I'm most interested in building [products like these](influences).`,
+Discharged this July, I'm building Octave, an Agent-First Document Editor.`,
 };

@@ -7,6 +7,9 @@ export const siteConfig = {
   url: "https://www.minkyojung.com",
   name: "William Jung",
   alternateName: "Minkyo Jung",
+  // 프로필에 보이는 이름. name/alternateName은 메타데이터·구조화 데이터가 쓰는
+  // 기계용 값이라 영어로 고정돼 있고, 사람이 읽는 이름만 로케일을 따른다.
+  displayName: { ko: "정민교", en: "Minkyo Jung" },
   role: "Operator × Engineer",
   description:
     "Operator × engineer. Previously led operations at Disquiet, growing the community from 15,000 to 100,000 members. Now building independent products and writing about products & AI.",
