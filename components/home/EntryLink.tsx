@@ -80,7 +80,7 @@ export function EntryLink({
 
       {/* 문구 시작점(왼쪽 모서리)에 맞춰 바로 아래에 띄운다. max-w는 화면보다
           좁은 창에서도 가로 스크롤이 생기지 않게 하는 안전장치일 뿐, 평소엔
-          w-80(320px)로 고정된다. pointer-events는 평소 꺼둔다 — opacity-0인
+          w-[22rem](352px)로 고정된다. pointer-events는 평소 꺼둔다 — opacity-0인
           채로도 카드가 아래 문단 내용을 클릭 못 하게 가로막는 사고를 막기
           위해서다. 열렸을 때만 켠다. gap은 margin이 아니라 padding-top으로
           준다 — margin은 커서가 지나가도 '호버 중'으로 잡히지 않는 빈 공간이라,
@@ -90,7 +90,7 @@ export function EntryLink({
       <span
         id={tooltipId}
         role="tooltip"
-        className="pointer-events-none absolute top-full left-0 z-popover block w-80 max-w-[calc(100vw-3rem)] pt-2 text-left opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+        className="pointer-events-none absolute top-full left-0 z-popover block w-[22rem] max-w-[calc(100vw-3rem)] pt-2 text-left opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
       >
         <span className="block overflow-hidden rounded-md border border-border-strong bg-surface-elevated shadow-popover">
           {/* 사진은 카드 폭을 꽉 채운다 — 안쪽 여백은 아래 글 블록만 갖는다. */}
