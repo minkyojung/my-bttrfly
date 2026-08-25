@@ -85,6 +85,7 @@ export const NAV_ENTRIES: NavEntry[] = [
     },
     icon: "/images/entries/disquiet.png",
     previewImage: "/images/entries/disquiet-photo.jpg",
+    externalUrl: "https://disquiet.io",
   },
   {
     id: "how-i-work",
