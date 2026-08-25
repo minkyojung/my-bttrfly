@@ -58,7 +58,7 @@ export function EntryLink({
         aria-describedby={tooltipId}
         // 카드를 이 안에 중첩하지 않는다 — <a> 안에 <a>는 유효하지 않은 HTML이라
         // 브라우저가 임의로 닫아버린다.
-        className="rounded-sm px-[0.2em] no-underline transition-colors duration-200 hover:bg-surface-elevated focus-visible:bg-surface-elevated"
+        className="rounded-sm px-[0.2em] underline decoration-fg-subtle underline-offset-2 transition-colors duration-200 hover:bg-surface-elevated focus-visible:bg-surface-elevated"
       >
         {phrase}
       </Wrapper>

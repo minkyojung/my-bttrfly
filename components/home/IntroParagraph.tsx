@@ -37,7 +37,7 @@ function ExternalMark({ phrase, href }: { phrase: string; href: string }) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="rounded-sm px-[0.2em] no-underline transition-colors duration-200 hover:bg-surface-elevated"
+      className="rounded-sm px-[0.2em] underline decoration-fg-subtle underline-offset-2 transition-colors duration-200 hover:bg-surface-elevated"
     >
       {phrase}
       {domain === "github.com" ? (

@@ -160,7 +160,7 @@ export const INTRO: Record<Locale, string> = {
 
 하지만 아쉽게도 입영 통지서를 받으면서 팀을 나와야했습니다.
 
-디스콰이엇은 제게 정말 뜻깊은 팀이었습니다. 메이커들에게 도움이 되고 싶은 마음에 시작했지만, 오히려 수많은 도움을 받았습니다. 이때의 경험은 지금의 제가 생각하고 행동하는 방식에 많은 영향을 줬습니다.
+디스콰이엇은 제게 정말 뜻깊은 팀이었습니다. 메이커들에게 도움이 되고 싶은 마음에 시작했지만, 오히려 수많은 도움을 받았습니다. 이때의 경험은 [지금의 제가 생각하고 행동하는 방식에 많은 영향](https://williamjung0130.substack.com/p/2024)을 줬습니다.
 
 이외에도 AI가 사람의 작업을 관찰하고 해당 작업을 python, appplescript 등으로 리버스 엔지니어링하는 [flowcap](https://github.com/minkyojung/flowcap), AI memory assistant인 [Momo](https://github.com/momo-personal-assistant/momo-research)의 초기버전을 함께 만들기도 했습니다.
 
