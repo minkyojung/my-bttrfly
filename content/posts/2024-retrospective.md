@@ -1,10 +1,12 @@
 ---
-title: "2024년 회고 — 불안정함을 탈출하는 방법, 호기심과 조급함의 차이, 모방하는 법, 와우 모먼트를 주는 법, 정보의 교차점 등"
-date: "2024-12-31"
-external: "https://williamjung0130.substack.com/p/2024"
+title: '2024년 회고 — 불안정함을 탈출하는 방법, 호기심과 조급함의 차이, 모방하는 법, 와우 모먼트를 주는 법, 정보의 교차점 등'
+date: '2024-12-31'
+external: 'https://williamjung0130.substack.com/p/2024'
 featured: true
 source: substack
-category: "Retrospectives"
+category: Retrospectives
+cover: >-
+  https://substackcdn.com/image/fetch/$s_!2tD6!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F14d0eb8e-a824-4da1-a14a-571236892310_1545x1024.jpeg
 ---
 벌써 마지막 날입니다. 작년 연말에는 독일에서 글을 적었는데, 벌써 시간이 이렇게 되었네요. 2024년은 제게 정말 감사한 일이 많았던 해입니다. 특히, 올해 많은 시간을 함께 보낸 현솔과 도언에게 고마운 마음이 가장 크네요. 더불어 꾸준히 글을 읽어주시는 독자분들께도 감사인사를 전하고 싶습니다 :)
 

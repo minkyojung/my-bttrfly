@@ -1,12 +1,10 @@
 import { getAllPosts } from "@/lib/markdown";
 import { SECTIONS } from "@/lib/columns";
-import { Section } from "@/components/ui/section";
-import { WritingTabs } from "./WritingTabs";
-import { getStrings } from "@/lib/ui-strings";
+import { WritingFeed } from "./WritingFeed";
 import type { Locale } from "@/lib/i18n";
 
-// 홈 Personal 탭에 싣는 편수. 나머지는 /writing이 보여준다. Work는 디스콰이엇
-// 인터뷰 전부를 실어도 몇 편 안 되니 자르지 않는다.
+// 홈 피드에 싣는 Personal 글 편수. 나머지는 /writing이 보여준다. Work는
+// 디스콰이엇 인터뷰 전부를 실어도 몇 편 안 되니 자르지 않는다.
 const RECENT = 20;
 
 const sectionCategories = (key: string) =>
@@ -35,7 +33,7 @@ export async function WritingSection({ locale }: { locale: Locale }) {
     (post) => post.category && WORK_CATEGORIES.includes(post.category)
   );
 
-  // All 탭은 두 목록을 합치되 고른 글을 위로 올린다. 날짜순으로 그냥 섞으면
+  // 두 목록을 합치되 고른 글을 위로 올린다. 날짜순으로 그냥 섞으면
   // 2024년에 몰려 있는 인터뷰가 위를 다 차지해 featured를 고른 의미가 없어진다.
   // 두 섹션의 카테고리는 서로 겹치지 않으므로 이어붙여도 중복이 없다.
   const merged = [...personal, ...work];
@@ -44,16 +42,5 @@ export async function WritingSection({ locale }: { locale: Locale }) {
     ...merged.filter((post) => !post.featured),
   ];
 
-  const t = getStrings(locale);
-
-  return (
-    <Section label={t.home.writing}>
-      <WritingTabs
-        all={all}
-        personal={personal}
-        work={work}
-        locale={locale}
-      />
-    </Section>
-  );
+  return <WritingFeed posts={all} locale={locale} />;
 }

@@ -10,7 +10,7 @@ const CIRCLE =
 
 export function ProfileInfo({ locale }: { locale: Locale }) {
   return (
-    <div className="w-full pb-3 -mt-1 max-[640px]:py-4">
+    <div className="w-full pb-3 max-[640px]:py-4">
       <div className="flex items-baseline justify-between gap-2 mb-2.5">
         <h1 className="flex items-baseline gap-2 text-2xl font-bold text-fg max-[640px]:text-xl">
           {siteConfig.displayName[locale]}

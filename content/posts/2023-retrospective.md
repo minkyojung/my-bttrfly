@@ -1,8 +1,15 @@
 ---
-title: "지속가능한 반복을 위한 2023년 회고"
-date: "2023-12-31"
-external: "https://williamjung0130.substack.com/p/2023"
+title: 지속가능한 반복을 위한 2023년 회고
+date: '2023-12-31'
+external: 'https://williamjung0130.substack.com/p/2023'
 source: substack
-summary: "초기 창업 실패에서 배운 교훈을 정리한 회고. 비관적 사고와 매출만 집중하는 경영이 팀을 와해시켰던 경험을 통해, 장기적 낙관과 팀원 배려의 중요성을 깨닫는다. 실패를 학습 기회로 삼기 위해 가설의 controllability를 높여야 한다고 본다. 일과 자아실현에만 몰두했던 삶의 구조를 바꾸어, 우정과 사랑을 포함한 '일·나·사랑'의 세 기둥으로 재설정한다. 해외 여행을 통해 메타인지를 높이며, 2024년을 향해 지적 역량 강화와 팀 기여도 확대를 다짐한다."
-category: "Retrospectives"
+summary: >-
+  초기 창업 실패에서 배운 교훈을 정리한 회고. 비관적 사고와 매출만 집중하는 경영이 팀을 와해시켰던 경험을 통해, 장기적 낙관과 팀원 배려의
+  중요성을 깨닫는다. 실패를 학습 기회로 삼기 위해 가설의 controllability를 높여야 한다고 본다. 일과 자아실현에만 몰두했던 삶의
+  구조를 바꾸어, 우정과 사랑을 포함한 '일·나·사랑'의 세 기둥으로 재설정한다. 해외 여행을 통해 메타인지를 높이며, 2024년을 향해 지적
+  역량 강화와 팀 기여도 확대를 다짐한다.
+category: Retrospectives
+cover: >-
+  https://substackcdn.com/image/fetch/$s_!xwTQ!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F48f47e44-580c-4c83-83eb-fc50d583deba_2722x1518.png
 ---
+

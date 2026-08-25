@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LocaleToggle } from "@/components/LocaleToggle";
+import { FontToggle } from "@/components/FontToggle";
 import { localePath, type Locale } from "@/lib/i18n";
 
 export function NavBar({ locale }: { locale: Locale }) {
@@ -12,7 +13,11 @@ export function NavBar({ locale }: { locale: Locale }) {
         MJ
       </Link>
       {/* '소개' 링크는 없다 — 홈이 곧 소개다. */}
-      <LocaleToggle locale={locale} />
+      <div className="flex items-center gap-4">
+        {/* Pretendard 테스트가 끝나면 지운다. */}
+        <FontToggle />
+        <LocaleToggle locale={locale} />
+      </div>
     </nav>
   );
 }

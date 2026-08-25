@@ -1,10 +1,12 @@
 ---
-title: "Be Sincere—Not Serious"
-date: "2024-08-06"
-external: "https://williamjung0130.substack.com/p/be-sincerenot-serious"
+title: Be Sincere—Not Serious
+date: '2024-08-06'
+external: 'https://williamjung0130.substack.com/p/be-sincerenot-serious'
 featured: true
 source: substack
-category: "Newsletter"
+category: Newsletter
+cover: >-
+  https://substackcdn.com/image/fetch/$s_!fyK4!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F9e0b3d23-6d33-496a-9099-99310eb4ec86_2160x1080.png
 ---
 좋은 아침입니다! 비가 많이 오네요.
 

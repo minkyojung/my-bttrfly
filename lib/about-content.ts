@@ -32,15 +32,15 @@ export const aboutContent = {
     {
       period: "2023–2024",
       role: {
-        ko: "Growth/Ops · 디스콰이엇 (MAU 15K → 130K)",
-        en: "Growth/Ops · Disquiet (MAU 15K → 130K)",
+        ko: "Growth/Ops at Disquiet",
+        en: "Growth/Ops at Disquiet",
       },
     },
     {
       period: "2021–2023",
       role: {
-        ko: "Business Administration · Mondragon University",
-        en: "BBA · Mondragon University",
+        ko: "BBA Mondragon Univ.",
+        en: "BBA Mondragon Univ.",
       },
     },
   ],
@@ -49,9 +49,11 @@ export const aboutContent = {
     {
       name: "flowcap",
       url: "https://github.com/minkyojung/flowcap",
+      language: "Swift",
+      license: "MIT",
       description: {
-        ko: "AI가 사람의 작업과정을 지켜보며, 에이전트가 이해할 수 있는 형태로 도구화합니다.",
-        en: "AI watches how a person works and turns it into something an agent can understand and use.",
+        ko: "Agent가 작업을 관찰하고 여러 언어로 설명합니다.",
+        en: "An agent watches your work and explains it in multiple languages.",
       },
     },
   ],

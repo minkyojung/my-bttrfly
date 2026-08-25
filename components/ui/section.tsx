@@ -19,12 +19,15 @@ export function SectionLabel({ children }: { children: React.ReactNode }) {
 export function Section({
   label,
   children,
+  compact,
 }: {
   label: string;
   children: React.ReactNode;
+  // 사이드바처럼 좁고 세로로 긴 자리에 놓일 때 섹션 간 여백을 줄인다.
+  compact?: boolean;
 }) {
   return (
-    <section className="mt-14 first:mt-0">
+    <section className={compact ? "mt-6 first:mt-0" : "mt-14 first:mt-0"}>
       <SectionLabel>{label}</SectionLabel>
       {children}
     </section>

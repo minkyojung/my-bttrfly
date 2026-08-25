@@ -38,22 +38,7 @@ interface Strings {
     count: (n: number) => string;
     seeAll: (total: number) => string;
   };
-  github: {
-    languageList: (names: string[]) => string;
-    summary: (total: string, languages: string) => string;
-  };
 }
-
-// GitHub 잔디 요약만은 한국어 화면에서도 영어로 둔다. 기여 수와 언어 이름이
-// 전부 영어라 한 문장 안에서 언어가 섞이는 것보다 통째로 영어인 편이 낫다.
-const github: Strings["github"] = {
-  languageList: (names) =>
-    names.length < 2 ? (names[0] ?? "") : `${names[0]} and ${names[1]}`,
-  summary: (total, languages) =>
-    languages
-      ? `${total} contributions in the last year — primarily ${languages}.`
-      : `${total} contributions in the last year`,
-};
 
 const ko: Strings = {
   nav: {
@@ -80,7 +65,6 @@ const ko: Strings = {
     count: (n) => `${n} posts`,
     seeAll: (total) => `All ${total} posts →`,
   },
-  github,
 };
 
 const en: Strings = {
@@ -108,7 +92,6 @@ const en: Strings = {
     count: (n) => `${n} posts`,
     seeAll: (total) => `All ${total} posts →`,
   },
-  github,
 };
 
 const DICTIONARIES: Record<Locale, Strings> = { ko, en };

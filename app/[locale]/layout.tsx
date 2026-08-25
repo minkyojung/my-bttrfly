@@ -19,6 +19,9 @@ const serif = Noto_Serif_KR({
   preload: false,
 });
 
+// 본문 sans(Pretendard)는 globals.css의 @font-face + body 규칙이 이미
+// 맡고 있다 — 여기서 또 로드하면 같은 폰트를 두 번 받는다.
+
 // 이 파일이 루트 레이아웃이다(app/layout.tsx는 없다). 모든 라우트를 [locale] 아래
 // 둔 이유가 여기 있다 — <html lang>은 루트 레이아웃에서만 정할 수 있고, 루트가
 // 로케일을 모르면 /en 페이지가 한국어로 선언된다.

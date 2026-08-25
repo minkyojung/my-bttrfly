@@ -1,10 +1,12 @@
 ---
-title: "계속해서 초보자가 되는 불편함"
-date: "2024-03-23"
+title: 계속해서 초보자가 되는 불편함
+date: '2024-03-23'
 source: substack
-category: "Essays"
+category: Essays
 featured: true
-external: "https://williamjung0130.substack.com/p/a51"
+external: 'https://williamjung0130.substack.com/p/a51'
+cover: >-
+  https://substackcdn.com/image/fetch/$s_!P8U_!,w_1200,h_675,c_fill,f_jpg,q_auto:good,fl_progressive:steep,g_auto/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2F1f4068ed-fcbb-471f-9960-14acad0c14fa_1800x1800.png
 ---
 몇 주 전, 「직군이라는 허상」이라는 글을 올렸고, 적지 않은 메이커분들께서 공감의 반응을 남겨주셨다.
 

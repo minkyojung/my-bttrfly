@@ -1,10 +1,11 @@
 ---
-title: "Claude Code팀은 Linear, Slack, Notion을 안 씀, 해적과 건축가, 실험과 느낀 점"
-date: "2026-04-26"
-external: "https://williamjung0130.substack.com/p/claude-code-linear-slack-notion"
+title: 'Claude Code팀은 Linear, Slack, Notion을 안 씀, 해적과 건축가, 실험과 느낀 점'
+date: '2026-04-26'
+external: 'https://williamjung0130.substack.com/p/claude-code-linear-slack-notion'
 featured: true
 source: substack
-category: "Newsletter"
+category: Newsletter
+cover: 'https://substackcdn.com/image/youtube/w_728,c_limit/PplmzlgE0kg'
 ---
 (이번 주에 재밌는 에피소드가 갑자기 많이 나와서 급하게 적느라 음악은 없습니다 ㅎㅎ)
 

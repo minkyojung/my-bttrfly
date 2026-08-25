@@ -150,18 +150,32 @@ export function getEntry(id: string): NavEntry {
 // 어느 문구가 어디로 가는지 소스에서 그대로 읽힌다.
 export const INTRO: Record<Locale, string> = {
   ko: `안녕하세요, 정민교입니다.
-[글 쓰는 것](writing)과 [책](books)을 좋아합니다.
 
-좋은 원서를 골라 [북클럽](bookclub)을 운영하다가,
+저는 제품을 만들고, [사진을 찍는](https://www.instagram.com/williamjungfilm) 일을 좋아하는 사람입니다.
 
-한국의 스타트업 커뮤니티 [디스콰이엇](disquiet)에 합류해
-MAU를 15K → 130K로, M1 리텐션을 40%로 만들었습니다.
-스타트업의 스토리를 발굴하고 컨텐츠로 만드는 일을 전담해,
-이를 제품·팀을 소개하는 광고 비즈니스로 연결하고 매출을 만들었습니다.
+현재는 26년 7월에 전역한 뒤, Agent-first Notion, Octave를 만들고 있습니다.
 
-올해 7월 전역 후, Agent-First Document Editor, Octave를 만들고 있습니다.`,
+이전에는 [디스콰이엇](disquiet)의 오퍼레이터였습니다. 디스콰이엇은 한국의 스타트업 커뮤니티입니다. 창업가와 현직자들이 제품과 본인들의 시행착오를 build in public할 수 있는 공간으로, 저는 그들의 스토리를 발굴하고 컨텐츠화하는 일을 했습니다. 이를 바탕으로 MAU 130,000, M1 Retention 40%의 성과를 만들었습니다. 나아가 B2B 광고 비즈니스를 맡아 매출에 기여하기도 했습니다.
+
+하지만 아쉽게도 입영 통지서를 받으면서 팀을 나와야했습니다.
+
+디스콰이엇은 제게 정말 뜻깊은 팀이었습니다. 메이커들에게 도움이 되고 싶은 마음에 시작했지만, 오히려 수많은 도움을 받았습니다. 이때의 경험은 지금의 제가 생각하고 행동하는 방식에 많은 영향을 줬습니다.
+
+이외에도 AI가 사람의 작업을 관찰하고 해당 작업을 python, appplescript 등으로 리버스 엔지니어링하는 [flowcap](https://github.com/minkyojung/flowcap), AI memory assistant인 [Momo](https://github.com/momo-personal-assistant/momo-research)의 초기버전을 함께 만들기도 했습니다.
+
+[라지피자 북클럽](bookclub)이라는 모임을 운영했습니다. 한국에는 아직 번역되지 않은 원서를 찾아 함께 읽고, 네트워킹하는 모임입니다. 사실 말이 그렇지 책을 중심으로 모인 사람들이 그저 맥주와 피자를 마시며 마음을 이완시키는 시간이었습니다. 이때 저에게 좋은 자극을 주신 인디 창업가, VC 분들을 여전히 잊지 못합니다.
+
+이제부터는 크게 두 가지 일을 하려 합니다.
+
+1. 좋은 [책](books)과 글을 찾아 번역하고 알리는 일 (능력의 증가와 지혜의 증가는 비례해야 하니까요)
+2. Agent와 사람이 함께 협업할 수 있는 AI Native Notion을 만드는 일.
+
+10년 뒤 도달하고 싶은 어떠한 목표 지점은 없습니다. 오히려 10년 후에도 호기심을 잃지 않고 제품을 만들고 [글을 쓰는](writing) 행위를 반복할 수 있는 상태이길 바랄 뿐입니다. 그게 더 어려운 일이라는 생각도 드네요.
+
+마지막으로, 4년째 뉴스레터를 쓰고 있습니다. 주로 좋은 글을 번역하거나 개인적인 회고 글을 올립니다. [구독하기](writing).`,
 
   en: `Hi, I'm Minkyo Jung.
+
 I love to [write](writing), and I love [books](books).
 
 I ran a [book club](bookclub) around carefully chosen English titles,

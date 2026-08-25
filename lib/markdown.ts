@@ -22,6 +22,10 @@ export interface Post {
   summary?: string;
   content: string;
   imageMeta: Record<string, ImageMeta>;
+  // 목록 카드 썸네일. 본문이 로컬에 없는 외부 링크 글(external)에 쓴다 —
+  // scripts/backfill-covers.mjs가 원문의 og:image를 긁어서 한 번 채워넣는다.
+  // 본문이 로컬에 있는 글은 이 필드 없이 본문 첫 이미지(imageMeta)를 쓴다.
+  cover?: string;
   external?: string;
   // 원문 URL. external과 달리 리다이렉트하지 않고 본문을 그대로 보여주되,
   // <link rel="canonical">만 원문으로 가리켜 중복 콘텐츠를 피한다(타 매체에서 옮겨온 글).
@@ -95,6 +99,7 @@ function parseFile(slug: string, fileContents: string): Post {
     summary: optionalString(data.summary)?.trim(),
     content,
     imageMeta: collectImageMeta(content),
+    cover: optionalString(data.cover),
     external: optionalString(data.external),
     canonical: optionalString(data.canonical),
     category: optionalString(data.category),

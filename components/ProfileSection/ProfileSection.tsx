@@ -1,5 +1,4 @@
 import { ProfileInfo } from "./ProfileInfo";
-import { GitHubActivity } from "./GitHubActivity";
 import { GitHubContributions } from "./GitHubContributions";
 import { StackBadges } from "./StackBadges";
 import type { GitHubData } from "@/lib/github";
@@ -18,12 +17,6 @@ export function ProfileSection({ githubData, locale }: ProfileSectionProps) {
       <ProfileInfo locale={locale} />
 
       <GitHubContributions data={githubData} />
-
-      {githubData && (
-        <div className="mt-2">
-          <GitHubActivity data={githubData} locale={locale} />
-        </div>
-      )}
 
       {/* 기술 스택은 잔디 바로 밑에 둔다 — 둘 다 "무엇으로 어떻게 일하는지"를
           보여주는 같은 종류의 정보라 떨어뜨려 두면 안 된다. 라벨 없이 로고
