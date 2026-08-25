@@ -43,7 +43,7 @@ const config: Config = {
         wide: "var(--width-wide)",
       },
       fontFamily: {
-        serif: ["var(--font-serif)", "'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
+        serif: ["'BookkMyungjo'", "'KoPub Batang'", "'Noto Serif KR'", "'Batang'", "'Georgia'", "serif"],
       },
       // 글 본문의 타이포그래피 단일 출처. 본문을 렌더하는 곳이 `prose` 하나만
       // 붙이면 같은 모습이 되도록 여기에 모아둔다. 예전에는 크기·간격이 발행

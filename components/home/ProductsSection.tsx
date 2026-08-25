@@ -45,12 +45,14 @@ export function ProductsSection({
           <li
             key={item.name}
             className={`first:pt-0 border-b border-border last:border-b-0 ${
-              compact ? "py-2" : "py-4"
+              compact ? "py-1.5" : "py-4"
             }`}
           >
+            {/* -mx/-my로 li의 padding 영역까지 배경이 덮게 하고, 그만큼
+                px/py를 더해 텍스트 위치는 그대로 유지한다. */}
             <SmartLink
               href={item.url}
-              className="group block no-underline"
+              className="group -mx-2 -my-1 block rounded-lg px-2 py-1 no-underline transition-colors duration-150 hover:bg-surface-elevated"
             >
               <div className="flex items-center gap-2">
                 <h3

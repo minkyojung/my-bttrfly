@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Noto_Serif_KR } from "next/font/google";
 import "../globals.css";
 import { NavBar } from "@/components/NavBar";
 import { JsonLd } from "@/components/JsonLd";
@@ -11,16 +10,9 @@ import {
   isLocale,
 } from "@/lib/i18n";
 
-const serif = Noto_Serif_KR({
-  // 400: 본문(serif) · 700: 제목. 그 외 웨이트는 미사용이라 로드하지 않음(용량).
-  weight: ["400", "700"],
-  variable: "--font-serif",
-  display: "swap",
-  preload: false,
-});
-
-// 본문 sans(Pretendard)는 globals.css의 @font-face + body 규칙이 이미
-// 맡고 있다 — 여기서 또 로드하면 같은 폰트를 두 번 받는다.
+// 본문 sans(Pretendard)와 제목·자기소개용 serif(BookkMyungjo)는 globals.css의
+// @font-face + body 규칙이 이미 맡고 있다 — 여기서 next/font로 또 로드하면
+// 같은 종류의 폰트를 두 번 받는다.
 
 // 이 파일이 루트 레이아웃이다(app/layout.tsx는 없다). 모든 라우트를 [locale] 아래
 // 둔 이유가 여기 있다 — <html lang>은 루트 레이아웃에서만 정할 수 있고, 루트가
@@ -79,7 +71,7 @@ export default async function RootLayout({
   const locale = isLocale(raw) ? raw : DEFAULT_LOCALE;
 
   return (
-    <html lang={HTML_LANG[locale]} className={serif.variable}>
+    <html lang={HTML_LANG[locale]}>
       <body className="antialiased">
         <JsonLd data={personSchema()} />
         <NavBar locale={locale} />

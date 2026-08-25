@@ -34,6 +34,23 @@
     font-display: swap;
 }
 
+/* font-serif(제목·자기소개 문단)에 쓰는 서체. next/font/google로 셀프호스팅하던
+   Noto Serif KR을 대신한다 — CDN 로드라 next/font의 빌드 시 최적화는 없지만,
+   이 폰트는 noonfonts 배포판이 npm/자체 파일로는 없어서 CDN이 유일한 경로다. */
+@font-face {
+    font-family: 'BookkMyungjo';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Lt.woff2') format('woff2');
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'BookkMyungjo';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Bd.woff2') format('woff2');
+    font-weight: 700;
+    font-display: swap;
+}
+
 @layer base {
   :root {
     /* === Design tokens === */
