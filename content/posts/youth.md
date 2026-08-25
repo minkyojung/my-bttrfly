@@ -3,6 +3,7 @@ title: 젊음
 date: '2025-05-26'
 source: substack
 category: Essays
+draft: true
 summary: '군 복무로 겪은 심리적 어려움을, 창조적 활동과 사람들과의 연결로 다시 에너지를 얻은 이야기.'
 featured: true
 external: 'https://williamjung0130.substack.com/p/060'
