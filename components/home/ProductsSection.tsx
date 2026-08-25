@@ -52,7 +52,7 @@ export function ProductsSection({
                 px/py를 더해 텍스트 위치는 그대로 유지한다. */}
             <SmartLink
               href={item.url}
-              className="group -mx-2 -my-0.5 block rounded-lg px-2 py-0.5 no-underline transition-colors duration-150 hover:bg-surface-elevated"
+              className="group -m-2 block rounded-lg p-2 no-underline transition-colors duration-150 hover:bg-surface-elevated"
             >
               <div className="flex items-center gap-2">
                 <h3

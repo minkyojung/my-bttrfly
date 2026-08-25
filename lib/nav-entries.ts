@@ -59,14 +59,17 @@ export const NAV_ENTRIES: NavEntry[] = [
     path: "/bookclub",
     label: { ko: "북클럽", en: "Book club" },
     preview: {
-      ko: { title: "북클럽", body: "라지피자북클럽 · 역삼" },
+      ko: {
+        title: "한국에서 가장 캐주얼한 원서 북클럽",
+        body: '"관심분야가 비슷한 사람들끼리 퇴근하고 모여서 피자랑 술 마시면서 떠드는 책 이야기가 생각보다 재밌다. 그리고 이걸 더 재미있게 만들어가고 싶다. 여담으로, 클럽에 계신 승환님은 인천에서 매번 버번을 챙겨오시는데 격주마다 하는 모임이 정말 기다려지는 이유 중 하나다." - 글 중',
+      },
       en: {
         title: "Book club",
         body: "Reading carefully chosen English titles, together.",
       },
     },
     icon: "/images/entries/bookclub.png",
-    externalUrl: "https://disquiet.io/groups/pizza",
+    externalUrl: "https://disquiet.io/articles/dYs307",
     previewImage: "/images/entries/bookclub-photo.jpg",
   },
   {
@@ -164,7 +167,7 @@ export const INTRO: Record<Locale, string> = {
 
 이외에도 AI가 사람의 작업을 관찰하고 해당 작업을 python, appplescript 등으로 리버스 엔지니어링하는 [flowcap](https://github.com/minkyojung/flowcap), AI memory assistant인 [Momo](https://github.com/momo-personal-assistant/momo-research)의 초기버전을 함께 만들기도 했습니다.
 
-[라지피자 북클럽](bookclub)이라는 모임을 운영했습니다. 한국에는 아직 번역되지 않은 원서를 찾아 함께 읽고, 네트워킹하는 모임입니다. 사실 말이 그렇지 책을 중심으로 모인 사람들이 그저 맥주와 피자를 마시며 마음을 이완시키는 시간이었습니다. 이때 저에게 좋은 자극을 주신 인디 창업가, VC 분들을 여전히 잊지 못합니다.
+[라지피자 북클럽](bookclub)이라는 모임을 운영했습니다. 한국에는 아직 번역되지 않은 원서를 찾아 함께 읽고, 네트워킹하는 모임입니다. 관심분야가 비슷한 사람들끼리 퇴근하고 모여서 피자랑 술 마시면서 떠드는 책 이야기가 생각보다 재밌었습니다. 이때 저에게 좋은 자극을 주신 인디 창업가, VC 분들을 여전히 잊지 못합니다.
 
 이제부터는 크게 두 가지 일을 하려 합니다.
 

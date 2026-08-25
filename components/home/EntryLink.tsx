@@ -107,10 +107,10 @@ export function EntryLink({
           )}
 
           <span className="block p-3">
-            <span className="block text-fg text-[13px] font-medium leading-snug">
+            <span className="block text-fg text-[15px] font-bold leading-snug">
               {preview.title}
             </span>
-            <span className="mt-1 block whitespace-pre-line text-fg-muted text-[13px] font-normal leading-[1.5]">
+            <span className="mt-2 block whitespace-pre-line text-fg-muted text-[14px] font-normal leading-[1.65]">
               {preview.body}
             </span>
           </span>
