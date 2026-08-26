@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { LocaleToggle } from "@/components/LocaleToggle";
 import { localePath, type Locale } from "@/lib/i18n";
 
 export function NavBar({ locale }: { locale: Locale }) {
@@ -12,7 +11,7 @@ export function NavBar({ locale }: { locale: Locale }) {
         MJ
       </Link>
       {/* '소개' 링크는 없다 — 홈이 곧 소개다. */}
-      <LocaleToggle locale={locale} />
+      {/* 언어 전환 버튼은 당분간 숨긴다 — 한글로만 노출한다. */}
     </nav>
   );
 }
