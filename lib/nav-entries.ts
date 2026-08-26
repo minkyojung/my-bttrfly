@@ -174,7 +174,7 @@ export const INTRO: Record<Locale, string> = {
 1. 좋은 [책](books)과 글을 찾아 번역하고 알리는 일 (능력의 증가와 지혜의 증가는 비례해야 하니까요)
 2. Agent와 사람이 함께 협업할 수 있는 AI Native Notion을 만드는 일.
 
-10년 뒤 도달하고 싶은 어떠한 목표 지점은 없습니다. 오히려 10년 후에도 호기심을 잃지 않고 제품을 만들고 [글을 쓰는](https://williamjung0130.substack.com/p/be-sincerenot-serious) 행위를 반복할 수 있는 상태이길 바랄 뿐입니다. 그게 더 어려운 일이라는 생각도 드네요.
+10년 뒤 도달하고 싶은 어떠한 목표 지점은 없습니다. 오히려 10년 후에도 호기심을 잃지 않고 제품을 만들고 [글을 쓰는 행위를 반복할 수 있는 상태](https://williamjung0130.substack.com/p/be-sincerenot-serious)이길 바랄 뿐입니다. 그게 더 어려운 일이라는 생각도 드네요.
 
 마지막으로, 4년째 뉴스레터를 쓰고 있습니다. 주로 좋은 글을 번역하거나 개인적인 회고 글을 올립니다. [구독하기](writing).`,
 
