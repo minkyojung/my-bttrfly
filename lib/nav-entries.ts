@@ -163,7 +163,7 @@ export function getEntry(id: string): NavEntry {
 export const INTRO: Record<Locale, string> = {
   ko: `안녕하세요, 정민교입니다.
 
-현재는 26년 7월에 전역한 뒤, Agent-first Notion, Octave를 만들고 있습니다.
+2026년 7월에 전역했습니다.
 
 이전에는 [디스콰이엇](disquiet) (acquired by [Relate](https://www.relate.kr/) YC22)의 오퍼레이터였습니다. 디스콰이엇은 한국의 스타트업 커뮤니티입니다. 창업가와 현직자들이 제품과 본인들의 시행착오를 build in public할 수 있는 공간으로, 저는 그들의 스토리를 발굴하고 컨텐츠화하는 일을 했습니다. 이를 바탕으로 MAU 130,000, M1 Retention 40%의 성과를 만들었습니다. 나아가 B2B 광고 비즈니스를 맡아 매출에 기여하기도 했습니다.
 
@@ -171,16 +171,16 @@ export const INTRO: Record<Locale, string> = {
 
 디스콰이엇은 제게 정말 뜻깊은 팀이었습니다. 메이커들에게 도움이 되고 싶은 마음에 시작했지만, 오히려 수많은 도움을 받았습니다. 이때의 경험은 [지금의 제가 생각하고 행동하는 방식에 많은 영향](https://williamjung0130.substack.com/p/2024)을 줬습니다.
 
-이외에도 AI가 사람의 작업을 관찰하고 해당 작업을 python, appplescript 등으로 리버스 엔지니어링하는 [flowcap](https://github.com/minkyojung/flowcap), AI memory assistant인 [Momo](https://github.com/momo-personal-assistant/momo-research)의 초기버전을 함께 만들기도 했습니다.
+군대에 있을 때는 AI Native 제품을 공부하고 만드는 경험에 집중했습니다. AI가 사람의 작업을 관찰하고 해당 작업을 python, markdown 등으로 리버스 엔지니어링하는 [Flowcap](https://github.com/minkyojung/flowcap), Gmail, Slack 등의 데이터를 가져와 Graph Memory를 만드는 [Momo](https://github.com/momo-personal-assistant/momo-research)의 초기버전을 함께 만들었습니다.
 
-[라지피자 북클럽](bookclub)이라는 모임을 운영했습니다. 한국에는 아직 번역되지 않은 원서를 찾아 함께 읽고, 네트워킹하는 모임입니다. 관심분야가 비슷한 사람들끼리 퇴근하고 모여서 피자랑 술 마시면서 떠드는 책 이야기가 생각보다 재밌었습니다. 이때 저에게 좋은 자극을 주신 인디 창업가, VC 분들을 여전히 잊지 못합니다.
+[라지피자 북클럽](bookclub)이라는 모임을 운영했습니다. 한국에는 아직 번역되지 않은 원서를 찾아 함께 읽고 네트워킹을 가졌습니다. 관심분야가 비슷한 사람들과 퇴근 후 피자와 맥주를 마시며 나누는 책 이야기가 생각보다 재밌었습니다.
 
 이제부터는 크게 두 가지 일을 하려 합니다.
 
 1. [좋은 책](books)과 글을 찾아 번역하고 알리는 일
-2. Agent와 사람이 함께 협업할 수 있는 AI Native Notion을 만드는 일.
+2. Agent Native한 팀을 만나거나 만드는 일
 
-10년 뒤 도달하고 싶은 어떠한 목표 지점은 없습니다. 오히려 10년 후에도 호기심을 잃지 않고 제품을 만들고 [글을 쓰는 행위를 반복할 수 있는 상태](https://williamjung0130.substack.com/p/be-sincerenot-serious)이길 바랄 뿐입니다. 그게 더 어려운 일이라는 생각도 드네요.
+생각과 행동이 일관된 개연성 있는 삶을 살기 위해 항상 노력 중입니다. 10년 뒤에도 인과관계가 명확한 판단을 내리며 [호기심을 잃지 않고 제품을 만들고 싶습니다](https://williamjung0130.substack.com/p/be-sincerenot-serious).
 
 마지막으로, 4년째 뉴스레터를 쓰고 있습니다. 주로 좋은 글을 번역하거나 개인적인 회고 글을 올립니다. [구독하기](writing).`,
 
