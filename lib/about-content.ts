@@ -39,8 +39,8 @@ export const aboutContent = {
     {
       period: "2021–2023",
       role: {
-        ko: "BBA Mondragon Univ.",
-        en: "BBA Mondragon Univ.",
+        ko: "BBA Mondragon Univ. (WD)",
+        en: "BBA Mondragon Univ. (WD)",
       },
     },
   ],
