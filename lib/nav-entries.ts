@@ -155,8 +155,6 @@ export function getEntry(id: string): NavEntry {
 export const INTRO: Record<Locale, string> = {
   ko: `안녕하세요, 정민교입니다.
 
-저는 제품을 만들고, [사진을 찍는](https://www.instagram.com/williamjungfilm) 일을 좋아하는 사람입니다.
-
 현재는 26년 7월에 전역한 뒤, Agent-first Notion, Octave를 만들고 있습니다.
 
 이전에는 [디스콰이엇](disquiet) (acquired by [Relate](https://www.relate.kr/) YC22)의 오퍼레이터였습니다. 디스콰이엇은 한국의 스타트업 커뮤니티입니다. 창업가와 현직자들이 제품과 본인들의 시행착오를 build in public할 수 있는 공간으로, 저는 그들의 스토리를 발굴하고 컨텐츠화하는 일을 했습니다. 이를 바탕으로 MAU 130,000, M1 Retention 40%의 성과를 만들었습니다. 나아가 B2B 광고 비즈니스를 맡아 매출에 기여하기도 했습니다.
